@@ -680,119 +680,152 @@ function analyse(){
   document.getElementById('readingTime').innerText =
     Math.ceil(lastWords.length/255)<=1?'< 1 min read':`${Math.ceil(lastWords.length/255)} min read`;
 
-  // Repetition
-  const wsMap={};
-  lastSentences.forEach((s,si)=>{
-    s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
-      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
-      .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
-  });
-  const repeatSet=new Set(); let repeatCount=0;
-  Object.entries(wsMap).forEach(([w,idxs])=>{
-    for(let i=1;i<idxs.length;i++) if(idxs[i]-idxs[i-1]<=2){ repeatSet.add(w); repeatCount++; break; }
+  // ── Map sentences back to character positions in original text ──
+  const sentRanges=[];
+  let searchFrom=0;
+  for(const sent of lastSentences){
+    const idx=text.indexOf(sent,searchFrom);
+    if(idx!==-1){
+      sentRanges.push({start:idx,end:idx+sent.length,text:sent});
+      searchFrom=idx+sent.length;
+    }
+  }
+
+  // ── Repetition: character-proximity based ──
+  // Flag same word appearing twice within ~250 characters (~2 marketing sentences)
+  const REPEAT_PROXIMITY = 250;
+  const targetKWLower = (document.getElementById('targetKW').value||'').trim().toLowerCase();
+  // Exclude: stop words, fillers, target keyword, and common structural verbs
+  const REPEAT_COMMON = ['work','works','help','helps','make','makes','made','know','knows','said','used','using','find','found','want','give','told','show','keep','turn','call','come','goes','goes','feel','seem','look','mean','means','need','think','thing','things','place','point','part','does','done','been','being','gets','take','goes','want','much','many','just','also','even','well','more','most','very','some','such','only','back','year','long','time'];
+  const repeatExclude = new Set([...STOP, ...FILLERS, ...REPEAT_COMMON]);
+  if(targetKWLower) targetKWLower.split(/\s+/).forEach(w=>repeatExclude.add(w));
+
+  // Find all content word occurrences with their positions
+  const wordOccurrences = {}; // word → [{start,end}, ...]
+  const wordRe = /[a-zA-Z]+/g; let wm;
+  while((wm=wordRe.exec(text))!==null){
+    const w = wm[0].toLowerCase();
+    if(w.length < 5 || repeatExclude.has(w)) continue;
+    if(!wordOccurrences[w]) wordOccurrences[w] = [];
+    wordOccurrences[w].push({start:wm.index, end:wm.index+wm[0].length});
+  }
+
+  // For each word with multiple occurrences, flag pairs that are too close
+  const repeatPositions = []; // {start, end} of each flagged instance
+  let repeatCount = 0;
+  Object.entries(wordOccurrences).forEach(([w, positions])=>{
+    if(positions.length < 2) return;
+    const flagged = new Set();
+    for(let i = 1; i < positions.length; i++){
+      const gap = positions[i].start - positions[i-1].end;
+      if(gap <= REPEAT_PROXIMITY){
+        // Flag both instances
+        if(!flagged.has(i-1)){ flagged.add(i-1); repeatCount++; }
+        if(!flagged.has(i)){ flagged.add(i); repeatCount++; }
+      }
+    }
+    flagged.forEach(idx=>repeatPositions.push({...positions[idx], word:w}));
   });
 
-  // Variety
+  // ── Variety ──
   const starts=lastSentences.map(s=>s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g,'')||'');
-  const varietyIssues=new Set();
-  for(let i=1;i<starts.length;i++) if(starts[i]&&starts[i]===starts[i-1]&&starts[i].length>2) varietyIssues.add(i);
+  const varietyIssueSet=new Set();
+  for(let i=1;i<starts.length;i++) if(starts[i]&&starts[i]===starts[i-1]&&starts[i].length>2) varietyIssueSet.add(i);
 
+  // ── Collect ALL annotations against the FULL ORIGINAL TEXT ──
   let pCount=0,fCount=0,cCount=0;
+  const raw=[];
 
-  // Colour config for tooltip dots
+  if(modes.filler) FILLERS.forEach(w=>{
+    const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
+    while((m=re.exec(text))!==null){ fCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'filler',tip:null}); }
+  });
+
+  if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
+    const re=new RegExp(`\\b${phrase.replace(/[-\s]/g,'[\\s\\-]+')}\\b`,'gi'); let m;
+    while((m=re.exec(text))!==null){ cCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'cliche',tip}); }
+  });
+
+  if(modes.repeat) repeatPositions.forEach(rp=>{
+    raw.push({start:rp.start,end:rp.end,type:'repeat',tip:`"${rp.word}" repeated within ${REPEAT_PROXIMITY} characters — try a synonym`});
+  });
+
+  if(modes.passive){
+    const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
+    while((m=pr.exec(text))!==null){ pCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'passive',tip:getSug(m[0])}); }
+  }
+
+  // Sentence-level: long sentences (40+ words) and variety
+  sentRanges.forEach((sr,si)=>{
+    const wc=sr.text.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
+    if(modes.sentence&&wc>=40) raw.push({start:sr.start,end:sr.end,type:'long',tip:null});
+    if(modes.variety&&varietyIssueSet.has(si)) raw.push({start:sr.start,end:sr.end,type:'variety',tip:null});
+  });
+
+  // ── Build character-level issue map on the ORIGINAL TEXT ──
   const ISSUE_COLOURS = {passive:'#ef4444',filler:'#eab308',cliche:'#a855f7',repeat:'#3b82f6'};
   const ISSUE_LABELS  = {passive:'Passive',filler:'Filler',cliche:'Cliché',repeat:'Repeat'};
 
-  const sentHTMLs=lastSentences.map((sent,si)=>{
-    // Collect ALL annotations — allow overlaps
-    const raw=[];
-
-    if(modes.filler) FILLERS.forEach(w=>{
-      const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){ fCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'filler',tip:null}); }
-    });
-
-    if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
-      const re=new RegExp(`\\b${phrase.replace(/[-\s]/g,'[\\s\\-]+')}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){ cCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'cliche',tip}); }
-    });
-
-    if(modes.repeat) repeatSet.forEach(w=>{
-      const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null) raw.push({start:m.index,end:m.index+m[0].length,type:'repeat',tip:'Repeated nearby — try a synonym'});
-    });
-
-    if(modes.passive){
-      const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
-      while((m=pr.exec(sent))!==null){ pCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'passive',tip:getSug(m[0])}); }
+  const charIssues = new Array(text.length).fill(null);
+  for(const a of raw){
+    for(let c=a.start;c<a.end;c++){
+      if(!charIssues[c]) charIssues[c]={types:new Set(),tips:[]};
+      charIssues[c].types.add(a.type);
+      if(a.tip && !charIssues[c].tips.some(t=>t.type===a.type)) charIssues[c].tips.push({type:a.type,tip:a.tip});
     }
+  }
 
-    if(!raw.length){
-      let html = esc(sent);
-      if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh">${html}</span>`;
-      const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-      if(modes.sentence&&wc>=30) html=`<span class="sh">${html}</span>`;
-      return html;
+  // ── Collapse into contiguous spans with the same issue set ──
+  const spans=[];
+  let spanStart=0, prevKey='';
+  for(let c=0;c<=text.length;c++){
+    const curKey = c<text.length && charIssues[c] ? [...charIssues[c].types].sort().join('+') : '';
+    if(curKey!==prevKey){
+      if(spanStart<c) spans.push({start:spanStart,end:c,key:prevKey,issues:c>0&&charIssues[c-1]?charIssues[c-1]:null});
+      spanStart=c; prevKey=curKey;
     }
+  }
 
-    // ── Merge overlapping annotations into combined spans ──
-    // Build a character-level issue map
-    const charIssues = new Array(sent.length).fill(null);
-    for(const a of raw){
-      for(let c=a.start;c<a.end;c++){
-        if(!charIssues[c]) charIssues[c]={types:new Set(),tips:[]};
-        charIssues[c].types.add(a.type);
-        if(a.tip && !charIssues[c].tips.some(t=>t.type===a.type)) charIssues[c].tips.push({type:a.type,tip:a.tip});
-      }
+  // ── Render overlay HTML from spans — preserving EVERY original character ──
+  let overlayHtml='';
+  for(const sp of spans){
+    const chunk=esc(text.slice(sp.start,sp.end));
+    if(!sp.key||!sp.issues){
+      overlayHtml+=chunk;
+      continue;
     }
+    const types=[...sp.issues.types];
+    // Separate sentence-level types from word-level
+    const wordTypes=types.filter(t=>t!=='long'&&t!=='variety');
+    const hasLong=types.includes('long');
+    const hasVariety=types.includes('variety');
 
-    // Collapse into contiguous spans with the same issue set
-    const spans=[];
-    let spanStart=0, prevKey='';
-    for(let c=0;c<=sent.length;c++){
-      const curKey = c<sent.length && charIssues[c] ? [...charIssues[c].types].sort().join('+') : '';
-      if(curKey!==prevKey){
-        if(spanStart<c) spans.push({start:spanStart,end:c,key:prevKey,issues:c>0&&charIssues[c-1]?charIssues[c-1]:null});
-        spanStart=c; prevKey=curKey;
-      }
-    }
-
-    // Render spans
-    let html='';
-    for(const sp of spans){
-      const text=esc(sent.slice(sp.start,sp.end));
-      if(!sp.key||!sp.issues){
-        html+=text;
+    let inner=chunk;
+    // Apply word-level highlight
+    if(wordTypes.length>0){
+      const classes=['hl',...wordTypes.map(t=>'hl-'+t)].join(' ');
+      const hasTip=sp.issues.tips.length>0||wordTypes.length>0;
+      if(hasTip){
+        const tipItems=wordTypes.map(t=>{
+          const specificTip=sp.issues.tips.find(x=>x.type===t);
+          const label=ISSUE_LABELS[t]||t;
+          const colour=ISSUE_COLOURS[t]||'#888';
+          const desc=specificTip?specificTip.tip:(t==='filler'?'Filler word — consider removing':t==='repeat'?'Repeated nearby — try a synonym':'');
+          return `<div class="tip-item"><span class="tip-dot" style="background:${colour}"></span><span class="tip-text"><strong>${label}:</strong> ${desc}</span></div>`;
+        }).join('');
+        inner=`<span class="${classes}" onclick="showTip(this)">${chunk}<span class="tip">${tipItems}</span></span>`;
       } else {
-        const types=[...sp.issues.types];
-        const classes=['hl',...types.map(t=>'hl-'+t)].join(' ');
-        const hasTip=sp.issues.tips.length>0||types.some(t=>ISSUE_LABELS[t]);
-
-        if(hasTip){
-          // Build multi-issue tooltip
-          const tipItems=types.map(t=>{
-            const specificTip=sp.issues.tips.find(x=>x.type===t);
-            const label=ISSUE_LABELS[t]||t;
-            const colour=ISSUE_COLOURS[t]||'#888';
-            const desc=specificTip?specificTip.tip:(t==='filler'?'Filler word — consider removing':t==='repeat'?'Repeated nearby — try a synonym':'');
-            return `<div class="tip-item"><span class="tip-dot" style="background:${colour}"></span><span class="tip-text"><strong>${label}:</strong> ${desc}</span></div>`;
-          }).join('');
-
-          html+=`<span class="${classes}" onclick="showTip(this)">${text}<span class="tip">${tipItems}</span></span>`;
-        } else {
-          html+=`<span class="${classes}">${text}</span>`;
-        }
+        inner=`<span class="${classes}">${chunk}</span>`;
       }
     }
+    // Wrap with sentence-level highlights
+    if(hasVariety) inner=`<span class="vh">${inner}</span>`;
+    if(hasLong) inner=`<span class="sh">${inner}</span>`;
+    overlayHtml+=inner;
+  }
 
-    if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh">${html}</span>`;
-    const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(modes.sentence&&wc>=30) html=`<span class="sh">${html}</span>`;
-    return html;
-  });
-
-  // Write to overlay — append a trailing newline so last line renders correctly
-  ov.innerHTML = sentHTMLs.join(' ') + '\n';
+  // Write overlay — character-perfect match with textarea
+  ov.innerHTML = overlayHtml;
 
   document.getElementById('sPassive').innerText=pCount;
   document.getElementById('sFiller').innerText =fCount;
@@ -809,7 +842,7 @@ function analyse(){
   lastFK=206.835-(1.015*(lastWords.length/(lastSentences.length||1)))-(84.6*(sylls/(lastWords.length||1)));
   updateRead(lastFK);
   detectTone(lastWords);
-  updateVariety(lastSentences,varietyIssues);
+  updateVariety(lastSentences,varietyIssueSet);
   detectCTA(text);
   updateKW(lastWords,text);
   updateAudience();
@@ -1063,7 +1096,7 @@ function runCopyAudit(){
   const longSentences=[];
   sentences.forEach((s,i)=>{
     const swc=s.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(swc>=30) longSentences.push({text:s,wordCount:swc,index:i});
+    if(swc>=40) longSentences.push({text:s,wordCount:swc,index:i});
   });
 
   // SEO keywords
@@ -1174,9 +1207,20 @@ function auditFixFiller(word){
 function auditScrollTo(phrase){
   const idx=ta.value.toLowerCase().indexOf(phrase.toLowerCase());
   if(idx===-1){showToast('⚠️ Phrase not found — may have been edited');return;}
+  // Temporarily dim all highlights so the selection stands out
+  ov.style.opacity='0.15';
   ta.focus();
   ta.setSelectionRange(idx,idx+phrase.length);
+  // Make the selected text visible in the textarea temporarily
+  ta.style.webkitTextFillColor='#6366f1';
+  ta.style.color='#6366f1';
   showToast('🔍 Selected in editor');
+  // Restore after a moment
+  setTimeout(()=>{
+    ov.style.opacity='1';
+    ta.style.webkitTextFillColor='transparent';
+    ta.style.color='transparent';
+  },2500);
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
