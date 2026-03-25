@@ -32,7 +32,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 /* ── Editor: textarea on top, highlight div behind ── */
 .editor-shell{border:1.5px solid #e0e0e0;border-radius:14px;background:#fff;overflow:hidden;transition:border-color .2s;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 .editor-shell:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
-.editor-wrap{position:relative;min-height:420px;overflow-y:auto;overflow-x:hidden}
+.editor-wrap{position:relative;min-height:420px;max-height:75vh;overflow-y:auto;overflow-x:hidden}
 
 /* Both layers must share IDENTICAL typography so text aligns perfectly */
 #editor-textarea, #editor-overlay {
@@ -57,6 +57,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
   grid-area:1/1/2/2;
   width:100%;
   min-height:420px;
+  height:auto;
   overflow:hidden;
   resize:none;
 }
@@ -452,7 +453,14 @@ let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
 // ── Main input handler (adaptive debounce for long copy) ──────────────────────
+function growTextarea(){
+  // Only grow, never shrink — avoids cursor jump from height:auto collapse
+  const needed = ta.scrollHeight;
+  if(needed > ta.offsetHeight) ta.style.height = needed + 'px';
+}
+
 function onEditorInput(){
+  growTextarea();
   clearTimeout(analyseTimer);
   const wordCount = ta.value.trim().split(/\s+/).length;
   const delay = wordCount > 1000 ? 250 : 80;
@@ -875,6 +883,10 @@ function analyse(){
 
   // Write overlay — character-perfect match with textarea
   ov.innerHTML = overlayHtml;
+  // Sync textarea height: grow to fit, and shrink if content was removed
+  // Use overlay's rendered height as the source of truth (it's a div, auto-sizes correctly)
+  const overlayH = ov.scrollHeight;
+  if(overlayH > 0) ta.style.height = Math.max(420, overlayH) + 'px';
 
   document.getElementById('sPassive').innerText=pCount;
   document.getElementById('sFiller').innerText =fCount;
@@ -1092,6 +1104,7 @@ function persistLoad(){
 
 function resetUI(){
   ov.innerHTML='';
+  ta.style.height='420px';
   ['sPassive','sFiller','sCliche','sRepeat','sWords','sChars'].forEach(id=>document.getElementById(id).innerText='0');
   const fill=document.getElementById('gFill'); fill.style.strokeDashoffset='0'; fill.style.stroke='#e5e5e5';
   document.getElementById('gNum').innerText='—';
