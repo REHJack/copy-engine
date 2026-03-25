@@ -715,17 +715,7 @@ function analyse(){
     }
   }
 
-  // ── Repetition: character-proximity based ──
-  // Flag same word appearing twice within ~250 characters (~2 marketing sentences)
-  const REPEAT_PROXIMITY = 250;
-  const targetKWLower = (document.getElementById('targetKW').value||'').trim().toLowerCase();
-  // Exclude: stop words, fillers, target keyword, and common structural verbs
-  const REPEAT_COMMON = ['work','works','help','helps','make','makes','made','know','knows','said','used','using','find','found','want','give','told','show','keep','turn','call','come','goes','goes','feel','seem','look','mean','means','need','think','thing','things','place','point','part','does','done','been','being','gets','take','goes','want','much','many','just','also','even','well','more','most','very','some','such','only','back','year','long','time'];
-  const repeatExclude = new Set([...STOP, ...FILLERS, ...REPEAT_COMMON]);
-  if(targetKWLower) targetKWLower.split(/\s+/).forEach(w=>repeatExclude.add(w));
-
-  // Detect heading-like lines: short lines (under 12 words) that end with a newline and have no terminal punctuation
-  // These are likely h1/h2/h3s pasted as plain text
+  // ── Detect headings (short lines with no terminal punctuation) ──
   const headingRanges=[];
   sentRanges.forEach(sr=>{
     const trimmed=sr.text.trim();
@@ -733,23 +723,46 @@ function analyse(){
     const endsWithPunct=/[.!?]$/.test(trimmed);
     if(wc<=12 && !endsWithPunct) headingRanges.push(sr);
   });
-
-  // Helper: check if a character position falls inside a heading
   function isInHeading(pos){
     return headingRanges.some(h=>pos>=h.start && pos<h.end);
   }
-  // Helper: check if a character position falls in the first sentence after a heading
   function isInFirstSentAfterHeading(pos){
     for(let si=1;si<sentRanges.length;si++){
-      const prev=sentRanges[si-1];
-      const cur=sentRanges[si];
+      const prev=sentRanges[si-1], cur=sentRanges[si];
       if(pos>=cur.start && pos<cur.end){
-        // Check if previous sentence is a heading
         return headingRanges.some(h=>h.start===prev.start && h.end===prev.end);
       }
     }
     return false;
   }
+
+  // ── Repetition: character-proximity based ──
+  // Only flag when the SAME word appears 3+ times within a proximity window
+  // Two occurrences is natural emphasis; three is where it becomes noticeable
+  const REPEAT_PROXIMITY = 300; // ~2.5 marketing sentences
+  const targetKWLower = (document.getElementById('targetKW').value||'').trim().toLowerCase();
+  // Exclude: stop words, fillers, target keyword, and common structural verbs
+  const REPEAT_COMMON = ['work','works','help','helps','make','makes','made','know','knows','said','used','using','find','found','want','give','told','show','keep','turn','call','come','goes','goes','feel','seem','look','mean','means','need','think','thing','things','place','point','part','does','done','been','being','gets','take','goes','want','much','many','just','also','even','well','more','most','very','some','such','only','back','year','long','time','best','free','data','team','plan','full','cost','type','rate','site','page','user','form','case','real','sure'];
+  const repeatExclude = new Set([...STOP, ...FILLERS, ...REPEAT_COMMON]);
+  if(targetKWLower) targetKWLower.split(/\s+/).forEach(w=>repeatExclude.add(w));
+
+  // Detect topic words: the top 5 most frequent content words are likely the subject
+  // of the piece and should not flag as repetition
+  const wordFreq = {};
+  const topicRe = /[a-zA-Z]+/g; let tw;
+  while((tw=topicRe.exec(text))!==null){
+    const w=tw[0].toLowerCase();
+    if(w.length>=5 && !repeatExclude.has(w)) wordFreq[w]=(wordFreq[w]||0)+1;
+  }
+  const topicWords = new Set(
+    Object.entries(wordFreq)
+      .filter(([,c])=>c>=4) // appears 4+ times across the whole piece
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,8) // top 8 most frequent
+      .map(([w])=>w)
+  );
+  // Add topic words to exclusion set
+  topicWords.forEach(w=>repeatExclude.add(w));
 
   // Find all content word occurrences with their positions
   const wordOccurrences = {}; // word → [{start,end}, ...]
@@ -761,27 +774,28 @@ function analyse(){
     wordOccurrences[w].push({start:wm.index, end:wm.index+wm[0].length});
   }
 
-  // For each word with multiple occurrences, flag pairs that are too close
-  // EXCEPT: heading word → first paragraph sentence is intentional reinforcement
-  const repeatPositions = []; // {start, end} of each flagged instance
+  // For each word, flag when 3+ occurrences cluster within proximity
+  // (A pair of 2 is fine; a cluster of 3+ within a short span is the problem)
+  const repeatPositions = [];
   let repeatCount = 0;
   Object.entries(wordOccurrences).forEach(([w, positions])=>{
-    if(positions.length < 2) return;
+    if(positions.length < 3) return; // need at least 3 total occurrences to even check
+    // Sliding window: for each position, count how many other occurrences are within proximity
     const flagged = new Set();
-    for(let i = 1; i < positions.length; i++){
-      const gap = positions[i].start - positions[i-1].end;
-      if(gap <= REPEAT_PROXIMITY){
-        // Skip if either instance is in a heading or in the first sentence after a heading
-        // Headings are structural labels; first-sentence echo is intentional reinforcement
-        const prevProtected = isInHeading(positions[i-1].start) || isInFirstSentAfterHeading(positions[i-1].start);
-        const curProtected = isInHeading(positions[i].start) || isInFirstSentAfterHeading(positions[i].start);
-        if(prevProtected || curProtected) continue;
-
-        if(!flagged.has(i-1)){ flagged.add(i-1); repeatCount++; }
-        if(!flagged.has(i)){ flagged.add(i); repeatCount++; }
+    for(let i = 0; i < positions.length; i++){
+      // Skip protected positions (headings, first sentence after heading)
+      if(isInHeading(positions[i].start) || isInFirstSentAfterHeading(positions[i].start)) continue;
+      let nearby = 0;
+      for(let j = 0; j < positions.length; j++){
+        if(i === j) continue;
+        if(isInHeading(positions[j].start) || isInFirstSentAfterHeading(positions[j].start)) continue;
+        const gap = Math.abs(positions[i].start - positions[j].start);
+        if(gap <= REPEAT_PROXIMITY) nearby++;
       }
+      // Flag if 2+ other unprotected instances are nearby (= 3+ total in the cluster)
+      if(nearby >= 2) flagged.add(i);
     }
-    flagged.forEach(idx=>repeatPositions.push({...positions[idx], word:w}));
+    flagged.forEach(idx=>{ repeatPositions.push({...positions[idx], word:w}); repeatCount++; });
   });
 
   // ── Variety ──
@@ -883,10 +897,12 @@ function analyse(){
 
   // Write overlay — character-perfect match with textarea
   ov.innerHTML = overlayHtml;
-  // Sync textarea height: grow to fit, and shrink if content was removed
-  // Use overlay's rendered height as the source of truth (it's a div, auto-sizes correctly)
-  const overlayH = ov.scrollHeight;
-  if(overlayH > 0) ta.style.height = Math.max(420, overlayH) + 'px';
+  // Ensure textarea height fits all content
+  // Temporarily remove height constraint to measure true scrollHeight
+  const prevH = ta.style.height;
+  ta.style.height = '0';
+  const needed = Math.max(420, ta.scrollHeight);
+  ta.style.height = needed + 'px';
 
   document.getElementById('sPassive').innerText=pCount;
   document.getElementById('sFiller').innerText =fCount;
