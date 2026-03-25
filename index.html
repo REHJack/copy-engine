@@ -58,7 +58,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
   width:100%;
   min-height:420px;
   height:auto;
-  overflow:hidden;
+  overflow:visible;
   resize:none;
 }
 #editor-textarea {
@@ -454,9 +454,11 @@ document.getElementById('reportDate').innerText=new Date().toLocaleDateString('e
 
 // ── Main input handler (adaptive debounce for long copy) ──────────────────────
 function growTextarea(){
-  // Only grow, never shrink — avoids cursor jump from height:auto collapse
-  const needed = ta.scrollHeight;
-  if(needed > ta.offsetHeight) ta.style.height = needed + 'px';
+  // Grow-only on keystroke — never collapse to avoid cursor jump
+  // Full accurate sync happens in analyse() via overlay height
+  if(ta.scrollHeight > ta.clientHeight){
+    ta.style.height = ta.scrollHeight + 'px';
+  }
 }
 
 function onEditorInput(){
@@ -897,12 +899,12 @@ function analyse(){
 
   // Write overlay — character-perfect match with textarea
   ov.innerHTML = overlayHtml;
-  // Ensure textarea height fits all content
-  // Temporarily remove height constraint to measure true scrollHeight
-  const prevH = ta.style.height;
-  ta.style.height = '0';
-  const needed = Math.max(420, ta.scrollHeight);
-  ta.style.height = needed + 'px';
+  // Textarea doesn't auto-grow like a div — explicitly match it to the overlay's rendered height
+  // Use requestAnimationFrame to ensure DOM has painted the overlay first
+  requestAnimationFrame(()=>{
+    const h = Math.max(420, ov.scrollHeight, ta.scrollHeight);
+    ta.style.height = h + 'px';
+  });
 
   document.getElementById('sPassive').innerText=pCount;
   document.getElementById('sFiller').innerText =fCount;
