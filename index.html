@@ -484,34 +484,42 @@ function splitSentences(text){
   const parts = []; let buf = '';
   for(let i = 0; i < text.length; i++){
     buf += text[i];
-    // Check for sentence-ending punctuation
+
+    // ── Newline = sentence boundary (handles headings, line breaks, structured content) ──
+    if(text[i] === '\n' || text[i] === '\r'){
+      // Consume consecutive newlines/carriage returns
+      while(i + 1 < text.length && (text[i+1] === '\n' || text[i+1] === '\r')){ i++; buf += text[i]; }
+      if(buf.trim()){
+        parts.push(buf.trimEnd());
+        buf = '';
+      } else {
+        buf = '';
+      }
+      continue;
+    }
+
+    // ── Check for sentence-ending punctuation ──
     if('.!?'.includes(text[i])){
       // Check if this is an ellipsis (2+ consecutive periods) — usually not a sentence break
       if(text[i] === '.' && i + 1 < text.length && text[i+1] === '.'){
-        // Consume all consecutive periods into the buffer
         while(i + 1 < text.length && text[i+1] === '.'){ i++; buf += text[i]; }
-        // But if followed by whitespace + capital letter, treat as sentence break
         const afterDots = text[i+1] || '';
         const afterSpace = text[i+2] || '';
         if(/\s/.test(afterDots) && afterSpace && afterSpace !== afterSpace.toLowerCase()){
           parts.push(buf.trimEnd());
           buf = '';
-          i++; // skip the whitespace
+          i++;
         }
         continue;
       }
       // Handle sequences like "?!" or "!?" — consume all terminal punct
       while(i + 1 < text.length && '!?'.includes(text[i+1])){ i++; buf += text[i]; }
-      // Now decide: is this a real sentence break?
       const nextChar = text[i+1] || '';
-      // If the terminator is a period, check for abbreviation and decimal
       if(text[i] === '.' || buf.endsWith('.')){
-        // Check for abbreviation: grab the word just before the period
         const wordBefore = buf.slice(0,-1).split(/\s+/).pop()?.replace(/[^a-zA-Z]/g, '').toLowerCase() || '';
         if(ABBREVS.has(wordBefore)){
-          continue; // Abbreviation — not a sentence break
+          continue;
         }
-        // Check for decimal: digit.digit
         const charBeforePeriod = buf.length >= 2 ? buf[buf.length - 2] : '';
         if(/\d/.test(charBeforePeriod) && /\d/.test(nextChar)){
           continue;
@@ -708,6 +716,33 @@ function analyse(){
   const repeatExclude = new Set([...STOP, ...FILLERS, ...REPEAT_COMMON]);
   if(targetKWLower) targetKWLower.split(/\s+/).forEach(w=>repeatExclude.add(w));
 
+  // Detect heading-like lines: short lines (under 12 words) that end with a newline and have no terminal punctuation
+  // These are likely h1/h2/h3s pasted as plain text
+  const headingRanges=[];
+  sentRanges.forEach(sr=>{
+    const trimmed=sr.text.trim();
+    const wc=trimmed.split(/\s+/).length;
+    const endsWithPunct=/[.!?]$/.test(trimmed);
+    if(wc<=12 && !endsWithPunct) headingRanges.push(sr);
+  });
+
+  // Helper: check if a character position falls inside a heading
+  function isInHeading(pos){
+    return headingRanges.some(h=>pos>=h.start && pos<h.end);
+  }
+  // Helper: check if a character position falls in the first sentence after a heading
+  function isInFirstSentAfterHeading(pos){
+    for(let si=1;si<sentRanges.length;si++){
+      const prev=sentRanges[si-1];
+      const cur=sentRanges[si];
+      if(pos>=cur.start && pos<cur.end){
+        // Check if previous sentence is a heading
+        return headingRanges.some(h=>h.start===prev.start && h.end===prev.end);
+      }
+    }
+    return false;
+  }
+
   // Find all content word occurrences with their positions
   const wordOccurrences = {}; // word → [{start,end}, ...]
   const wordRe = /[a-zA-Z]+/g; let wm;
@@ -719,6 +754,7 @@ function analyse(){
   }
 
   // For each word with multiple occurrences, flag pairs that are too close
+  // EXCEPT: heading word → first paragraph sentence is intentional reinforcement
   const repeatPositions = []; // {start, end} of each flagged instance
   let repeatCount = 0;
   Object.entries(wordOccurrences).forEach(([w, positions])=>{
@@ -727,7 +763,12 @@ function analyse(){
     for(let i = 1; i < positions.length; i++){
       const gap = positions[i].start - positions[i-1].end;
       if(gap <= REPEAT_PROXIMITY){
-        // Flag both instances
+        // Skip if either instance is in a heading or in the first sentence after a heading
+        // Headings are structural labels; first-sentence echo is intentional reinforcement
+        const prevProtected = isInHeading(positions[i-1].start) || isInFirstSentAfterHeading(positions[i-1].start);
+        const curProtected = isInHeading(positions[i].start) || isInFirstSentAfterHeading(positions[i].start);
+        if(prevProtected || curProtected) continue;
+
         if(!flagged.has(i-1)){ flagged.add(i-1); repeatCount++; }
         if(!flagged.has(i)){ flagged.add(i); repeatCount++; }
       }
