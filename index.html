@@ -211,23 +211,38 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .ai-close{background:none;border:none;font-size:20px;color:#ccc;cursor:pointer;line-height:1;padding:0 4px}
 .ai-close:hover{color:#555}
 .ai-body{padding:18px}
-.ai-section{border-left:2px solid #f0f0f0;padding-left:13px;margin-bottom:18px}
-.ai-section:last-child{margin-bottom:0}
-.ai-section h4{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6366f1;margin-bottom:8px}
-.ai-section p,.ai-section li{font-size:12px;color:#444;line-height:1.65}
-.ai-section ul{list-style:disc;padding-left:16px}
-.pass-item{margin-bottom:9px}
-.pass-orig{font-size:12px;color:#ef4444;text-decoration:line-through;line-height:1.5}
-.pass-fix{font-size:12px;color:#16a34a;line-height:1.5}
-.ai-kw-table{width:100%;border-collapse:collapse;font-size:12px}
-.ai-kw-table th{text-align:left;color:#bbb;font-weight:700;padding-bottom:6px;font-size:11px}
-.ai-kw-table td{padding:5px 0;border-top:1px solid #f5f5f5;color:#333;font-weight:600}
-.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
-.ba-box{border:1.5px solid #e5e5e5;border-radius:9px;padding:12px}
-.ba-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
-.ba-before .ba-label{color:#ef4444}.ba-after .ba-label{color:#16a34a}
-.ba-text{font-size:12px;color:#444;line-height:1.7}
-.ba-after .ba-text{color:#166534;background:#f0fdf4;padding:9px;border-radius:7px}
+
+/* Audit tabs */
+.audit-tabs{display:flex;gap:0;border-bottom:1.5px solid #f0f0f0;padding:0 18px;overflow-x:auto}
+.audit-tab{padding:10px 16px;font-size:11px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;position:relative}
+.audit-tab:hover{color:#555}
+.audit-tab.active{color:#6366f1;border-bottom-color:#6366f1}
+.audit-tab .tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:99px;font-size:9px;font-weight:800;margin-left:5px;padding:0 5px}
+.audit-tab .tab-count.t-red{background:#fee2e2;color:#dc2626}
+.audit-tab .tab-count.t-amber{background:#fef3c7;color:#d97706}
+.audit-tab .tab-count.t-purple{background:#f3e8ff;color:#7c3aed}
+.audit-tab .tab-count.t-green{background:#dcfce7;color:#16a34a}
+.audit-tab .tab-count.t-blue{background:#dbeafe;color:#2563eb}
+
+/* Audit fix items */
+.audit-fix{display:flex;gap:12px;align-items:flex-start;padding:11px 13px;border:1.5px solid #f0f0f0;border-radius:9px;margin-bottom:8px;transition:all .15s}
+.audit-fix:hover{border-color:#e0e0e0;background:#fafafa}
+.audit-fix-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.audit-fix-body{flex:1;min-width:0}
+.audit-fix-title{font-size:12px;font-weight:700;color:#111;margin-bottom:2px}
+.audit-fix-desc{font-size:11px;color:#888;line-height:1.5}
+.audit-fix-impact{font-size:10px;font-weight:800;border-radius:99px;padding:2px 8px;white-space:nowrap;flex-shrink:0;align-self:center}
+.impact-high{background:#fee2e2;color:#dc2626}
+.impact-med{background:#fef3c7;color:#d97706}
+.impact-low{background:#dbeafe;color:#2563eb}
+.audit-fix-action{margin-top:6px}
+.audit-fix-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#555;transition:all .15s}
+.audit-fix-btn:hover{border-color:#6366f1;color:#6366f1;background:#faf9ff}
+.audit-empty{font-size:12px;color:#bbb;font-style:italic;padding:16px 0;text-align:center}
+.audit-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.audit-summary-card{background:#f8fafc;border:1.5px solid #f0f0f0;border-radius:9px;padding:10px 12px;text-align:center}
+.audit-summary-val{font-size:20px;font-weight:900;line-height:1}
+.audit-summary-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#bbb;margin-top:4px}
 
 .toast{position:fixed;bottom:28px;right:28px;background:#111;color:#fff;font-size:12px;font-weight:600;padding:11px 18px;border-radius:10px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -248,7 +263,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
     </div>
     <div class="btn-row no-print">
       <button class="btn btn-ghost btn-sm" onclick="fixAllFillers()">⚡ Fix Fillers</button>
-      <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ AI Audit</button>
+      <button class="btn btn-violet btn-sm" onclick="runCopyAudit()">✦ Copy Audit</button>
       <button class="btn btn-teal btn-sm" onclick="downloadHTML()">
         <svg width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
         HTML
@@ -308,9 +323,10 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
       <div class="ai-wrap" id="aiPanel">
         <div class="ai-head">
-          <div class="ai-title">✦ AI Copy Audit Report</div>
+          <div class="ai-title">✦ Copy Audit Report</div>
           <button class="ai-close" onclick="document.getElementById('aiPanel').classList.remove('open')">×</button>
         </div>
+        <div class="audit-tabs" id="auditTabs"></div>
         <div class="ai-body" id="aiOutput"></div>
       </div>
     </div>
@@ -1008,35 +1024,159 @@ function resetUI(){
   document.getElementById('audResult').innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">Select an audience to score your copy.</p>';
 }
 
-// ── AI Audit ──────────────────────────────────────────────────────────────────
-async function runAIAudit(){
-  const text=ta.value.trim(); if(!text){alert('Please paste some copy first.');return;}
-  const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput');
+// ── Copy Audit (fully client-side, tabbed, prioritised fixes) ─────────────────
+function runCopyAudit(){
+  const text=ta.value.trim();
+  if(!text){alert('Please paste some copy first.');return;}
+  const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput'),tabs=document.getElementById('auditTabs');
   panel.classList.add('open');
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
-  out.innerHTML='<div class="loading-wrap"><div class="spinner"></div><p>Analysing your copy…</p></div>';
-  const sys=`You are an elite Direct-Response Copy Editor and SEO Analyst. Return ONLY a raw JSON object — no markdown fences, no commentary. Shape: {"activeScore":"82%","readability":"Standard","wordCount":123,"passiveFlags":[{"original":"phrase","suggestion":"fix"}],"fillerWords":[{"word":"just","count":3}],"cliches":[{"phrase":"game changer","suggestion":"describe actual impact"}],"keywords":[{"word":"conversion","density":"2.1%","status":"Optimal"}],"rewrite":"Full rewritten lean version."}`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:text}]})});
-    const data=await res.json();
-    const raw=(data.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-    renderAI(JSON.parse(raw),text);
-  }catch(e){ out.innerHTML='<p style="color:#ef4444;font-size:12px;padding:8px 0">⚠️ Failed to load AI report. Please try again.</p>'; }
+
+  // ── Gather all issues from the live analysis ──
+  const words=text.split(/\s+/).filter(w=>w.length>0);
+  const sentences=splitSentences(text);
+  const wc=words.length;
+
+  // Passive
+  const passiveIssues=[];
+  const pr=new RegExp(PASSIVE_RE.source,'gi'); let pm;
+  while((pm=pr.exec(text))!==null){
+    passiveIssues.push({match:pm[0],index:pm.index,fix:getSug(pm[0])});
+  }
+
+  // Fillers
+  const fillerMap={};
+  FILLERS.forEach(w=>{
+    const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
+    while((m=re.exec(text))!==null){ fillerMap[w]=(fillerMap[w]||0)+1; }
+  });
+  const fillerIssues=Object.entries(fillerMap).sort((a,b)=>b[1]-a[1]).map(([word,count])=>({word,count}));
+
+  // Clichés
+  const clicheIssues=[];
+  Object.entries(CLICHES).forEach(([phrase,tip])=>{
+    const re=new RegExp(`\\b${phrase.replace(/[-\s]/g,'[\\s\\-]+')}\\b`,'gi'); let m;
+    while((m=re.exec(text))!==null) clicheIssues.push({phrase:m[0],tip,index:m.index});
+  });
+
+  // Long sentences
+  const longSentences=[];
+  sentences.forEach((s,i)=>{
+    const swc=s.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
+    if(swc>=30) longSentences.push({text:s,wordCount:swc,index:i});
+  });
+
+  // SEO keywords
+  const tkw=document.getElementById('targetKW').value.trim().toLowerCase();
+  let kwDensity=null;
+  if(tkw&&wc>0){
+    const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
+    const count=(text.match(re)||[]).length;
+    kwDensity={word:tkw,count,pct:(count/wc*100).toFixed(2),status:count/wc*100>=2.5?'High':count/wc*100>=1.5?'Optimal':'Low'};
+  }
+
+  // Readability
+  const sylls=words.reduce((a,w)=>a+countSylls(w),0);
+  const fk=206.835-(1.015*(wc/(sentences.length||1)))-(84.6*(sylls/(wc||1)));
+  const fkLabel=fk>=80?'Very Easy':fk>=70?'Easy':fk>=60?'Fairly Easy':fk>=50?'Standard':fk>=40?'Fairly Difficult':fk>=30?'Difficult':'Very Difficult';
+  const avgSentLen=sentences.length?Math.round(wc/sentences.length):0;
+
+  // ── Build prioritised fix list per tab ──
+  // Impact scoring: passive=5pts, filler=2pts, cliché=3pts per instance
+  const pImpact=passiveIssues.length*5;
+  const fImpact=fillerIssues.reduce((a,f)=>a+f.count*2,0);
+  const cImpact=clicheIssues.length*3;
+
+  // ── Tab definitions ──
+  const tabDefs=[
+    {id:'priority',label:'Priority Fixes',count:passiveIssues.length+fillerIssues.length+clicheIssues.length+longSentences.length,countCls:'t-red'},
+    {id:'passive',label:'Passive',count:passiveIssues.length,countCls:passiveIssues.length?'t-red':'t-green'},
+    {id:'fillers',label:'Fillers',count:fillerIssues.reduce((a,f)=>a+f.count,0),countCls:fillerIssues.length?'t-amber':'t-green'},
+    {id:'cliches',label:'Clichés',count:clicheIssues.length,countCls:clicheIssues.length?'t-purple':'t-green'},
+    {id:'readability',label:'Readability',count:null,countCls:'t-blue'},
+  ];
+
+  tabs.innerHTML=tabDefs.map(t=>
+    `<div class="audit-tab${t.id==='priority'?' active':''}" data-tab="${t.id}" onclick="switchAuditTab('${t.id}')">${t.label}${t.count!==null?`<span class="tab-count ${t.countCls}">${t.count}</span>`:''}</div>`
+  ).join('');
+
+  // ── Store tab content so switching is instant ──
+  const tabContent={};
+
+  // Priority tab — all issues ranked by impact
+  const allFixes=[];
+  passiveIssues.forEach(p=>allFixes.push({type:'passive',icon:'🔴',iconBg:'#fee2e2',title:`"${esc(p.match)}"`,desc:p.fix,impact:5,impactLabel:'−5 pts',match:p.match}));
+  clicheIssues.forEach(c=>allFixes.push({type:'cliche',icon:'🟣',iconBg:'#f3e8ff',title:`"${esc(c.phrase)}"`,desc:c.tip,impact:3,impactLabel:'−3 pts',match:c.phrase}));
+  fillerIssues.forEach(f=>allFixes.push({type:'filler',icon:'🟡',iconBg:'#fef9c3',title:`"${esc(f.word)}" × ${f.count}`,desc:'Filler word — consider removing for punchier copy.',impact:f.count*2,impactLabel:`−${f.count*2} pts`,match:f.word}));
+  longSentences.forEach(l=>allFixes.push({type:'long',icon:'🟠',iconBg:'#ffedd5',title:`${l.wordCount}-word sentence`,desc:`"${esc(l.text.slice(0,60))}…" — try splitting for better readability.`,impact:2,impactLabel:'readability',match:null}));
+  allFixes.sort((a,b)=>b.impact-a.impact);
+
+  const summaryHtml=`<div class="audit-summary-grid"><div class="audit-summary-card"><div class="audit-summary-val" style="color:${lastScore>85?'#22c55e':lastScore>65?'#6366f1':'#ef4444'}">${lastScore}%</div><div class="audit-summary-lbl">Active Score</div></div><div class="audit-summary-card"><div class="audit-summary-val" style="color:#6366f1">${wc}</div><div class="audit-summary-lbl">Words</div></div><div class="audit-summary-card"><div class="audit-summary-val" style="color:${allFixes.length===0?'#22c55e':'#d97706'}">${allFixes.length}</div><div class="audit-summary-lbl">Issues</div></div></div>`;
+
+  tabContent.priority=summaryHtml+(allFixes.length?allFixes.map((f,i)=>{
+    const impCls=f.impact>=5?'impact-high':f.impact>=3?'impact-med':'impact-low';
+    const actionBtn=f.type==='filler'?`<div class="audit-fix-action"><button class="audit-fix-btn" onclick="auditFixFiller('${esc(f.match)}')">⚡ Remove all</button></div>`
+      :f.type==='passive'?`<div class="audit-fix-action"><button class="audit-fix-btn" onclick="auditScrollTo('${esc(f.match)}')">🔍 Find in text</button></div>`
+      :f.type==='cliche'?`<div class="audit-fix-action"><button class="audit-fix-btn" onclick="auditScrollTo('${esc(f.match)}')">🔍 Find in text</button></div>`:'';
+    return `<div class="audit-fix"><div class="audit-fix-icon" style="background:${f.iconBg}">${f.icon}</div><div class="audit-fix-body"><div class="audit-fix-title">${f.title}</div><div class="audit-fix-desc">${f.desc}</div>${actionBtn}</div><span class="audit-fix-impact ${impCls}">${f.impactLabel}</span></div>`;
+  }).join(''):'<div class="audit-empty">No issues found — your copy is clean.</div>');
+
+  // Passive tab
+  tabContent.passive=passiveIssues.length?passiveIssues.map(p=>
+    `<div class="audit-fix"><div class="audit-fix-icon" style="background:#fee2e2">🔴</div><div class="audit-fix-body"><div class="audit-fix-title">"${esc(p.match)}"</div><div class="audit-fix-desc">${p.fix}</div><div class="audit-fix-action"><button class="audit-fix-btn" onclick="auditScrollTo('${esc(p.match)}')">🔍 Find in text</button></div></div><span class="audit-fix-impact impact-high">−5 pts</span></div>`
+  ).join(''):'<div class="audit-empty">No passive voice detected — nice work.</div>';
+
+  // Fillers tab
+  tabContent.fillers=fillerIssues.length?fillerIssues.map(f=>
+    `<div class="audit-fix"><div class="audit-fix-icon" style="background:#fef9c3">🟡</div><div class="audit-fix-body"><div class="audit-fix-title">"${esc(f.word)}" — ${f.count} occurrence${f.count>1?'s':''}</div><div class="audit-fix-desc">Filler word adding ${f.count*2} points of drag to your score.</div><div class="audit-fix-action"><button class="audit-fix-btn" onclick="auditFixFiller('${esc(f.word)}')">⚡ Remove all "${esc(f.word)}"</button></div></div><span class="audit-fix-impact impact-med">−${f.count*2} pts</span></div>`
+  ).join(''):'<div class="audit-empty">No filler words detected — tight writing.</div>';
+
+  // Clichés tab
+  tabContent.cliches=clicheIssues.length?clicheIssues.map(c=>
+    `<div class="audit-fix"><div class="audit-fix-icon" style="background:#f3e8ff">🟣</div><div class="audit-fix-body"><div class="audit-fix-title">"${esc(c.phrase)}"</div><div class="audit-fix-desc">${c.tip}</div><div class="audit-fix-action"><button class="audit-fix-btn" onclick="auditScrollTo('${esc(c.phrase)}')">🔍 Find in text</button></div></div><span class="audit-fix-impact impact-med">−3 pts</span></div>`
+  ).join(''):'<div class="audit-empty">No clichés detected — original voice.</div>';
+
+  // Readability tab
+  const readCol=fk>=60?'#22c55e':fk>=40?'#d97706':'#ef4444';
+  const ctaFound=CTA_PHRASES.filter(p=>text.toLowerCase().includes(p));
+  const ctaStatus=ctaFound.length>=3?'Strong':ctaFound.length>=1?'Weak':'Missing';
+  const ctaCol=ctaFound.length>=3?'#22c55e':ctaFound.length>=1?'#d97706':'#ef4444';
+  tabContent.readability=`
+    <div class="audit-summary-grid" style="grid-template-columns:repeat(4,1fr)">
+      <div class="audit-summary-card"><div class="audit-summary-val" style="color:${readCol}">${fkLabel.split(' ')[0]}</div><div class="audit-summary-lbl">Readability</div></div>
+      <div class="audit-summary-card"><div class="audit-summary-val" style="color:#6366f1">${avgSentLen}w</div><div class="audit-summary-lbl">Avg Sentence</div></div>
+      <div class="audit-summary-card"><div class="audit-summary-val" style="color:${ctaCol}">${ctaStatus}</div><div class="audit-summary-lbl">CTA</div></div>
+      <div class="audit-summary-card"><div class="audit-summary-val" style="color:#6366f1">${Math.ceil(wc/255)}<span style="font-size:11px;font-weight:600"> min</span></div><div class="audit-summary-lbl">Read Time</div></div>
+    </div>
+    ${kwDensity?`<div class="audit-fix"><div class="audit-fix-icon" style="background:${kwDensity.status==='Optimal'?'#dcfce7':kwDensity.status==='High'?'#fee2e2':'#fef3c7'}">${kwDensity.status==='Optimal'?'🟢':kwDensity.status==='High'?'🔴':'🟡'}</div><div class="audit-fix-body"><div class="audit-fix-title">Target keyword: "${esc(kwDensity.word)}"</div><div class="audit-fix-desc">${kwDensity.pct}% density (${kwDensity.count} × in ${wc} words) — ${kwDensity.status==='Optimal'?'perfect range.':kwDensity.status==='High'?'reduce to avoid keyword stuffing.':'increase for better SEO relevance.'}</div></div><span class="audit-fix-impact ${kwDensity.status==='Optimal'?'impact-low':kwDensity.status==='High'?'impact-high':'impact-med'}">${kwDensity.status}</span></div>`:'<div class="audit-fix"><div class="audit-fix-icon" style="background:#f3f4f6">💡</div><div class="audit-fix-body"><div class="audit-fix-title">No target keyword set</div><div class="audit-fix-desc">Enter a target keyword in the SEO panel to include density analysis.</div></div></div>'}
+    ${longSentences.length?`<div style="margin-top:6px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:8px">Long Sentences (${longSentences.length})</div>${longSentences.map(l=>`<div class="audit-fix"><div class="audit-fix-icon" style="background:#ffedd5">🟠</div><div class="audit-fix-body"><div class="audit-fix-title">${l.wordCount} words</div><div class="audit-fix-desc">"${esc(l.text.slice(0,80))}${l.text.length>80?'…':''}"</div></div></div>`).join('')}</div>`:''}`;
+
+  // Store content globally for tab switching
+  window._auditTabContent=tabContent;
+  out.innerHTML=tabContent.priority;
 }
 
-function renderAI(r,original){
-  const passive=r.passiveFlags?.length?r.passiveFlags.map(f=>`<div class="pass-item"><div class="pass-orig">${esc(f.original)}</div><div class="pass-fix">→ ${esc(f.suggestion)}</div></div>`).join(''):'<p style="color:#aaa">None detected.</p>';
-  const fillers=r.fillerWords?.length?r.fillerWords.map(f=>`<li>"<strong>${f.word}</strong>" — ${f.count}×</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
-  const cliches=r.cliches?.length?r.cliches.map(c=>`<li>"<strong>${c.phrase}</strong>" — ${c.suggestion}</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
-  const kw=r.keywords?.length?`<table class="ai-kw-table"><thead><tr><th>Keyword</th><th>Density</th><th>Status</th></tr></thead><tbody>${r.keywords.map(k=>`<tr><td style="text-transform:capitalize">${k.word}</td><td style="color:#6366f1;font-family:monospace">${k.density}</td><td>${k.status==='Optimal'?'🟢':k.status==='High'?'🔴':'🟡'} ${k.status}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#aaa">No keywords extracted.</p>';
-  const ba=`<div class="ba-grid"><div class="ba-box ba-before"><div class="ba-label">Before</div><div class="ba-text">${esc(original)}</div></div><div class="ba-box ba-after"><div class="ba-label">After</div><div class="ba-text">${esc(r.rewrite||'')}</div></div></div>`;
-  document.getElementById('aiOutput').innerHTML=`
-    <div class="ai-section"><h4>Executive Summary</h4><p><strong>Active Score:</strong> ${r.activeScore} · <strong>Readability:</strong> ${r.readability} · <strong>Words:</strong> ${r.wordCount}</p></div>
-    <div class="ai-section"><h4>🔴 Passive Voice Flags</h4>${passive}</div>
-    <div class="ai-section"><h4>🟡 Filler Alerts</h4><ul>${fillers}</ul></div>
-    <div class="ai-section"><h4>🟣 Cliché Flags</h4><ul>${cliches}</ul></div>
-    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>
-    <div class="ai-section"><h4>✨ Before vs After</h4>${ba}</div>`;
+function switchAuditTab(tabId){
+  document.querySelectorAll('.audit-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tabId));
+  const out=document.getElementById('aiOutput');
+  if(window._auditTabContent&&window._auditTabContent[tabId]) out.innerHTML=window._auditTabContent[tabId];
+}
+
+function auditFixFiller(word){
+  let t=ta.value;
+  t=t.replace(new RegExp(`\\s?\\b${word}\\b\\s?`,'gi'),' ');
+  ta.value=t.replace(/ {2,}/g,' ').replace(/ ([.,!?;:])/g,'$1').trim();
+  onEditorInput();
+  setTimeout(()=>runCopyAudit(),150);
+  showToast(`✓ Removed all "${word}"`);
+}
+
+function auditScrollTo(phrase){
+  const idx=ta.value.toLowerCase().indexOf(phrase.toLowerCase());
+  if(idx===-1){showToast('⚠️ Phrase not found — may have been edited');return;}
+  ta.focus();
+  ta.setSelectionRange(idx,idx+phrase.length);
+  showToast('🔍 Selected in editor');
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
