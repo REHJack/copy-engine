@@ -34,12 +34,11 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .editor-shell:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
 .editor-wrap{position:relative;min-height:420px;overflow-y:auto}
 
-/* Both layers must share IDENTICAL typography so text aligns perfectly */
+/* Both layers share identical typography */
 #editor-textarea, #editor-overlay {
   position:absolute;
   top:0; left:0;
   width:100%;
-  height:100%;
   margin:0;
   padding:22px;
   font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
@@ -53,32 +52,27 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
   tab-size:4;
   border:none;
   outline:none;
-  overflow-x:hidden;
+  overflow:hidden;
   box-sizing:border-box;
 }
 #editor-textarea {
-  color:transparent;
+  color:#1a1a1a;
   background:transparent;
   caret-color:#6366f1;
   resize:none;
   z-index:2;
-  overflow-y:auto;
-  scrollbar-gutter:stable;
-  /* Ensure no browser-specific styling interferes */
-  -webkit-text-fill-color:transparent;
-}
+  -webkit-text-fill-color:#1a1a1a;
+  height:100%;
 }
 #editor-overlay {
-  color:#1a1a1a;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
   background:#fff;
   pointer-events:none;
   z-index:1;
   border-radius:14px 14px 0 0;
-  overflow-y:auto;
-  scrollbar-gutter:stable;
-  scrollbar-width:none;
+  height:100%;
 }
-#editor-overlay::-webkit-scrollbar{display:none}
 /* Placeholder */
 #editor-textarea::placeholder{color:#bbb;-webkit-text-fill-color:#bbb}
 
@@ -87,13 +81,13 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#888;font-weight:600}
 .leg-dot{width:9px;height:9px;border-radius:3px}
 
-/* ── Highlights ── */
-.ph{background:#fee2e2;border-bottom:2px solid #ef4444;color:#991b1b;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.fh{background:#fef9c3;border-bottom:2px solid #eab308;color:#854d0e;padding:0 2px;border-radius:3px}
-.sh{background:#ffedd5;border-bottom:2px solid #f97316;color:#9a3412;padding:0 2px;border-radius:3px}
-.ch{background:#f3e8ff;border-bottom:2px solid #a855f7;color:#6b21a8;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.rh{background:#dbeafe;border-bottom:2px solid #3b82f6;color:#1e40af;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.vh{background:#fce7f3;border-bottom:2px solid #ec4899;color:#9d174d;padding:0 2px;border-radius:3px}
+/* ── Highlights — background only, text is transparent on overlay ── */
+.ph{background:#fecaca;border-bottom:2px solid #ef4444;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.fh{background:#fef08a;border-bottom:2px solid #eab308;padding:0 2px;border-radius:3px}
+.sh{background:#fed7aa;border-bottom:2px solid #f97316;padding:0 2px;border-radius:3px}
+.ch{background:#e9d5ff;border-bottom:2px solid #a855f7;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.rh{background:#bfdbfe;border-bottom:2px solid #3b82f6;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.vh{background:#fce7f3;border-bottom:2px solid #ec4899;padding:0 2px;border-radius:3px}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
 
@@ -407,14 +401,12 @@ document.getElementById('reportDate').innerText=new Date().toLocaleDateString('e
 function syncScroll(){ ov.scrollTop = ta.scrollTop; }
 ta.addEventListener('scroll', syncScroll);
 
-// ── Sync overlay height to textarea content height ────────────────────────────
+// ── Sync height to content ────────────────────────────────────────────────────
 function syncHeight(){
-  // Reset height to auto so it can shrink, then set to scrollHeight
   ta.style.height = 'auto';
   const h = Math.max(420, ta.scrollHeight);
   ta.style.height = h + 'px';
   ov.style.height  = h + 'px';
-  // Keep the wrapper tall enough
   ta.closest('.editor-wrap').style.minHeight = h + 'px';
 }
 
