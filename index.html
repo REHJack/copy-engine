@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.3</title>
+<title>Copy Engine v6.2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -29,26 +29,57 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .btn-teal:hover{background:#0f766e}
 .btn-sm{padding:8px 14px;font-size:11px}
 
-/* ── Editor: sizer-driven overlay architecture ── */
+/* ── Editor: textarea on top, highlight div behind ── */
 .editor-shell{border:1.5px solid #e0e0e0;border-radius:14px;background:#fff;overflow:hidden;transition:border-color .2s;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 .editor-shell:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
-/* Wrapper scrolls; sizer drives height */
-.editor-wrap{position:relative;min-height:420px;max-height:75vh;overflow-y:auto;overflow-x:hidden}
+.editor-wrap{position:relative;min-height:420px;overflow-y:auto}
 
-/* Shared typography — MUST be identical on all three layers */
-.editor-typo{
-  margin:0;padding:22px;
+/* Both layers must share IDENTICAL typography so text aligns perfectly */
+#editor-textarea, #editor-overlay {
+  position:absolute;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  padding:22px;
   font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
-  font-size:15px;line-height:1.85;letter-spacing:normal;word-spacing:normal;
-  white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;
-  tab-size:4;border:none;outline:none;box-sizing:border-box;
+  font-size:15px;
+  line-height:1.85;
+  letter-spacing:normal;
+  word-spacing:normal;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+  overflow-wrap:break-word;
+  tab-size:4;
+  border:none;
+  outline:none;
+  overflow-x:hidden;
+  box-sizing:border-box;
 }
-/* Sizer: invisible div in normal flow — its height drives the wrapper */
-#editor-sizer{visibility:hidden;min-height:420px}
-/* Textarea and overlay: absolute, pinned to fill the sizer's footprint */
-#editor-textarea,#editor-overlay{position:absolute;top:0;left:0;width:100%;height:100%;overflow:hidden;resize:none}
-#editor-textarea{color:transparent;background:transparent;caret-color:#6366f1;z-index:2;-webkit-text-fill-color:transparent}
-#editor-overlay{color:#1a1a1a;background:#fff;pointer-events:none;z-index:1}
+#editor-textarea {
+  color:transparent;
+  background:transparent;
+  caret-color:#6366f1;
+  resize:none;
+  z-index:2;
+  overflow-y:auto;
+  scrollbar-width:none;
+  /* Ensure no browser-specific styling interferes */
+  -webkit-text-fill-color:transparent;
+}
+#editor-textarea::-webkit-scrollbar{display:none}
+}
+#editor-overlay {
+  color:#1a1a1a;
+  background:#fff;
+  pointer-events:none;
+  z-index:1;
+  border-radius:14px 14px 0 0;
+  overflow-y:auto;
+  scrollbar-width:none;
+}
+#editor-overlay::-webkit-scrollbar{display:none}
+/* Placeholder */
 #editor-textarea::placeholder{color:#bbb;-webkit-text-fill-color:#bbb}
 
 .editor-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid #f0f0f0;background:#fafafa;flex-wrap:wrap;gap:8px}
@@ -57,42 +88,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .leg-dot{width:9px;height:9px;border-radius:3px}
 
 /* ── Highlights ── */
-/* Base highlight: every flagged span gets this — NO padding to keep pixel-perfect alignment with textarea */
-.hl{position:relative;border-radius:3px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-/* Individual issue types — applied as additional classes */
-.hl-passive{cursor:pointer}
-.hl-filler{}
-.hl-cliche{cursor:pointer}
-.hl-repeat{cursor:pointer}
-.hl-variety{}
-
-/* Single-issue colours — use box-shadow for "padding" effect without shifting text */
-.hl-passive:not(.hl-filler):not(.hl-cliche):not(.hl-repeat){background:#fee2e2;border-bottom:2px solid #ef4444;color:#991b1b;box-shadow:2px 0 0 #fee2e2,-2px 0 0 #fee2e2}
-.hl-filler:not(.hl-passive):not(.hl-cliche):not(.hl-repeat){background:#fef9c3;border-bottom:2px solid #eab308;color:#854d0e;box-shadow:2px 0 0 #fef9c3,-2px 0 0 #fef9c3}
-.hl-cliche:not(.hl-passive):not(.hl-filler):not(.hl-repeat){background:#f3e8ff;border-bottom:2px solid #a855f7;color:#6b21a8;box-shadow:2px 0 0 #f3e8ff,-2px 0 0 #f3e8ff}
-.hl-repeat:not(.hl-passive):not(.hl-filler):not(.hl-cliche){background:#dbeafe;border-bottom:2px solid #3b82f6;color:#1e40af;box-shadow:2px 0 0 #dbeafe,-2px 0 0 #dbeafe}
-
-/* Multi-issue combos — gradient underline shows both colours */
-.hl-passive.hl-filler{background:linear-gradient(135deg,#fee2e2 50%,#fef9c3 50%);border-bottom:2px solid;border-image:linear-gradient(90deg,#ef4444 50%,#eab308 50%) 1;color:#991b1b}
-.hl-passive.hl-repeat{background:linear-gradient(135deg,#fee2e2 50%,#dbeafe 50%);border-bottom:2px solid;border-image:linear-gradient(90deg,#ef4444 50%,#3b82f6 50%) 1;color:#991b1b}
-.hl-passive.hl-cliche{background:linear-gradient(135deg,#fee2e2 50%,#f3e8ff 50%);border-bottom:2px solid;border-image:linear-gradient(90deg,#ef4444 50%,#a855f7 50%) 1;color:#991b1b}
-.hl-filler.hl-repeat{background:linear-gradient(135deg,#fef9c3 50%,#dbeafe 50%);border-bottom:2px solid;border-image:linear-gradient(90deg,#eab308 50%,#3b82f6 50%) 1;color:#854d0e}
-.hl-filler.hl-cliche{background:linear-gradient(135deg,#fef9c3 50%,#f3e8ff 50%);border-bottom:2px solid;border-image:linear-gradient(90deg,#eab308 50%,#a855f7 50%) 1;color:#854d0e}
-.hl-cliche.hl-repeat{background:linear-gradient(135deg,#f3e8ff 50%,#dbeafe 50%);border-bottom:2px solid;border-image:linear-gradient(90deg,#a855f7 50%,#3b82f6 50%) 1;color:#6b21a8}
-/* 3+ issues — hot striped underline */
-.hl-passive.hl-filler.hl-repeat,.hl-passive.hl-filler.hl-cliche,.hl-passive.hl-cliche.hl-repeat,.hl-filler.hl-cliche.hl-repeat,.hl-passive.hl-filler.hl-cliche.hl-repeat{background:linear-gradient(135deg,#fee2e2 33%,#fef9c3 33%,#fef9c3 66%,#dbeafe 66%);border-bottom:2px solid;border-image:linear-gradient(90deg,#ef4444,#eab308,#a855f7,#3b82f6) 1;color:#111}
-
-/* Sentence-level wrappers — also zero-padding, use box-shadow for visual bleed */
-.sh{background:#ffedd5;border-bottom:2px solid #f97316;color:#9a3412;border-radius:3px;box-shadow:2px 0 0 #ffedd5,-2px 0 0 #ffedd5;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-.vh{background:#fce7f3;border-bottom:2px solid #ec4899;color:#9d174d;border-radius:3px;box-shadow:2px 0 0 #fce7f3,-2px 0 0 #fce7f3;box-decoration-break:clone;-webkit-box-decoration-break:clone}
-
-/* Multi-issue tooltip */
-.tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:230px;white-space:normal;text-align:left;line-height:1.45;display:none}
+.ph{background:#fee2e2;border-bottom:2px solid #ef4444;color:#991b1b;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.fh{background:#fef9c3;border-bottom:2px solid #eab308;color:#854d0e;padding:0 2px;border-radius:3px}
+.sh{background:#ffedd5;border-bottom:2px solid #f97316;color:#9a3412;padding:0 2px;border-radius:3px}
+.ch{background:#f3e8ff;border-bottom:2px solid #a855f7;color:#6b21a8;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.rh{background:#dbeafe;border-bottom:2px solid #3b82f6;color:#1e40af;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.vh{background:#fce7f3;border-bottom:2px solid #ec4899;color:#9d174d;padding:0 2px;border-radius:3px}
+.tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
-.tip-item{display:flex;gap:6px;align-items:baseline;padding:2px 0}
-.tip-item:not(:last-child){border-bottom:1px solid #333;padding-bottom:4px;margin-bottom:3px}
-.tip-dot{width:7px;height:7px;border-radius:2px;flex-shrink:0;margin-top:2px}
-.tip-text{flex:1;font-size:11px;line-height:1.4}
 
 /* ── Stats ── */
 .stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:#e5e5e5;border:1.5px solid #e0e0e0;border-top:none;border-radius:0 0 14px 14px;overflow:hidden}
@@ -186,46 +189,23 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .ai-close{background:none;border:none;font-size:20px;color:#ccc;cursor:pointer;line-height:1;padding:0 4px}
 .ai-close:hover{color:#555}
 .ai-body{padding:18px}
-
-/* Audit tabs */
-.audit-tabs{display:flex;gap:0;border-bottom:1.5px solid #f0f0f0;padding:0 18px;overflow-x:auto}
-.audit-tab{padding:10px 16px;font-size:11px;font-weight:700;color:#aaa;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;position:relative}
-.audit-tab:hover{color:#555}
-.audit-tab.active{color:#6366f1;border-bottom-color:#6366f1}
-.audit-tab .tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:99px;font-size:9px;font-weight:800;margin-left:5px;padding:0 5px}
-.audit-tab .tab-count.t-red{background:#fee2e2;color:#dc2626}
-.audit-tab .tab-count.t-amber{background:#fef3c7;color:#d97706}
-.audit-tab .tab-count.t-purple{background:#f3e8ff;color:#7c3aed}
-.audit-tab .tab-count.t-green{background:#dcfce7;color:#16a34a}
-.audit-tab .tab-count.t-blue{background:#dbeafe;color:#2563eb}
-
-/* Audit fix items */
-.audit-fix{display:flex;gap:12px;align-items:flex-start;padding:11px 13px;border:1.5px solid #f0f0f0;border-radius:9px;margin-bottom:8px;transition:all .15s}
-.audit-fix:hover{border-color:#e0e0e0;background:#fafafa}
-.audit-fix-icon{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
-.audit-fix-body{flex:1;min-width:0}
-.audit-fix-title{font-size:12px;font-weight:700;color:#111;margin-bottom:2px}
-.audit-fix-desc{font-size:11px;color:#888;line-height:1.5}
-.audit-fix-impact{font-size:10px;font-weight:800;border-radius:99px;padding:2px 8px;white-space:nowrap;flex-shrink:0;align-self:center}
-.impact-high{background:#fee2e2;color:#dc2626}
-.impact-med{background:#fef3c7;color:#d97706}
-.impact-low{background:#dbeafe;color:#2563eb}
-.audit-fix-action{margin-top:6px}
-.audit-fix-btn{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#555;transition:all .15s}
-.audit-fix-btn:hover{border-color:#6366f1;color:#6366f1;background:#faf9ff}
-.audit-empty{font-size:12px;color:#bbb;font-style:italic;padding:16px 0;text-align:center}
-.audit-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.audit-summary-card{background:#f8fafc;border:1.5px solid #f0f0f0;border-radius:9px;padding:10px 12px;text-align:center}
-.audit-summary-val{font-size:20px;font-weight:900;line-height:1}
-.audit-summary-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#bbb;margin-top:4px}
-
-/* Fix suggestion dropdown */
-.audit-suggestion{margin-top:6px;background:#f8fafc;border:1.5px solid #e5e5e5;border-radius:8px;overflow:hidden;display:none}
-.audit-suggestion.open{display:block}
-.audit-suggestion-head{padding:7px 10px;font-size:10px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid #f0f0f0;background:#faf9ff}
-.audit-suggestion-body{padding:9px 10px;font-size:11px;color:#555;line-height:1.65}
-.audit-suggestion-body strong{color:#111;font-weight:700}
-.audit-fix-actions{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.ai-section{border-left:2px solid #f0f0f0;padding-left:13px;margin-bottom:18px}
+.ai-section:last-child{margin-bottom:0}
+.ai-section h4{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6366f1;margin-bottom:8px}
+.ai-section p,.ai-section li{font-size:12px;color:#444;line-height:1.65}
+.ai-section ul{list-style:disc;padding-left:16px}
+.pass-item{margin-bottom:9px}
+.pass-orig{font-size:12px;color:#ef4444;text-decoration:line-through;line-height:1.5}
+.pass-fix{font-size:12px;color:#16a34a;line-height:1.5}
+.ai-kw-table{width:100%;border-collapse:collapse;font-size:12px}
+.ai-kw-table th{text-align:left;color:#bbb;font-weight:700;padding-bottom:6px;font-size:11px}
+.ai-kw-table td{padding:5px 0;border-top:1px solid #f5f5f5;color:#333;font-weight:600}
+.ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.ba-box{border:1.5px solid #e5e5e5;border-radius:9px;padding:12px}
+.ba-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
+.ba-before .ba-label{color:#ef4444}.ba-after .ba-label{color:#16a34a}
+.ba-text{font-size:12px;color:#444;line-height:1.7}
+.ba-after .ba-text{color:#166534;background:#f0fdf4;padding:9px;border-radius:7px}
 
 .toast{position:fixed;bottom:28px;right:28px;background:#111;color:#fff;font-size:12px;font-weight:600;padding:11px 18px;border-radius:10px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -241,12 +221,12 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.3</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.2</span></div>
       <div class="brand-sub" id="reportDate"></div>
     </div>
     <div class="btn-row no-print">
       <button class="btn btn-ghost btn-sm" onclick="fixAllFillers()">⚡ Fix Fillers</button>
-      <button class="btn btn-violet btn-sm" onclick="runCopyAudit()">✦ Copy Audit</button>
+      <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ AI Audit</button>
       <button class="btn btn-teal btn-sm" onclick="downloadHTML()">
         <svg width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
         HTML
@@ -271,9 +251,8 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
       <div class="editor-shell">
         <div class="editor-wrap">
-          <div id="editor-sizer" class="editor-typo" aria-hidden="true"></div>
-          <div id="editor-overlay" class="editor-typo" aria-hidden="true"></div>
-          <textarea id="editor-textarea" class="editor-typo" spellcheck="false" placeholder="Paste your marketing copy here…"></textarea>
+          <div id="editor-overlay" aria-hidden="true"></div>
+          <textarea id="editor-textarea" spellcheck="false" placeholder="Paste your marketing copy here…"></textarea>
         </div>
         <div class="editor-footer">
           <div class="legend">
@@ -307,10 +286,9 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
       <div class="ai-wrap" id="aiPanel">
         <div class="ai-head">
-          <div class="ai-title">✦ Copy Audit Report</div>
+          <div class="ai-title">✦ AI Copy Audit Report</div>
           <button class="ai-close" onclick="document.getElementById('aiPanel').classList.remove('open')">×</button>
         </div>
-        <div class="audit-tabs" id="auditTabs"></div>
         <div class="ai-body" id="aiOutput"></div>
       </div>
     </div>
@@ -387,7 +365,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
         <div class="card-title">Quick Fix Tips</div>
         <ul class="tip-list">
           <li><span>→</span><span>Target <strong>1.5–2.5%</strong> keyword density.</span></li>
-          <li><span>→</span><span>Click any highlight to see all issues — <strong>multi-colour</strong> = stacked problems.</span></li>
+          <li><span>→</span><span>Click <strong style="color:#fca5a5">red</strong> or <strong style="color:#c4b5fd">purple</strong> highlights for fix suggestions.</span></li>
           <li><span>→</span><span><strong style="color:#93c5fd">Blue</strong> = word repeated too close together.</span></li>
           <li><span>→</span><span><strong style="color:#f9a8d4">Pink</strong> = consecutive sentences starting the same way.</span></li>
           <li><span>→</span><span>Keep sentences <strong>under 30 words</strong> for maximum punch.</span></li>
@@ -400,14 +378,12 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 <script>
 const ta  = document.getElementById('editor-textarea');
 const ov  = document.getElementById('editor-overlay');
-const STORAGE_KEY = 'copyengine_v63';
+const STORAGE_KEY = 'copyengine_v62';
 
 const FILLERS = ['just','really','very','basically','actually','literally','simply','totally','perhaps','maybe','quite','slightly','rather','fairly','highly','extremely'];
 const STOP = new Set(['the','and','for','this','that','with','from','your','their','have','been','will','they','what','when','were','which','about','into','more','some','than','then','them','these','those','also','each','much','such','both','even','most','over','after','before','through','between','should','would','could','shall','does','doing','there','here','where','while','within','without','other','another','every','because','since','though','although','however','therefore','thus','hence','indeed','still','again','never','always','often','must','need','make','take','come','goes','like','many','well','back','only','same','good','high','long','great','small','large','next','last','first']);
-// Passive voice: covers simple (is built), continuous (is being built), perfect (has been built), and modal (will be built, could be built)
-const PASSIVE_PARTICIPLES = 'shown|taken|known|given|seen|found|kept|told|held|brought|written|set|left|made|built|delivered|processed|organized|organised|published|driven|chosen|forgotten|hidden|broken|stolen|spoken|worn|torn|grown|thrown|drawn|beaten|bitten|blown|frozen|risen|shaken|woken|[a-z]{4,}ed';
-const PASSIVE_RE = new RegExp(`\\b(?:(?:has|have|had)\\s+been\\s+|(?:will|shall|can|could|would|should|may|might|must)\\s+(?:have\\s+been\\s+|be\\s+)|(?:am|is|are|was|were)\\s+(?:being\\s+)?)(?:${PASSIVE_PARTICIPLES})\\b`,'gi');
-const PASSIVE_FIXES = {'is generated':'generates','was generated':'generated','are built':'build','was built':'built','is delivered':'delivers','was delivered':'delivered','is processed':'processes','was processed':'processed','is written':'writes','was written':'wrote','is made':'makes','was made':'made','is found':'finds','was found':'found','is known':'knows','was known':'knew','is seen':'sees','was seen':'saw','is given':'gives','was given':'gave','is shown':'shows','was shown':'showed','is taken':'takes','was taken':'took','is held':'holds','was held':'held','is told':'tells','was told':'told','has been built':'built','has been made':'made','has been given':'gave','has been found':'found','will be delivered':'will deliver','will be made':'will make','will be built':'will build','will be given':'will give','could be improved':'could improve','could be made':'could make','should be given':'should give','should be made':'should make','can be found':'can find','can be made':'can make','must be given':'must give','may be found':'may find','might be seen':'might see','would be made':'would make','is being built':'is building','is being made':'is making','was being built':'was building','was being made':'was making'};
+const PASSIVE_RE = /\b(am|is|are|was|were|be|been|being)\s+(shown|taken|known|given|seen|found|kept|told|held|brought|written|set|left|made|built|delivered|processed|organized|organised|published|[a-z]{4,}ed)\b/gi;
+const PASSIVE_FIXES = {'is generated':'generates','was generated':'generated','are built':'build','was built':'built','is delivered':'delivers','was delivered':'delivered','is processed':'processes','was processed':'processed','is written':'writes','was written':'wrote','is made':'makes','was made':'made','is found':'finds','was found':'found','is known':'knows','was known':'knew','is seen':'sees','was seen':'saw','is given':'gives','was given':'gave','is shown':'shows','was shown':'showed','is taken':'takes','was taken':'took','is held':'holds','was held':'held','is told':'tells','was told':'told'};
 const CLICHES = {'game changer':'Describe the actual impact','game-changer':'Describe the actual impact','move the needle':'Specify what metric improves','synergy':'Try "collaboration" or be specific','think outside the box':'Describe the actual idea','low hanging fruit':'Try "quick wins"','low-hanging fruit':'Try "quick wins"','at the end of the day':'State your point directly','best in class':'Cite actual proof','best-in-class':'Cite actual proof','cutting edge':'Name the actual technology','cutting-edge':'Name the actual technology','world class':'Cite a stat or specific claim','world-class':'Cite a stat or specific claim','next level':'Describe the actual improvement','next-level':'Describe the actual improvement','robust':'Try "reliable" or "powerful"','leverage':'Try "use" or "apply"','scalable':'Describe what specifically grows','innovative':'Describe what makes it new','seamless':'Describe how it actually works','revolutionary':'Describe the actual change','disruptive':'Describe what it replaces','paradigm shift':'Describe the specific change','value add':'Describe the specific value','value-add':'Describe the specific value','circle back':'Try "follow up"','deep dive':'Try "detailed review"','bandwidth':'Try "capacity" or "time"'};
 const CTA_PHRASES = ['buy now','get started','sign up','subscribe','download','learn more','try free','start free','book a demo','get a demo','request a demo','contact us','get in touch','claim your','start today','join now','order now','shop now','get access','unlock','discover','find out','see how','watch now','read more','apply now','register now','schedule','book now','get your','claim now','try it','speak to us','get a quote','request a quote','start your','begin your'];
 const TONE_AGG  = ['crush','dominate','destroy','kill','smash','win','beat','attack','force','unstoppable','ruthless','savage','obliterate','conquer'];
@@ -424,26 +400,29 @@ const AUDIENCES = {
 
 const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true};
 let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[];
-const sizer = document.getElementById('editor-sizer');
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-// ── Sizer: copy textarea content to the hidden sizer div so it drives the wrapper height ──
-// Also write plain text to the overlay immediately so text is visible before analysis runs
-function updateSizer(){
-  const escaped = esc(ta.value) + '\n';
-  sizer.innerHTML = escaped;
-  // Show plain text in overlay immediately — analysis will overwrite with highlights later
-  ov.innerHTML = escaped;
+// ── Sync scroll between textarea and overlay ──────────────────────────────────
+function syncScroll(){ ov.scrollTop = ta.scrollTop; }
+ta.addEventListener('scroll', syncScroll);
+
+// ── Sync overlay height to textarea content height ────────────────────────────
+function syncHeight(){
+  // Reset height to auto so it can shrink, then set to scrollHeight
+  ta.style.height = 'auto';
+  const h = Math.max(420, ta.scrollHeight);
+  ta.style.height = h + 'px';
+  ov.style.height  = h + 'px';
+  // Keep the wrapper tall enough
+  ta.closest('.editor-wrap').style.minHeight = h + 'px';
 }
 
-// ── Main input handler (adaptive debounce for long copy) ──────────────────────
+// ── Main input handler ────────────────────────────────────────────────────────
 function onEditorInput(){
-  updateSizer();
+  syncHeight();
   clearTimeout(analyseTimer);
-  const wordCount = ta.value.trim().split(/\s+/).length;
-  const delay = wordCount > 1000 ? 250 : 80;
-  analyseTimer = setTimeout(()=>{ analyse(); scheduleSave(); persistSave(); }, delay);
+  analyseTimer = setTimeout(()=>{ analyse(); scheduleSave(); persistSave(); }, 80);
 }
 
 ta.addEventListener('input', onEditorInput);
@@ -464,194 +443,39 @@ ta.addEventListener('paste', e=>{
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── Abbreviation-aware sentence splitter ──────────────────────────────────────
-const ABBREVS = new Set(['mr','mrs','ms','dr','prof','sr','jr','st','ave','blvd','dept','est','inc','corp','ltd','co','vs','etc','approx','govt','assn','intl','natl','no','nos','vol','jan','feb','mar','apr','jun','jul','aug','sep','sept','oct','nov','dec','mon','tue','wed','thu','fri','sat','sun','gen','sgt','cpl','pvt','capt','maj','col','lt','cmdr','adm','rev','hon','pres','gov','atty','supt','det','insp','fig','figs','eq','eqs','ref','refs','dept','depts','univ','p','pp','ed','trans','e','i']);
-
 function splitSentences(text){
-  const parts = []; let buf = '';
-  for(let i = 0; i < text.length; i++){
-    buf += text[i];
-
-    // ── Newline = sentence boundary (handles headings, line breaks, structured content) ──
-    if(text[i] === '\n' || text[i] === '\r'){
-      // Consume consecutive newlines/carriage returns
-      while(i + 1 < text.length && (text[i+1] === '\n' || text[i+1] === '\r')){ i++; buf += text[i]; }
-      if(buf.trim()){
-        parts.push(buf.trimEnd());
-        buf = '';
-      } else {
-        buf = '';
-      }
-      continue;
-    }
-
-    // ── Check for sentence-ending punctuation ──
-    if('.!?'.includes(text[i])){
-      // Check if this is an ellipsis (2+ consecutive periods) — usually not a sentence break
-      if(text[i] === '.' && i + 1 < text.length && text[i+1] === '.'){
-        while(i + 1 < text.length && text[i+1] === '.'){ i++; buf += text[i]; }
-        const afterDots = text[i+1] || '';
-        const afterSpace = text[i+2] || '';
-        if(/\s/.test(afterDots) && afterSpace && afterSpace !== afterSpace.toLowerCase()){
-          parts.push(buf.trimEnd());
-          buf = '';
-          i++;
-        }
-        continue;
-      }
-      // Handle sequences like "?!" or "!?" — consume all terminal punct
-      while(i + 1 < text.length && '!?'.includes(text[i+1])){ i++; buf += text[i]; }
-      const nextChar = text[i+1] || '';
-      if(text[i] === '.' || buf.endsWith('.')){
-        const wordBefore = buf.slice(0,-1).split(/\s+/).pop()?.replace(/[^a-zA-Z]/g, '').toLowerCase() || '';
-        if(ABBREVS.has(wordBefore)){
-          continue;
-        }
-        const charBeforePeriod = buf.length >= 2 ? buf[buf.length - 2] : '';
-        if(/\d/.test(charBeforePeriod) && /\d/.test(nextChar)){
-          continue;
-        }
-      }
-      // Real break: require whitespace or end-of-string
-      if(nextChar === '' || /\s/.test(nextChar)){
-        parts.push(buf.trimEnd());
-        buf = '';
-        if(nextChar && /\s/.test(nextChar)) i++;
-      }
+  // Split on: sentence-ending punctuation followed by space or newline,
+  // OR on newline characters themselves (paragraph/line breaks).
+  const parts=[]; let buf='';
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    // Sentence-end punctuation followed by space or newline
+    if('.!?'.includes(ch) && i<text.length-1 && (text[i+1]===' '||text[i+1]==='\n')){
+      buf+=ch;
+      parts.push(buf.trimEnd()); buf='';
+      // skip the following whitespace char so it doesn't start the next sentence
+      i++;
+    } else if(ch==='\n'){
+      // newline = paragraph boundary
+      if(buf.trim()) parts.push(buf.trimEnd());
+      buf='';
+    } else {
+      buf+=ch;
     }
   }
   if(buf.trim()) parts.push(buf.trimEnd());
-  return parts.filter(s => s.trim().length > 0);
+  return parts.filter(s=>s.trim().length>0);
 }
 
-// ── High-accuracy syllable counter ────────────────────────────────────────────
-// Exception dictionary for the 200+ most commonly miscounted English words
-const SYLL_EXCEPTIONS = {
-  'business':2,'every':2,'different':3,'interesting':3,'important':3,'beautiful':3,
-  'chocolate':3,'comfortable':3,'favourite':3,'favorite':3,'family':3,'finally':3,
-  'general':3,'generally':4,'however':3,'natural':3,'naturally':4,'probably':3,
-  'really':2,'several':3,'usually':4,'valuable':3,'vegetable':3,'wednesday':2,
-  'actually':4,'camera':3,'evening':2,'everything':3,'experience':4,'imagine':3,
-  'literature':4,'memory':3,'ordinary':4,'temperature':4,'separate':3,'desperate':3,
-  'corporate':3,'elaborate':4,'moderate':3,'delicate':3,'accurate':3,'adequate':3,
-  'private':2,'pirate':2,'climate':2,'senate':2,'estate':2,'primate':2,
-  'people':2,'little':2,'middle':2,'single':2,'simple':2,'double':2,'trouble':2,
-  'couple':2,'purple':2,'circle':2,'angle':2,'table':2,'able':2,'noble':2,
-  'bottle':2,'settle':2,'cattle':2,'battle':2,'gentle':2,'candle':2,'handle':2,
-  'subtle':2,'muscle':2,'article':3,'vehicle':3,'miracle':3,'obstacle':3,
-  'area':3,'idea':3,'real':1,'deal':1,'meal':1,'heal':1,'steal':1,'create':2,
-  'creature':2,'feature':2,'measure':2,'pleasure':2,'treasure':2,'league':1,
-  'vague':1,'tongue':1,'unique':2,'technique':2,'antique':2,'boutique':2,
-  'queue':1,'catalogue':3,'dialogue':3,'colleague':2,'fatigue':2,'intrigue':2,
-  'recipe':3,'maybe':2,'employee':3,'committee':3,'guarantee':3,'refugee':3,
-  'the':1,'have':1,'give':1,'live':1,'love':1,'move':1,'prove':1,'some':1,
-  'come':1,'done':1,'gone':1,'none':1,'one':1,'were':1,'where':1,'there':1,
-  'here':1,'fire':1,'hire':1,'wire':1,'tire':1,'sure':1,'pure':1,'cure':1,
-  'are':1,'ore':1,'more':1,'bore':1,'core':1,'fore':1,'gore':1,'lore':1,
-  'pore':1,'sore':1,'tore':1,'wore':1,'store':1,'score':1,'before':2,
-  'explore':2,'ignore':2,'restore':2,'adore':2,'ashore':2,
-  'like':1,'make':1,'take':1,'name':1,'game':1,'came':1,'same':1,'time':1,
-  'line':1,'fine':1,'mine':1,'nine':1,'wine':1,'dine':1,'pine':1,'vine':1,
-  'wide':1,'ride':1,'side':1,'hide':1,'guide':1,'pride':1,'slide':1,'stride':1,
-  'quite':1,'white':1,'write':1,'while':1,'smile':1,'style':1,
-  'those':1,'close':1,'chose':1,'whose':1,'rose':1,'nose':1,'pose':1,'dose':1,
-  'large':1,'change':1,'range':1,'strange':1,'charge':1,
-  'world':1,'world':1,'called':1,'walked':1,'talked':1,'looked':1,'worked':1,
-  'opened':2,'ended':2,'started':2,'wanted':2,'needed':2,'added':2,'decided':3,
-  'provided':3,'included':3,'expected':3,'created':3,'related':3,'located':3,
-  'delivered':3,'discovered':3,'considered':3,'remembered':3,'recovered':3,
-  'encountered':4,'empowered':3,'conquered':2,'covered':2,'offered':2,
-  'educated':4,'complicated':5,'associated':5,'differentiated':6,
-  'engagement':3,'management':3,'development':4,'achievement':3,'improvement':3,
-  'statement':2,'movement':2,'excitement':3,'requirement':3,'measurement':3,
-  'entertainment':4,'environment':4,'advertisement':4,'acknowledgement':4,
-  'conversion':3,'strategy':3,'customer':3,'marketing':3,'content':2,
-  'platform':2,'campaign':2,'revenue':3,'analytics':4,'integration':4,
-  'eyes':1,'does':1,'goes':1,'shoes':1,'canoes':2,'potatoes':3,'tomatoes':3,
-  'said':1,'again':2,'against':2,'says':1,'been':1,'being':2,'seeing':2,
-  'doing':2,'going':2,'having':2,'making':2,'taking':2,'coming':2,'giving':2,
-  'living':2,'moving':2,'using':2,'trying':2,'buying':2,'lying':2,
-  'applied':2,'supplied':2,'implied':2,'relied':2,'replied':2,'denied':2,
-  'dried':1,'tried':1,'fried':1,'cried':1,
-  'science':2,'audience':3,'experience':4,'patience':2,'violence':3,'silence':2,
-  'difference':3,'reference':3,'conference':3,'preference':3,'influence':3,
-  'evidence':3,'sentence':2,'sequence':2,'consequence':3,'presence':2,
-  'essence':2,'absence':2,'instance':2,'distance':2,'substance':2,
-  'alliance':3,'compliance':3,'reliance':3,'appliance':3,'guidance':2,
-  'performance':3,'importance':3,'resistance':3,'assistance':3,
-  'their':1,'weird':1,'height':1,'weight':1,'eight':1,'freight':1,'sleigh':1,
-  'through':1,'though':1,'thought':1,'brought':1,'bought':1,'caught':1,
-  'taught':1,'daughter':2,'laughter':2,'slaughter':2,'naughty':2,
-  'enough':2,'rough':1,'tough':1,'cough':1,'bough':1,'dough':1,
-  'borough':2,'thorough':2,'throughout':2,
-  'could':1,'would':1,'should':1,'because':2,'before':2,'between':2,
-  'behind':2,'below':2,'above':2,'about':2,'after':2,'never':2,
-  'always':2,'also':2,'already':3,'although':2,'another':3,
-  'power':2,'tower':2,'flower':2,'shower':2,'lower':2,'slower':2,
-  'hour':1,'our':1,'your':1,'pour':1,'four':1,'tour':1,'sour':1,
-  'favourite':3,'behaviour':3,'colour':2,'honour':2,'labour':2,'neighbour':2,
-  'flavour':2,'humour':2,'rumour':2,'vapour':2,'favour':2,
-  'centre':2,'theatre':3,'metre':2,'litre':2,'fibre':2,'sombre':2,
-  'analyse':3,'paralyse':3,'catalyse':3,
-  'realise':3,'organise':3,'recognise':3,'specialise':3,'finalise':3,
-  'programme':2,'catalogue':3,'dialogue':3,'analogue':3,
-};
-
-// Diphthongs/triphthongs that count as ONE vowel sound
-const DIPHTHONGS = /(?:eau|ieu|oeu|ai|au|aw|ay|ea|ee|ei|ey|eu|ie|oa|oe|oi|oo|ou|ow|oy|ue|ui)/gi;
-
 function countSylls(word){
-  const clean = word.toLowerCase().replace(/[^a-z]/g, '');
-  if(!clean) return 1;
-  // Check exception dictionary first
-  if(SYLL_EXCEPTIONS[clean] !== undefined) return SYLL_EXCEPTIONS[clean];
-  if(clean.length <= 3) return 1;
-
-  let w = clean;
-  // Rule: remove silent -e at end (but not -le, -ee, -ie, etc.)
-  if(w.endsWith('e') && !w.endsWith('le') && !w.endsWith('ee') && !w.endsWith('ie') && !w.endsWith('ye')){
-    w = w.slice(0, -1);
-  }
-  // Remove -es and -ed endings that are silent
-  if(w.endsWith('es') && !/[aeiou]es$/.test(w) && w.length > 3){
-    w = w.slice(0, -2);
-  } else if(w.endsWith('ed') && w.length > 3){
-    // -ted and -ded endings are voiced (wanted, added) — keep them
-    // -ered, -ened, etc. are voiced — keep them
-    // Only strip -ed when preceded by a consonant that isn't t/d and the letter before that isn't a vowel
-    const preEd = w.slice(0, -2);
-    const lastChar = preEd[preEd.length - 1] || '';
-    if(!/[aeiou]/.test(lastChar) && !/[td]/.test(lastChar)){
-      w = preEd;
-    }
-    // If it ends in vowel+consonant+ed (like "opened"), keep -ed (it's voiced)
-  }
-
-  // Count vowel groups, treating diphthongs as single sounds
-  const withDiph = w.replace(DIPHTHONGS, 'V'); // replace diphthongs with single vowel marker
-  const stripped = withDiph.replace(/^y/, ''); // leading y isn't a vowel
-  const clusters = stripped.match(/[aeiouyV]+/gi);
-  let count = clusters ? clusters.length : 1;
-
-  // Consonant + le at end = extra syllable (bottle, candle, purple)
-  if(clean.endsWith('le') && clean.length > 2 && !/[aeiouy]/.test(clean[clean.length - 3])){
-    count++;
-  }
-  // -tion, -sion = 1 syllable for that suffix
-  // -ious, -eous = 2 syllables for that suffix — already counted by vowel clusters
-
-  return Math.max(1, count);
+  word=word.toLowerCase(); if(word.length<=3) return 1;
+  word=word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/,'').replace(/^y/,'');
+  const s=word.match(/[aeiouy]{1,2}/g); return s?s.length:1;
 }
 
 function getSug(m){
-  const k=m.toLowerCase().replace(/\s+/g,' ').trim();
-  // Exact match first
-  if(PASSIVE_FIXES[k]) return `Active: "${PASSIVE_FIXES[k]}"`;
-  // Partial match (e.g. "is slowly generated" contains "is generated")
+  const k=m.toLowerCase();
   for(const [key,val] of Object.entries(PASSIVE_FIXES)) if(k.includes(key)) return `Active: "${val}"`;
-  // Generic advice for modal patterns
-  if(/^(could|should|would|can|may|might|must|will|shall)\b/.test(k)) return 'Rewrite: make the subject perform the action';
-  if(/^(has|have|had)\s+been\b/.test(k)) return 'Rewrite: use the simple past tense';
   return 'Rewrite with an active verb';
 }
 
@@ -668,7 +492,7 @@ function showTip(el){
   t.style.display=vis?'none':'block';
 }
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.hl'))
+  if(!e.target.closest('.ph')&&!e.target.closest('.ch')&&!e.target.closest('.rh'))
     document.querySelectorAll('.tip').forEach(t=>t.style.display='none');
 });
 
@@ -681,205 +505,145 @@ function analyse(){
   lastSentences = splitSentences(text);
 
   document.getElementById('readingTime').innerText =
-    Math.ceil(lastWords.length/255)<=1?'< 1 min read':`${Math.ceil(lastWords.length/255)} min read`;
+    Math.ceil(lastWords.length/238)<=1?'< 1 min read':`${Math.ceil(lastWords.length/238)} min read`;
 
-  // ── Map sentences back to character positions in original text ──
-  const sentRanges=[];
-  let searchFrom=0;
-  for(const sent of lastSentences){
-    const idx=text.indexOf(sent,searchFrom);
-    if(idx!==-1){
-      sentRanges.push({start:idx,end:idx+sent.length,text:sent});
-      searchFrom=idx+sent.length;
-    }
-  }
-
-  // ── Detect headings (short lines with no terminal punctuation) ──
-  const headingRanges=[];
-  sentRanges.forEach(sr=>{
-    const trimmed=sr.text.trim();
-    const wc=trimmed.split(/\s+/).length;
-    const endsWithPunct=/[.!?]$/.test(trimmed);
-    if(wc<=12 && !endsWithPunct) headingRanges.push(sr);
+  // Repetition — sentence index per word
+  const wsMap={};
+  lastSentences.forEach((s,si)=>{
+    s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
+      .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
   });
-  function isInHeading(pos){
-    return headingRanges.some(h=>pos>=h.start && pos<h.end);
-  }
-  function isInFirstSentAfterHeading(pos){
-    for(let si=1;si<sentRanges.length;si++){
-      const prev=sentRanges[si-1], cur=sentRanges[si];
-      if(pos>=cur.start && pos<cur.end){
-        return headingRanges.some(h=>h.start===prev.start && h.end===prev.end);
-      }
-    }
-    return false;
-  }
-
-  // ── Repetition: character-proximity based ──
-  // Only flag when the SAME word appears 3+ times within a proximity window
-  // Two occurrences is natural emphasis; three is where it becomes noticeable
-  const REPEAT_PROXIMITY = 300; // ~2.5 marketing sentences
-  const targetKWLower = (document.getElementById('targetKW').value||'').trim().toLowerCase();
-  // Exclude: stop words, fillers, target keyword, and common structural verbs
-  const REPEAT_COMMON = ['work','works','help','helps','make','makes','made','know','knows','said','used','using','find','found','want','give','told','show','keep','turn','call','come','goes','goes','feel','seem','look','mean','means','need','think','thing','things','place','point','part','does','done','been','being','gets','take','goes','want','much','many','just','also','even','well','more','most','very','some','such','only','back','year','long','time','best','free','data','team','plan','full','cost','type','rate','site','page','user','form','case','real','sure'];
-  const repeatExclude = new Set([...STOP, ...FILLERS, ...REPEAT_COMMON]);
-  if(targetKWLower) targetKWLower.split(/\s+/).forEach(w=>repeatExclude.add(w));
-
-  // Topic word detection: only exclude words that are genuinely spread throughout
-  // the piece AND don't make up an excessive proportion of the text
-  const textQuarterLen = Math.max(1, Math.floor(text.length / 4));
-  const topicWordPositions = {};
-  const topicScanRe = /[a-zA-Z]+/g; let tw;
-  while((tw=topicScanRe.exec(text))!==null){
-    const w=tw[0].toLowerCase();
-    if(w.length>=4 && !repeatExclude.has(w)){
-      if(!topicWordPositions[w]) topicWordPositions[w]=[];
-      topicWordPositions[w].push(tw.index);
-    }
-  }
-  const totalContentWords = Object.values(topicWordPositions).reduce((a,p)=>a+p.length,0)||1;
-  const topicWords = new Set();
-  Object.entries(topicWordPositions).forEach(([w,positions])=>{
-    if(positions.length < 4) return; // must appear 4+ times
-    const quarters = new Set(positions.map(p=>Math.min(3,Math.floor(p/textQuarterLen))));
-    const density = positions.length / totalContentWords;
-    // Exclude ONLY if spread across 3+ quarters AND density under 15%
-    // Very high density (15%+) in a focused piece = likely lazy repetition
-    if(quarters.size >= 3 && density < 0.15) topicWords.add(w);
-  });
-  topicWords.forEach(w=>repeatExclude.add(w));
-
-  // Find all content word occurrences with their positions
-  const wordOccurrences = {};
-  const wordRe = /[a-zA-Z]+/g; let wm;
-  while((wm=wordRe.exec(text))!==null){
-    const w = wm[0].toLowerCase();
-    if(w.length < 4 || repeatExclude.has(w)) continue;
-    if(!wordOccurrences[w]) wordOccurrences[w] = [];
-    wordOccurrences[w].push({start:wm.index, end:wm.index+wm[0].length});
-  }
-
-  // For each word, flag when 2+ occurrences cluster within proximity
-  const repeatPositions = [];
-  let repeatCount = 0;
-  Object.entries(wordOccurrences).forEach(([w, positions])=>{
-    if(positions.length < 2) return;
-    const flagged = new Set();
-    for(let i = 0; i < positions.length; i++){
-      if(isInHeading(positions[i].start) || isInFirstSentAfterHeading(positions[i].start)) continue;
-      let nearby = 0;
-      for(let j = 0; j < positions.length; j++){
-        if(i === j) continue;
-        if(isInHeading(positions[j].start) || isInFirstSentAfterHeading(positions[j].start)) continue;
-        const gap = Math.abs(positions[i].start - positions[j].start);
-        if(gap <= REPEAT_PROXIMITY) nearby++;
-      }
-      if(nearby >= 1) flagged.add(i); // 2+ in proximity = flag
-    }
-    flagged.forEach(idx=>{ repeatPositions.push({...positions[idx], word:w}); repeatCount++; });
+  const repeatSet=new Set(); let repeatCount=0;
+  Object.entries(wsMap).forEach(([w,idxs])=>{
+    for(let i=1;i<idxs.length;i++) if(idxs[i]-idxs[i-1]<=2){ repeatSet.add(w); repeatCount++; break; }
   });
 
-  // ── Variety ──
+  // Variety — consecutive same-start sentences
   const starts=lastSentences.map(s=>s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g,'')||'');
-  const varietyIssueSet=new Set();
-  for(let i=1;i<starts.length;i++) if(starts[i]&&starts[i]===starts[i-1]&&starts[i].length>2) varietyIssueSet.add(i);
+  const varietyIssues=new Set();
+  for(let i=1;i<starts.length;i++) if(starts[i]&&starts[i]===starts[i-1]&&starts[i].length>2) varietyIssues.add(i);
 
-  // ── Collect ALL annotations against the FULL ORIGINAL TEXT ──
+  // ── Build sentence-level char ranges in the ORIGINAL text ──────────────────
+  // We locate each sentence string inside `text` sequentially so we get
+  // absolute offsets, preserving all whitespace/newlines between them.
   let pCount=0,fCount=0,cCount=0;
-  const raw=[];
-
-  if(modes.filler) FILLERS.forEach(w=>{
-    const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-    while((m=re.exec(text))!==null){ fCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'filler',tip:null}); }
+  const sentRanges=[]; // [{start, end, si}]
+  let searchFrom=0;
+  lastSentences.forEach((sent,si)=>{
+    const idx=text.indexOf(sent,searchFrom);
+    if(idx===-1) return;
+    sentRanges.push({start:idx,end:idx+sent.length,si});
+    searchFrom=idx+sent.length;
   });
 
-  if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
-    const re=new RegExp(`\\b${phrase.replace(/[-\s]/g,'[\\s\\-]+')}\\b`,'gi'); let m;
-    while((m=re.exec(text))!==null){ cCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'cliche',tip}); }
-  });
+  // ── Collect all annotations as absolute offsets into `text` ───────────────
+  const allAnns=[]; // {start,end,cls,tip,priority}
 
-  if(modes.repeat) repeatPositions.forEach(rp=>{
-    raw.push({start:rp.start,end:rp.end,type:'repeat',tip:`"${rp.word}" repeated within ${REPEAT_PROXIMITY} characters — try a synonym`});
-  });
+  sentRanges.forEach(({start:base,end:sentEnd,si})=>{
+    const sent=text.slice(base,sentEnd);
+    const local=[];
 
-  if(modes.passive){
-    const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
-    while((m=pr.exec(text))!==null){ pCount++; raw.push({start:m.index,end:m.index+m[0].length,type:'passive',tip:getSug(m[0])}); }
-  }
+    if(modes.filler) FILLERS.forEach(w=>{
+      const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
+      while((m=re.exec(sent))!==null){ fCount++; local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'fh',tip:null,pri:2}); }
+    });
 
-  // Sentence-level: long sentences (40+ words) and variety
-  sentRanges.forEach((sr,si)=>{
-    const wc=sr.text.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(modes.sentence&&wc>=30) raw.push({start:sr.start,end:sr.end,type:'long',tip:null});
-    if(modes.variety&&varietyIssueSet.has(si)) raw.push({start:sr.start,end:sr.end,type:'variety',tip:null});
-  });
+    if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
+      const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi'); let m;
+      while((m=re.exec(sent))!==null){ cCount++; local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'ch',tip,pri:2}); }
+    });
 
-  // ── Build character-level issue map on the ORIGINAL TEXT ──
-  const ISSUE_COLOURS = {passive:'#ef4444',filler:'#eab308',cliche:'#a855f7',repeat:'#3b82f6'};
-  const ISSUE_LABELS  = {passive:'Passive',filler:'Filler',cliche:'Cliché',repeat:'Repeat'};
+    if(modes.repeat) repeatSet.forEach(w=>{
+      const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
+      while((m=re.exec(sent))!==null) local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'rh',tip:'Repeated nearby — try a synonym',pri:1});
+    });
 
-  const charIssues = new Array(text.length).fill(null);
-  for(const a of raw){
-    for(let c=a.start;c<a.end;c++){
-      if(!charIssues[c]) charIssues[c]={types:new Set(),tips:[]};
-      charIssues[c].types.add(a.type);
-      if(a.tip && !charIssues[c].tips.some(t=>t.type===a.type)) charIssues[c].tips.push({type:a.type,tip:a.tip});
+    if(modes.passive){
+      const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
+      while((m=pr.exec(sent))!==null){ pCount++; local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'ph',tip:getSug(m[0]),pri:3}); }
     }
-  }
 
-  // ── Collapse into contiguous spans with the same issue set ──
-  const spans=[];
-  let spanStart=0, prevKey='';
-  for(let c=0;c<=text.length;c++){
-    const curKey = c<text.length && charIssues[c] ? [...charIssues[c].types].sort().join('+') : '';
-    if(curKey!==prevKey){
-      if(spanStart<c) spans.push({start:spanStart,end:c,key:prevKey,issues:c>0&&charIssues[c-1]?charIssues[c-1]:null});
-      spanStart=c; prevKey=curKey;
-    }
-  }
+    // Sentence-level wrappers stored as zero-priority range markers
+    const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
+    if(modes.sentence&&wc>=30) allAnns.push({start:base,end:sentEnd,cls:'sh',tip:null,pri:0,wrap:true});
+    if(modes.variety&&varietyIssues.has(si)) allAnns.push({start:base,end:sentEnd,cls:'vh',tip:null,pri:0,wrap:true});
 
-  // ── Render overlay HTML from spans — preserving EVERY original character ──
-  let overlayHtml='';
-  for(const sp of spans){
-    const chunk=esc(text.slice(sp.start,sp.end));
-    if(!sp.key||!sp.issues){
-      overlayHtml+=chunk;
-      continue;
-    }
-    const types=[...sp.issues.types];
-    // Separate sentence-level types from word-level
-    const wordTypes=types.filter(t=>t!=='long'&&t!=='variety');
-    const hasLong=types.includes('long');
-    const hasVariety=types.includes('variety');
+    allAnns.push(...local);
+  });
 
-    let inner=chunk;
-    // Apply word-level highlight
-    if(wordTypes.length>0){
-      const classes=['hl',...wordTypes.map(t=>'hl-'+t)].join(' ');
-      const hasTip=sp.issues.tips.length>0||wordTypes.length>0;
-      if(hasTip){
-        const tipItems=wordTypes.map(t=>{
-          const specificTip=sp.issues.tips.find(x=>x.type===t);
-          const label=ISSUE_LABELS[t]||t;
-          const colour=ISSUE_COLOURS[t]||'#888';
-          const desc=specificTip?specificTip.tip:(t==='filler'?'Filler word — consider removing':t==='repeat'?'Repeated nearby — try a synonym':'');
-          return `<div class="tip-item"><span class="tip-dot" style="background:${colour}"></span><span class="tip-text"><strong>${label}:</strong> ${desc}</span></div>`;
-        }).join('');
-        inner=`<span class="${classes}" onclick="showTip(this)">${chunk}<span class="tip">${tipItems}</span></span>`;
-      } else {
-        inner=`<span class="${classes}">${chunk}</span>`;
+  // ── Single-pass render: walk `text` left-to-right building HTML ────────────
+  // Sort inline anns by start; wraps handled separately per-sentence
+  // Strategy: for each character position, check if we're entering/exiting a span.
+  // Simpler approach: collect non-overlapping inline anns, then apply sentence wraps.
+
+  // Resolve inline anns (no overlaps, highest priority wins)
+  allAnns.sort((a,b)=>a.start-b.start||b.end-a.end||(b.pri-a.pri));
+  const inlineAnns=allAnns.filter(a=>!a.wrap);
+  const wrapAnns  =allAnns.filter(a=> a.wrap);
+
+  const resolved=[]; let cur=0;
+  for(const a of inlineAnns){ if(a.start>=cur){ resolved.push(a); cur=a.end; } }
+
+  // Build a flat HTML string character-by-character using resolved spans
+  // We'll build it in segments
+  let html='', pos=0;
+
+  // Merge wrap ranges so we know which chars are "inside" a sentence wrap
+  // We'll wrap by emitting open/close tags at sentence boundaries
+  // Build wrap index: for each sentRange, note its wrap classes
+  const sentWrapMap=new Map(); // si -> [cls,...]
+  wrapAnns.forEach(w=>{
+    // find which sentRange this belongs to
+    sentRanges.forEach(sr=>{
+      if(sr.start===w.start&&sr.end===w.end){
+        if(!sentWrapMap.has(sr.si)) sentWrapMap.set(sr.si,[]);
+        sentWrapMap.get(sr.si).push(w.cls);
       }
-    }
-    // Wrap with sentence-level highlights
-    if(hasVariety) inner=`<span class="vh">${inner}</span>`;
-    if(hasLong) inner=`<span class="sh">${inner}</span>`;
-    overlayHtml+=inner;
-  }
+    });
+  });
 
-  // Write overlay — character-perfect match with textarea
-  ov.innerHTML = overlayHtml;
-  // Sizer drives the height — update it with the raw text
-  updateSizer();
+  // Now build HTML: iterate sentRanges, wrapping each sentence's HTML if needed
+  const resolvedBySent=new Map();
+  sentRanges.forEach(sr=>resolvedBySent.set(sr.si,[]));
+  resolved.forEach(a=>{
+    const sr=sentRanges.find(s=>a.start>=s.start&&a.end<=s.end);
+    if(sr) resolvedBySent.get(sr.si)?.push(a);
+  });
+
+  let htmlOut='', textPos=0;
+
+  sentRanges.forEach(({start:sBase,end:sEnd,si})=>{
+    // Emit any whitespace/newlines before this sentence verbatim
+    if(sBase>textPos) htmlOut+=esc(text.slice(textPos,sBase));
+
+    // Build the sentence's inner HTML
+    const anns=resolvedBySent.get(si)||[];
+    let inner='', iPos=sBase;
+    for(const a of anns){
+      if(a.start>iPos) inner+=esc(text.slice(iPos,a.start));
+      const word=esc(text.slice(a.start,a.end));
+      inner+=a.tip
+        ?`<span class="${a.cls}" onclick="showTip(this)">${word}<span class="tip">${a.tip}</span></span>`
+        :`<span class="${a.cls}">${word}</span>`;
+      iPos=a.end;
+    }
+    if(iPos<sEnd) inner+=esc(text.slice(iPos,sEnd));
+
+    // Apply sentence-level wrappers
+    const wraps=sentWrapMap.get(si)||[];
+    let wrapped=inner;
+    for(const cls of wraps) wrapped=`<span class="${cls}">${wrapped}</span>`;
+
+    htmlOut+=wrapped;
+    textPos=sEnd;
+  });
+
+  // Emit any trailing text after last sentence
+  if(textPos<text.length) htmlOut+=esc(text.slice(textPos));
+
+  ov.innerHTML = htmlOut;
+  syncScroll();
 
   document.getElementById('sPassive').innerText=pCount;
   document.getElementById('sFiller').innerText =fCount;
@@ -896,7 +660,7 @@ function analyse(){
   lastFK=206.835-(1.015*(lastWords.length/(lastSentences.length||1)))-(84.6*(sylls/(lastWords.length||1)));
   updateRead(lastFK);
   detectTone(lastWords);
-  updateVariety(lastSentences,varietyIssueSet);
+  updateVariety(lastSentences,varietyIssues);
   detectCTA(text);
   updateKW(lastWords,text);
   updateAudience();
@@ -1097,7 +861,6 @@ function persistLoad(){
 
 function resetUI(){
   ov.innerHTML='';
-  sizer.innerHTML='\n';
   ['sPassive','sFiller','sCliche','sRepeat','sWords','sChars'].forEach(id=>document.getElementById(id).innerText='0');
   const fill=document.getElementById('gFill'); fill.style.strokeDashoffset='0'; fill.style.stroke='#e5e5e5';
   document.getElementById('gNum').innerText='—';
@@ -1112,204 +875,35 @@ function resetUI(){
   document.getElementById('audResult').innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">Select an audience to score your copy.</p>';
 }
 
-// ── Copy Audit (fully client-side, tabbed, prioritised fixes) ─────────────────
-function runCopyAudit(){
-  const text=ta.value.trim();
-  if(!text){alert('Please paste some copy first.');return;}
-  const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput'),tabs=document.getElementById('auditTabs');
+// ── AI Audit ──────────────────────────────────────────────────────────────────
+async function runAIAudit(){
+  const text=ta.value.trim(); if(!text){alert('Please paste some copy first.');return;}
+  const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput');
   panel.classList.add('open');
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
-
-  // ── Gather all issues from the live analysis ──
-  const words=text.split(/\s+/).filter(w=>w.length>0);
-  const sentences=splitSentences(text);
-  const wc=words.length;
-
-  // Passive
-  const passiveIssues=[];
-  const pr=new RegExp(PASSIVE_RE.source,'gi'); let pm;
-  while((pm=pr.exec(text))!==null){
-    passiveIssues.push({match:pm[0],index:pm.index,fix:getSug(pm[0])});
-  }
-
-  // Fillers
-  const fillerMap={};
-  FILLERS.forEach(w=>{
-    const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-    while((m=re.exec(text))!==null){ fillerMap[w]=(fillerMap[w]||0)+1; }
-  });
-  const fillerIssues=Object.entries(fillerMap).sort((a,b)=>b[1]-a[1]).map(([word,count])=>({word,count}));
-
-  // Clichés
-  const clicheIssues=[];
-  Object.entries(CLICHES).forEach(([phrase,tip])=>{
-    const re=new RegExp(`\\b${phrase.replace(/[-\s]/g,'[\\s\\-]+')}\\b`,'gi'); let m;
-    while((m=re.exec(text))!==null) clicheIssues.push({phrase:m[0],tip,index:m.index});
-  });
-
-  // Long sentences
-  const longSentences=[];
-  sentences.forEach((s,i)=>{
-    const swc=s.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(swc>=30) longSentences.push({text:s,wordCount:swc,index:i});
-  });
-
-  // SEO keywords
-  const tkw=document.getElementById('targetKW').value.trim().toLowerCase();
-  let kwDensity=null;
-  if(tkw&&wc>0){
-    const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
-    const count=(text.match(re)||[]).length;
-    kwDensity={word:tkw,count,pct:(count/wc*100).toFixed(2),status:count/wc*100>=2.5?'High':count/wc*100>=1.5?'Optimal':'Low'};
-  }
-
-  // Readability
-  const sylls=words.reduce((a,w)=>a+countSylls(w),0);
-  const fk=206.835-(1.015*(wc/(sentences.length||1)))-(84.6*(sylls/(wc||1)));
-  const fkLabel=fk>=80?'Very Easy':fk>=70?'Easy':fk>=60?'Fairly Easy':fk>=50?'Standard':fk>=40?'Fairly Difficult':fk>=30?'Difficult':'Very Difficult';
-  const avgSentLen=sentences.length?Math.round(wc/sentences.length):0;
-
-  // ── Build prioritised fix list per tab ──
-  // Impact scoring: passive=5pts, filler=2pts, cliché=3pts per instance
-  const pImpact=passiveIssues.length*5;
-  const fImpact=fillerIssues.reduce((a,f)=>a+f.count*2,0);
-  const cImpact=clicheIssues.length*3;
-
-  // ── Tab definitions ──
-  const tabDefs=[
-    {id:'priority',label:'Priority Fixes',count:passiveIssues.length+fillerIssues.length+clicheIssues.length+longSentences.length,countCls:'t-red'},
-    {id:'passive',label:'Passive',count:passiveIssues.length,countCls:passiveIssues.length?'t-red':'t-green'},
-    {id:'fillers',label:'Fillers',count:fillerIssues.reduce((a,f)=>a+f.count,0),countCls:fillerIssues.length?'t-amber':'t-green'},
-    {id:'cliches',label:'Clichés',count:clicheIssues.length,countCls:clicheIssues.length?'t-purple':'t-green'},
-    {id:'readability',label:'Readability',count:null,countCls:'t-blue'},
-  ];
-
-  tabs.innerHTML=tabDefs.map(t=>
-    `<div class="audit-tab${t.id==='priority'?' active':''}" data-tab="${t.id}" onclick="switchAuditTab('${t.id}')">${t.label}${t.count!==null?`<span class="tab-count ${t.countCls}">${t.count}</span>`:''}</div>`
-  ).join('');
-
-  // ── Store tab content so switching is instant ──
-  const tabContent={};
-  let _fixId=0;
-
-  // Helper: build a fix card with optional Find, Remove, and suggestion dropdown
-  function fixCard(opts){
-    const id='sug_'+(++_fixId);
-    const impCls=opts.impact>=5?'impact-high':opts.impact>=3?'impact-med':'impact-low';
-    let actions='<div class="audit-fix-actions">';
-    if(opts.findPhrase) actions+=`<button class="audit-fix-btn" onclick="auditScrollTo(\`${opts.findPhrase.replace(/`/g,'')}\`)">🔍 Find</button>`;
-    if(opts.removeWord) actions+=`<button class="audit-fix-btn" onclick="auditFixFiller('${opts.removeWord}')">⚡ Remove all</button>`;
-    if(opts.suggestion) actions+=`<button class="audit-fix-btn" onclick="toggleSuggestion('${id}')">💡 How to fix</button>`;
-    actions+='</div>';
-    const suggestionBox=opts.suggestion?`<div class="audit-suggestion" id="${id}"><div class="audit-suggestion-head">Suggested Fix</div><div class="audit-suggestion-body">${opts.suggestion}</div></div>`:'';
-    return `<div class="audit-fix"><div class="audit-fix-icon" style="background:${opts.iconBg}">${opts.icon}</div><div class="audit-fix-body"><div class="audit-fix-title">${opts.title}</div><div class="audit-fix-desc">${opts.desc}</div>${actions}${suggestionBox}</div><span class="audit-fix-impact ${impCls}">${opts.impactLabel}</span></div>`;
-  }
-
-  // Passive fix suggestions
-  function passiveSuggestion(match){
-    const lower=match.toLowerCase();
-    const fix=getSug(match);
-    if(fix.startsWith('Active:')) return `<strong>Rewrite:</strong> ${fix.replace('Active: ','Replace with ')}. Put the actor first — who is doing this action? Lead with them.`;
-    return `<strong>Flip to active voice:</strong> Identify who performs the action and make them the subject. e.g. instead of "${esc(match)}", write "[Actor] ${lower.split(/\s+/).pop()?.replace(/ed$/,'s')||'does this'}."`;
-  }
-
-  // Long sentence suggestions
-  function longSentSuggestion(sent, wc){
-    const hasSemicolon=sent.includes(';');
-    const hasCommaAnd=/,\s*(and|but|or|while|which|that)\s/i.test(sent);
-    const hasList=sent.split(',').length>=4;
-    if(hasList) return `<strong>Break up the list:</strong> This sentence has multiple comma-separated items. Try using a colon and short list, or split into two sentences — one to set up, one to deliver.`;
-    if(hasSemicolon) return `<strong>Split at the semicolon:</strong> Each clause can stand alone. Replace the semicolon with a full stop and start a new sentence.`;
-    if(hasCommaAnd) return `<strong>Split at the conjunction:</strong> Look for "and", "but", or "which" — that's your natural break point. Make two punchy sentences instead of one long one.`;
-    return `<strong>Find the core message:</strong> At ${wc} words, this sentence is carrying too much. Ask: what's the ONE thing this sentence needs to say? Move everything else into a follow-up sentence.`;
-  }
-
-  // Priority tab
-  const allFixes=[];
-  passiveIssues.forEach(p=>allFixes.push({type:'passive',icon:'🔴',iconBg:'#fee2e2',title:`"${esc(p.match)}"`,desc:p.fix,impact:5,impactLabel:'−5 pts',findPhrase:p.match,suggestion:passiveSuggestion(p.match)}));
-  clicheIssues.forEach(c=>allFixes.push({type:'cliche',icon:'🟣',iconBg:'#f3e8ff',title:`"${esc(c.phrase)}"`,desc:c.tip,impact:3,impactLabel:'−3 pts',findPhrase:c.phrase,suggestion:`<strong>Replace the cliché:</strong> ${c.tip}. Be specific — what exactly makes this different? Use a concrete detail or metric instead.`}));
-  fillerIssues.forEach(f=>allFixes.push({type:'filler',icon:'🟡',iconBg:'#fef9c3',title:`"${esc(f.word)}" × ${f.count}`,desc:'Filler word — consider removing for punchier copy.',impact:f.count*2,impactLabel:`−${f.count*2} pts`,removeWord:f.word,suggestion:`<strong>Remove or replace:</strong> Read each sentence containing "${esc(f.word)}" without it. If the meaning doesn't change, delete it. If it weakens the claim, replace with a stronger qualifier or specific detail.`}));
-  longSentences.forEach(l=>allFixes.push({type:'long',icon:'🟠',iconBg:'#ffedd5',title:`${l.wordCount}-word sentence`,desc:`"${esc(l.text.slice(0,60))}…"`,impact:2,impactLabel:'readability',findPhrase:l.text.slice(0,40),suggestion:longSentSuggestion(l.text,l.wordCount)}));
-  allFixes.sort((a,b)=>b.impact-a.impact);
-
-  const summaryHtml=`<div class="audit-summary-grid"><div class="audit-summary-card"><div class="audit-summary-val" style="color:${lastScore>85?'#22c55e':lastScore>65?'#6366f1':'#ef4444'}">${lastScore}%</div><div class="audit-summary-lbl">Active Score</div></div><div class="audit-summary-card"><div class="audit-summary-val" style="color:#6366f1">${wc}</div><div class="audit-summary-lbl">Words</div></div><div class="audit-summary-card"><div class="audit-summary-val" style="color:${allFixes.length===0?'#22c55e':'#d97706'}">${allFixes.length}</div><div class="audit-summary-lbl">Issues</div></div></div>`;
-
-  tabContent.priority=summaryHtml+(allFixes.length?allFixes.map(f=>fixCard(f)).join(''):'<div class="audit-empty">No issues found — your copy is clean.</div>');
-
-  // Passive tab
-  tabContent.passive=passiveIssues.length?passiveIssues.map(p=>fixCard({icon:'🔴',iconBg:'#fee2e2',title:`"${esc(p.match)}"`,desc:p.fix,impact:5,impactLabel:'−5 pts',findPhrase:p.match,suggestion:passiveSuggestion(p.match)})).join(''):'<div class="audit-empty">No passive voice detected — nice work.</div>';
-
-  // Fillers tab
-  tabContent.fillers=fillerIssues.length?fillerIssues.map(f=>fixCard({icon:'🟡',iconBg:'#fef9c3',title:`"${esc(f.word)}" — ${f.count} occurrence${f.count>1?'s':''}`,desc:`Filler word adding ${f.count*2} points of drag to your score.`,impact:f.count*2,impactLabel:`−${f.count*2} pts`,removeWord:f.word,suggestion:`<strong>Test without it:</strong> Read each sentence containing "${esc(f.word)}" with the word removed. If the meaning holds, delete it. You'll get tighter, more confident copy.`})).join(''):'<div class="audit-empty">No filler words detected — tight writing.</div>';
-
-  // Clichés tab
-  tabContent.cliches=clicheIssues.length?clicheIssues.map(c=>fixCard({icon:'🟣',iconBg:'#f3e8ff',title:`"${esc(c.phrase)}"`,desc:c.tip,impact:3,impactLabel:'−3 pts',findPhrase:c.phrase,suggestion:`<strong>Replace the cliché:</strong> ${c.tip}. What specific, concrete detail could replace this phrase? Readers engage with specifics — a number, a comparison, a real outcome.`})).join(''):'<div class="audit-empty">No clichés detected — original voice.</div>';
-
-  // Readability tab
-  const readCol=fk>=60?'#22c55e':fk>=40?'#d97706':'#ef4444';
-  const ctaFound=CTA_PHRASES.filter(p=>text.toLowerCase().includes(p));
-  const ctaStatus=ctaFound.length>=3?'Strong':ctaFound.length>=1?'Weak':'Missing';
-  const ctaCol=ctaFound.length>=3?'#22c55e':ctaFound.length>=1?'#d97706':'#ef4444';
-  tabContent.readability=`
-    <div class="audit-summary-grid" style="grid-template-columns:repeat(4,1fr)">
-      <div class="audit-summary-card"><div class="audit-summary-val" style="color:${readCol}">${fkLabel.split(' ')[0]}</div><div class="audit-summary-lbl">Readability</div></div>
-      <div class="audit-summary-card"><div class="audit-summary-val" style="color:#6366f1">${avgSentLen}w</div><div class="audit-summary-lbl">Avg Sentence</div></div>
-      <div class="audit-summary-card"><div class="audit-summary-val" style="color:${ctaCol}">${ctaStatus}</div><div class="audit-summary-lbl">CTA</div></div>
-      <div class="audit-summary-card"><div class="audit-summary-val" style="color:#6366f1">${Math.ceil(wc/255)}<span style="font-size:11px;font-weight:600"> min</span></div><div class="audit-summary-lbl">Read Time</div></div>
-    </div>
-    ${kwDensity?fixCard({icon:kwDensity.status==='Optimal'?'🟢':kwDensity.status==='High'?'🔴':'🟡',iconBg:kwDensity.status==='Optimal'?'#dcfce7':kwDensity.status==='High'?'#fee2e2':'#fef3c7',title:`Target keyword: "${esc(kwDensity.word)}"`,desc:`${kwDensity.pct}% density (${kwDensity.count}× in ${wc} words) — ${kwDensity.status==='Optimal'?'perfect range.':kwDensity.status==='High'?'reduce to avoid keyword stuffing.':'increase for better SEO relevance.'}`,impact:kwDensity.status==='High'?5:kwDensity.status==='Low'?3:1,impactLabel:kwDensity.status,suggestion:kwDensity.status==='High'?'<strong>Reduce keyword density:</strong> Replace some instances with synonyms or related terms. Search engines reward natural language — forced repetition can hurt rankings.':kwDensity.status==='Low'?`<strong>Increase keyword usage:</strong> Look for places where you describe "${esc(kwDensity.word)}" without naming it. Add the keyword naturally in headings, opening sentences, and CTAs.`:null}):'<div class="audit-fix"><div class="audit-fix-icon" style="background:#f3f4f6">💡</div><div class="audit-fix-body"><div class="audit-fix-title">No target keyword set</div><div class="audit-fix-desc">Enter a target keyword in the SEO panel to include density analysis.</div></div></div>'}
-    ${longSentences.length?`<div style="margin-top:6px"><div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb;margin-bottom:8px">Long Sentences (${longSentences.length})</div>${longSentences.map(l=>fixCard({icon:'🟠',iconBg:'#ffedd5',title:`${l.wordCount} words`,desc:`"${esc(l.text.slice(0,80))}${l.text.length>80?'…':''}"`,impact:2,impactLabel:'readability',findPhrase:l.text.slice(0,40),suggestion:longSentSuggestion(l.text,l.wordCount)})).join('')}</div>`:''}`;
-
-  // Store content globally for tab switching
-  window._auditTabContent=tabContent;
-  out.innerHTML=tabContent.priority;
+  out.innerHTML='<div class="loading-wrap"><div class="spinner"></div><p>Analysing your copy…</p></div>';
+  const sys=`You are an elite Direct-Response Copy Editor and SEO Analyst. Return ONLY a raw JSON object — no markdown fences, no commentary. Shape: {"activeScore":"82%","readability":"Standard","wordCount":123,"passiveFlags":[{"original":"phrase","suggestion":"fix"}],"fillerWords":[{"word":"just","count":3}],"cliches":[{"phrase":"game changer","suggestion":"describe actual impact"}],"keywords":[{"word":"conversion","density":"2.1%","status":"Optimal"}],"rewrite":"Full rewritten lean version."}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:text}]})});
+    const data=await res.json();
+    const raw=(data.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    renderAI(JSON.parse(raw),text);
+  }catch(e){ out.innerHTML='<p style="color:#ef4444;font-size:12px;padding:8px 0">⚠️ Failed to load AI report. Please try again.</p>'; }
 }
 
-function switchAuditTab(tabId){
-  document.querySelectorAll('.audit-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tabId));
-  const out=document.getElementById('aiOutput');
-  if(window._auditTabContent&&window._auditTabContent[tabId]) out.innerHTML=window._auditTabContent[tabId];
-}
-
-function auditFixFiller(word){
-  let t=ta.value;
-  t=t.replace(new RegExp(`\\s?\\b${word}\\b\\s?`,'gi'),' ');
-  ta.value=t.replace(/ {2,}/g,' ').replace(/ ([.,!?;:])/g,'$1').trim();
-  onEditorInput();
-  setTimeout(()=>runCopyAudit(),150);
-  showToast(`✓ Removed all "${word}"`);
-}
-
-let _scrollRestoreTimer=null;
-function auditScrollTo(phrase){
-  const idx=ta.value.toLowerCase().indexOf(phrase.toLowerCase());
-  if(idx===-1){showToast('⚠️ Phrase not found — may have been edited');return;}
-  // Cancel any previous restore timer
-  if(_scrollRestoreTimer) clearTimeout(_scrollRestoreTimer);
-  // Dim highlights so selection stands out
-  ov.style.opacity='0.15';
-  ta.focus();
-  ta.setSelectionRange(idx,idx+phrase.length);
-  ta.style.webkitTextFillColor='#6366f1';
-  ta.style.color='#6366f1';
-  // Scroll textarea to make selection visible
-  const lineHeight=parseFloat(getComputedStyle(ta).lineHeight)||28;
-  const charsPerLine=Math.floor(ta.clientWidth/9)||60;
-  const approxLine=Math.floor(idx/charsPerLine);
-  const editorWrap=ta.closest('.editor-wrap');
-  if(editorWrap) editorWrap.scrollTop=Math.max(0,(approxLine*lineHeight)-100);
-  showToast('🔍 Selected in editor');
-  _scrollRestoreTimer=setTimeout(()=>{
-    ov.style.opacity='1';
-    ta.style.webkitTextFillColor='transparent';
-    ta.style.color='transparent';
-    _scrollRestoreTimer=null;
-  },2500);
-}
-
-function toggleSuggestion(id){
-  const el=document.getElementById(id);
-  if(el) el.classList.toggle('open');
+function renderAI(r,original){
+  const passive=r.passiveFlags?.length?r.passiveFlags.map(f=>`<div class="pass-item"><div class="pass-orig">${esc(f.original)}</div><div class="pass-fix">→ ${esc(f.suggestion)}</div></div>`).join(''):'<p style="color:#aaa">None detected.</p>';
+  const fillers=r.fillerWords?.length?r.fillerWords.map(f=>`<li>"<strong>${f.word}</strong>" — ${f.count}×</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
+  const cliches=r.cliches?.length?r.cliches.map(c=>`<li>"<strong>${c.phrase}</strong>" — ${c.suggestion}</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
+  const kw=r.keywords?.length?`<table class="ai-kw-table"><thead><tr><th>Keyword</th><th>Density</th><th>Status</th></tr></thead><tbody>${r.keywords.map(k=>`<tr><td style="text-transform:capitalize">${k.word}</td><td style="color:#6366f1;font-family:monospace">${k.density}</td><td>${k.status==='Optimal'?'🟢':k.status==='High'?'🔴':'🟡'} ${k.status}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#aaa">No keywords extracted.</p>';
+  const ba=`<div class="ba-grid"><div class="ba-box ba-before"><div class="ba-label">Before</div><div class="ba-text">${esc(original)}</div></div><div class="ba-box ba-after"><div class="ba-label">After</div><div class="ba-text">${esc(r.rewrite||'')}</div></div></div>`;
+  document.getElementById('aiOutput').innerHTML=`
+    <div class="ai-section"><h4>Executive Summary</h4><p><strong>Active Score:</strong> ${r.activeScore} · <strong>Readability:</strong> ${r.readability} · <strong>Words:</strong> ${r.wordCount}</p></div>
+    <div class="ai-section"><h4>🔴 Passive Voice Flags</h4>${passive}</div>
+    <div class="ai-section"><h4>🟡 Filler Alerts</h4><ul>${fillers}</ul></div>
+    <div class="ai-section"><h4>🟣 Cliché Flags</h4><ul>${cliches}</ul></div>
+    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>
+    <div class="ai-section"><h4>✨ Before vs After</h4>${ba}</div>`;
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
