@@ -337,10 +337,15 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
       <div class="card">
         <div class="card-title">SEO Keyword Density</div>
-        <input id="targetKW" type="text" placeholder="Enter target keyword…"
-          style="width:100%;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;margin-bottom:10px;background:#fff"
-          onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e5e5'"
-          oninput="analyse();persistSave()">
+        <p style="font-size:11px;color:#aaa;line-height:1.55;margin-bottom:10px">Add keywords to track density and exclude their words from repetition flags.</p>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <input id="targetKW" type="text" placeholder="Add keyword or phrase…"
+            style="flex:1;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff"
+            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e5e5'"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addKeyword()}">
+          <button class="btn btn-ghost btn-sm" onclick="addKeyword()" style="padding:9px 13px">Add</button>
+        </div>
+        <div id="keywordTagsList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:0"></div>
         <div id="targetKWResult"></div>
         <hr class="divider-line" style="margin:10px 0">
         <div class="card-title" style="margin-bottom:9px">Top Keywords Found</div>
@@ -418,14 +423,12 @@ function addBrandTerm(){
   input.value='';
   renderBrandTerms();
   analyse();
-  persistSave();
 }
 
 function removeBrandTerm(term){
   brandTerms.delete(term);
   renderBrandTerms();
   analyse();
-  persistSave();
 }
 
 function renderBrandTerms(){
@@ -538,11 +541,12 @@ function analyse(){
   document.getElementById('readingTime').innerText =
     Math.ceil(lastWords.length/238)<=1?'< 1 min read':`${Math.ceil(lastWords.length/238)} min read`;
 
-  // Repetition — sentence index per word, excluding brand terms
+  // Repetition — sentence index per word, excluding brand terms and keyword words
+  const kwExclusions=keywordWords();
   const wsMap={};
   lastSentences.forEach((s,si)=>{
     s.text.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
-      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w)&&!brandTerms.has(w))
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w)&&!brandTerms.has(w)&&!kwExclusions.has(w))
       .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
   });
   const repeatSet=new Set(); let repeatCount=0;
@@ -776,17 +780,60 @@ function detectCTA(text){
   }
 }
 
+// ── Multi-keyword tag management ──────────────────────────────────────────────
+let keywordTags=[]; // array of phrase strings
+
+function addKeyword(){
+  const input=document.getElementById('targetKW');
+  const val=input.value.trim().toLowerCase();
+  if(!val||keywordTags.includes(val)) { input.value=''; return; }
+  keywordTags.push(val);
+  input.value='';
+  renderKeywordTags();
+  analyse();
+}
+
+function removeKeyword(idx){
+  keywordTags.splice(idx,1);
+  renderKeywordTags();
+  analyse();
+}
+
+function renderKeywordTags(){
+  const el=document.getElementById('keywordTagsList');
+  if(!keywordTags.length){ el.innerHTML=''; return; }
+  el.innerHTML=keywordTags.map((t,i)=>`<span style="display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;border:1.5px solid #bbf7d0">${esc(t)}<span onclick="removeKeyword(${i})" style="cursor:pointer;color:#86efac;font-size:15px;line-height:1">&times;</span></span>`).join('');
+}
+
+// Returns all individual words across all keyword tags — used to exempt from repetition
+function keywordWords(){
+  const words=new Set();
+  keywordTags.forEach(phrase=>phrase.split(/\s+/).filter(Boolean).forEach(w=>words.add(w.toLowerCase())));
+  return words;
+}
+
 function updateKW(words,text){
-  const total=words.length,tkw=document.getElementById('targetKW').value.trim().toLowerCase(),res=document.getElementById('targetKWResult');
-  if(tkw&&total>0){
-    const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
-    const count=(text.match(re)||[]).length,pct=count/total*100,ps=pct.toFixed(2)+'%';
-    const cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low',lbl=pct>=2.5?'🔴 Too High':pct>=1.5?'🟢 Optimal':'🟡 Too Low';
-    const advice=pct>=2.5?'Reduce usage — may trigger keyword stuffing.':pct>=1.5?'Perfect range for SEO.':count===0?'Keyword not found in your copy.':'Increase usage to improve SEO relevance.';
-    res.innerHTML=`<div class="kw-row ${cls}" style="background:#fafafa;border:1.5px solid #e5e5e5;border-radius:9px;padding:11px 13px"><div class="kw-meta" style="margin-bottom:5px"><span class="kw-word" style="font-size:13px">"${tkw}"</span><span class="kw-right" style="font-size:12px">${ps} <span class="kw-badge">${lbl}</span></span></div><div class="kw-track" style="margin-bottom:7px"><div class="kw-bar" style="width:${Math.min(100,pct*18)}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Found <strong style="color:#333">${count}×</strong> / ${total} words</span><span style="text-align:right;max-width:55%">${advice}</span></div></div>`;
-  }else{ res.innerHTML=tkw?'<p style="font-size:11px;color:#ccc;font-style:italic">Paste copy to measure density.</p>':''; }
+  const total=words.length;
+  const res=document.getElementById('targetKWResult');
+  const kwWords=keywordWords();
+
+  // Show density for each keyword tag
+  if(keywordTags.length&&total>0){
+    res.innerHTML=keywordTags.map(tkw=>{
+      const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
+      const count=(text.match(re)||[]).length,pct=count/total*100,ps=pct.toFixed(2)+'%';
+      const cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low',lbl=pct>=2.5?'🔴 Too High':pct>=1.5?'🟢 Optimal':'🟡 Too Low';
+      const advice=pct>=2.5?'Reduce usage — may trigger keyword stuffing.':pct>=1.5?'Perfect range for SEO.':count===0?'Keyword not found in your copy.':'Increase usage to improve SEO relevance.';
+      return`<div class="kw-row ${cls}" style="background:#fafafa;border:1.5px solid #e5e5e5;border-radius:9px;padding:11px 13px;margin-bottom:7px"><div class="kw-meta" style="margin-bottom:5px"><span class="kw-word" style="font-size:13px">"${esc(tkw)}"</span><span class="kw-right" style="font-size:12px">${ps} <span class="kw-badge">${lbl}</span></span></div><div class="kw-track" style="margin-bottom:7px"><div class="kw-bar" style="width:${Math.min(100,pct*18)}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Found <strong style="color:#333">${count}×</strong> / ${total} words</span><span style="text-align:right;max-width:55%">${advice}</span></div></div>`;
+    }).join('');
+  } else {
+    res.innerHTML='';
+  }
+
+  // Top keywords found — exclude keyword tag words and brand terms from the frequency list
+  const allExcluded=new Set([...kwWords,...brandTerms]);
   const freq={};
-  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c))freq[c]=(freq[c]||0)+1;});
+  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c)&&!allExcluded.has(c))freq[c]=(freq[c]||0)+1;});
   const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5);
   document.getElementById('kwList').innerHTML=sorted.length?sorted.map(([word,count])=>{
     const pct=count/total*100,ps=pct.toFixed(1)+'%',cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low',lbl=pct>=2.5?'High':pct>=1.5?'Optimal':'Low';
@@ -880,11 +927,9 @@ function persistSave(){
   try{
     localStorage.setItem(STORAGE_KEY,JSON.stringify({
       editorText:ta.value,
-      targetKW:document.getElementById('targetKW').value,
       audSelect:document.getElementById('audSelect').value,
       diffInput:document.getElementById('diffInput').value,
       drafts:drafts.slice(0,3),
-      brandTerms:[...brandTerms],
     }));
   }catch(e){}
 }
@@ -893,11 +938,9 @@ function persistLoad(){
     const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return;
     const data=JSON.parse(raw);
     if(data.editorText) ta.value=data.editorText;
-    if(data.targetKW)   document.getElementById('targetKW').value=data.targetKW;
     if(data.audSelect)  document.getElementById('audSelect').value=data.audSelect;
     if(data.diffInput)  document.getElementById('diffInput').value=data.diffInput;
     if(data.drafts)     { drafts=data.drafts; renderDrafts(); }
-    if(data.brandTerms) { brandTerms=new Set(data.brandTerms); renderBrandTerms(); }
     if(data.editorText){ onEditorInput(); showToast('↩ Progress restored'); }
   }catch(e){}
 }
