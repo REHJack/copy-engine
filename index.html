@@ -82,12 +82,12 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .leg-dot{width:9px;height:9px;border-radius:3px}
 
 /* ── Highlights — background only, text is transparent on overlay ── */
-.ph{background:#fecaca;border-bottom:2px solid #ef4444;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.fh{background:#fef08a;border-bottom:2px solid #eab308;padding:0 2px;border-radius:3px}
-.sh{background:#fed7aa;border-bottom:2px solid #f97316;padding:0 2px;border-radius:3px}
-.ch{background:#e9d5ff;border-bottom:2px solid #a855f7;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.rh{background:#bfdbfe;border-bottom:2px solid #3b82f6;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.vh{background:#fce7f3;border-bottom:2px solid #ec4899;padding:0 2px;border-radius:3px}
+.ph{display:inline;background:#fecaca;border-bottom:2px solid #ef4444;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.fh{display:inline;background:#fef08a;border-bottom:2px solid #eab308;padding:0 2px;border-radius:3px}
+.sh{display:inline;background:#fed7aa;border-bottom:2px solid #f97316;padding:0 2px;border-radius:3px}
+.ch{display:inline;background:#e9d5ff;border-bottom:2px solid #a855f7;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.rh{display:inline;background:#bfdbfe;border-bottom:2px solid #3b82f6;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.vh{display:inline;background:#fce7f3;border-bottom:2px solid #ec4899;padding:0 2px;border-radius:3px}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
 
@@ -436,27 +436,27 @@ ta.addEventListener('paste', e=>{
 function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function splitSentences(text){
-  // Split on: sentence-ending punctuation followed by space or newline,
-  // OR on newline characters themselves (paragraph/line breaks).
-  const parts=[]; let buf='';
+  // Returns [{text, start, end}] with exact character offsets in the original string
+  const parts=[]; let buf='', bufStart=0;
   for(let i=0;i<text.length;i++){
     const ch=text[i];
-    // Sentence-end punctuation followed by space or newline
     if('.!?'.includes(ch) && i<text.length-1 && (text[i+1]===' '||text[i+1]==='\n')){
       buf+=ch;
-      parts.push(buf.trimEnd()); buf='';
-      // skip the following whitespace char so it doesn't start the next sentence
-      i++;
+      const trimmed=buf.trimEnd();
+      if(trimmed.trim().length>0) parts.push({text:trimmed,start:bufStart,end:bufStart+trimmed.length});
+      i++; // skip the space/newline separator
+      buf=''; bufStart=i+1;
     } else if(ch==='\n'){
-      // newline = paragraph boundary
-      if(buf.trim()) parts.push(buf.trimEnd());
-      buf='';
+      const trimmed=buf.trimEnd();
+      if(trimmed.trim().length>0) parts.push({text:trimmed,start:bufStart,end:bufStart+trimmed.length});
+      buf=''; bufStart=i+1;
     } else {
       buf+=ch;
     }
   }
-  if(buf.trim()) parts.push(buf.trimEnd());
-  return parts.filter(s=>s.trim().length>0);
+  const trimmed=buf.trimEnd();
+  if(trimmed.trim().length>0) parts.push({text:trimmed,start:bufStart,end:bufStart+trimmed.length});
+  return parts;
 }
 
 function countSylls(word){
@@ -502,7 +502,7 @@ function analyse(){
   // Repetition — sentence index per word
   const wsMap={};
   lastSentences.forEach((s,si)=>{
-    s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
+    s.text.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
       .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
       .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
   });
@@ -512,22 +512,13 @@ function analyse(){
   });
 
   // Variety — consecutive same-start sentences
-  const starts=lastSentences.map(s=>s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g,'')||'');
+  const starts=lastSentences.map(s=>s.text.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g,'')||'');
   const varietyIssues=new Set();
   for(let i=1;i<starts.length;i++) if(starts[i]&&starts[i]===starts[i-1]&&starts[i].length>2) varietyIssues.add(i);
 
-  // ── Build sentence-level char ranges in the ORIGINAL text ──────────────────
-  // We locate each sentence string inside `text` sequentially so we get
-  // absolute offsets, preserving all whitespace/newlines between them.
+  // ── Sentence ranges come directly from splitSentences — no indexOf needed ──
   let pCount=0,fCount=0,cCount=0;
-  const sentRanges=[]; // [{start, end, si}]
-  let searchFrom=0;
-  lastSentences.forEach((sent,si)=>{
-    const idx=text.indexOf(sent,searchFrom);
-    if(idx===-1) return;
-    sentRanges.push({start:idx,end:idx+sent.length,si});
-    searchFrom=idx+sent.length;
-  });
+  const sentRanges=lastSentences.map((s,si)=>({start:s.start,end:s.end,si}));
 
   // ── Collect all annotations as absolute offsets into `text` ───────────────
   const allAnns=[]; // {start,end,cls,tip,priority}
@@ -710,7 +701,7 @@ function updateVariety(sentences,issues){
   if(sentences.length<2){el.innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">Need 2+ sentences to analyse.</p>';return;}
   const total=sentences.length,ic=issues.size,score=Math.round(((total-ic)/total)*100);
   const col=score>=80?'#22c55e':score>=60?'#f59e0b':'#ef4444';
-  const lens=sentences.map(s=>s.trim().split(/\s+/).filter(w=>w.length>0).length);
+  const lens=sentences.map(s=>s.text.trim().split(/\s+/).filter(w=>w.length>0).length);
   const sh=lens.filter(l=>l<=10).length,md=lens.filter(l=>l>10&&l<=20).length,lg=lens.filter(l=>l>20).length;
   const fb=ic===0?'Great variety — no consecutive same-start sentences.':`${ic} sentence${ic>1?'s':''} start the same way as the previous one (pink highlight).`;
   el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:22px;font-weight:900;color:${col}">${score}%</span><span style="font-size:10px;color:#aaa">${ic} issue${ic!==1?'s':''}</span></div><div class="variety-track"><div class="variety-fill" style="width:${score}%;background:${col}"></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:9px 0">${[['Short',sh],['Medium',md],['Long',lg]].map(([l,n])=>`<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:900;color:#555">${n}</div><div style="font-size:9px;color:#bbb;font-weight:700;text-transform:uppercase;margin-top:2px">${l}</div></div>`).join('')}</div><p style="font-size:11px;color:#888;line-height:1.55">${fb}</p>`;
