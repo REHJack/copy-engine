@@ -927,19 +927,52 @@ function resetUI(){
 }
 
 // ── AI Audit ──────────────────────────────────────────────────────────────────
-async function runAIAudit(){
+function runAIAudit(){
   const text=getText().trim(); if(!text){alert('Please paste some copy first.');return;}
   const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput');
   panel.classList.add('open');
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
-  out.innerHTML='<div class="loading-wrap"><div class="spinner"></div><p>Analysing your copy…</p></div>';
-  const sys=`You are an elite Direct-Response Copy Editor and SEO Analyst. Return ONLY a raw JSON object — no markdown fences, no commentary. Shape: {"activeScore":"82%","readability":"Standard","wordCount":123,"passiveFlags":[{"original":"phrase","suggestion":"fix"}],"fillerWords":[{"word":"just","count":3}],"cliches":[{"phrase":"game changer","suggestion":"describe actual impact"}],"keywords":[{"word":"conversion","density":"2.1%","status":"Optimal"}],"rewrite":"Full rewritten lean version."}`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2000,system:sys,messages:[{role:'user',content:text}]})});
-    const data=await res.json();
-    const raw=(data.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-    renderAI(JSON.parse(raw),text);
-  }catch(e){ out.innerHTML='<p style="color:#ef4444;font-size:12px;padding:8px 0">⚠️ Failed to load AI report. Please try again.</p>'; }
+
+  const words=text.split(/\s+/).filter(w=>w.length>0);
+  const total=words.length;
+
+  // Passive flags
+  const passiveFlags=[];
+  const pr=new RegExp(PASSIVE_RE.source,'gi'); let pm;
+  while((pm=pr.exec(text))!==null){
+    const phrase=pm[0];
+    if(!passiveFlags.find(f=>f.original===phrase))
+      passiveFlags.push({original:phrase,suggestion:getSug(phrase)});
+  }
+
+  // Filler counts
+  const fillerCounts={};
+  FILLERS.forEach(w=>{
+    const matches=text.match(new RegExp('\b'+w+'\b','gi'));
+    if(matches&&matches.length) fillerCounts[w]=matches.length;
+  });
+  const fillerWords=Object.entries(fillerCounts).map(([word,count])=>({word,count}));
+
+  // Clichés
+  const clicheFlags=[];
+  Object.entries(CLICHES).forEach(([phrase,suggestion])=>{
+    const re=new RegExp('\b'+phrase.replace(/[-]/g,'[\s-]')+'\b','gi');
+    if(re.test(text)) clicheFlags.push({phrase,suggestion});
+  });
+
+  // Top keywords
+  const freq={};
+  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c))freq[c]=(freq[c]||0)+1;});
+  const topKW=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([word,count])=>{
+    const pct=count/total*100;
+    return{word,density:pct.toFixed(1)+'%',status:pct>=2.5?'High':pct>=1.5?'Optimal':'Low'};
+  });
+
+  const sylls=words.reduce((a,w)=>a+countSylls(w),0);
+  const fk=206.835-(1.015*(total/(lastSentences.length||1)))-(84.6*(sylls/(total||1)));
+  const readLabel=fk>=80?'Very Easy':fk>=70?'Easy':fk>=60?'Fairly Easy':fk>=50?'Standard':fk>=40?'Fairly Difficult':fk>=30?'Difficult':'Very Difficult';
+
+  renderAI({activeScore:lastScore+'%',readability:readLabel,wordCount:total,passiveFlags,fillerWords,cliches:clicheFlags,keywords:topKW},text);
 }
 
 function renderAI(r,original){
@@ -947,14 +980,13 @@ function renderAI(r,original){
   const fillers=r.fillerWords?.length?r.fillerWords.map(f=>`<li>"<strong>${f.word}</strong>" — ${f.count}×</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
   const cliches=r.cliches?.length?r.cliches.map(c=>`<li>"<strong>${c.phrase}</strong>" — ${c.suggestion}</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
   const kw=r.keywords?.length?`<table class="ai-kw-table"><thead><tr><th>Keyword</th><th>Density</th><th>Status</th></tr></thead><tbody>${r.keywords.map(k=>`<tr><td style="text-transform:capitalize">${k.word}</td><td style="color:#6366f1;font-family:monospace">${k.density}</td><td>${k.status==='Optimal'?'🟢':k.status==='High'?'🔴':'🟡'} ${k.status}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#aaa">No keywords extracted.</p>';
-  const ba=`<div class="ba-grid"><div class="ba-box ba-before"><div class="ba-label">Before</div><div class="ba-text">${esc(original)}</div></div><div class="ba-box ba-after"><div class="ba-label">After</div><div class="ba-text">${esc(r.rewrite||'')}</div></div></div>`;
+
   document.getElementById('aiOutput').innerHTML=`
     <div class="ai-section"><h4>Executive Summary</h4><p><strong>Active Score:</strong> ${r.activeScore} · <strong>Readability:</strong> ${r.readability} · <strong>Words:</strong> ${r.wordCount}</p></div>
     <div class="ai-section"><h4>🔴 Passive Voice Flags</h4>${passive}</div>
     <div class="ai-section"><h4>🟡 Filler Alerts</h4><ul>${fillers}</ul></div>
     <div class="ai-section"><h4>🟣 Cliché Flags</h4><ul>${cliches}</ul></div>
-    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>
-    <div class="ai-section"><h4>✨ Before vs After</h4>${ba}</div>`;
+    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>`;
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
