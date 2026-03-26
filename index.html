@@ -32,13 +32,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 /* ── Editor: textarea on top, highlight div behind ── */
 .editor-shell{border:1.5px solid #e0e0e0;border-radius:14px;background:#fff;overflow:hidden;transition:border-color .2s;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 .editor-shell:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
-.editor-wrap{position:relative;min-height:420px;overflow-y:auto}
+.editor-wrap{position:relative;min-height:420px}
 
-/* Both layers share identical typography */
+/* Both layers must share IDENTICAL typography so text aligns perfectly */
 #editor-textarea, #editor-overlay {
   position:absolute;
   top:0; left:0;
   width:100%;
+  height:100%;
   margin:0;
   padding:22px;
   font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
@@ -52,26 +53,25 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
   tab-size:4;
   border:none;
   outline:none;
-  overflow:hidden;
+  overflow-y:scroll;
+  overflow-x:hidden;
   box-sizing:border-box;
 }
 #editor-textarea {
-  color:#1a1a1a;
+  color:transparent;
   background:transparent;
   caret-color:#6366f1;
   resize:none;
   z-index:2;
-  -webkit-text-fill-color:#1a1a1a;
-  height:100%;
+  /* Ensure no browser-specific styling interferes */
+  -webkit-text-fill-color:transparent;
 }
 #editor-overlay {
-  color:transparent;
-  -webkit-text-fill-color:transparent;
+  color:#1a1a1a;
   background:#fff;
   pointer-events:none;
   z-index:1;
   border-radius:14px 14px 0 0;
-  height:100%;
 }
 /* Placeholder */
 #editor-textarea::placeholder{color:#bbb;-webkit-text-fill-color:#bbb}
@@ -81,13 +81,13 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#888;font-weight:600}
 .leg-dot{width:9px;height:9px;border-radius:3px}
 
-/* ── Highlights — background only, text is transparent on overlay ── */
-.ph{display:inline;background:#fecaca;border-bottom:2px solid #ef4444;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.fh{display:inline;background:#fef08a;border-bottom:2px solid #eab308;padding:0 2px;border-radius:3px}
-.sh{display:inline;background:#fed7aa;border-bottom:2px solid #f97316;padding:0 2px;border-radius:3px}
-.ch{display:inline;background:#e9d5ff;border-bottom:2px solid #a855f7;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.rh{display:inline;background:#bfdbfe;border-bottom:2px solid #3b82f6;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.vh{display:inline;background:#fce7f3;border-bottom:2px solid #ec4899;padding:0 2px;border-radius:3px}
+/* ── Highlights ── */
+.ph{background:#fee2e2;border-bottom:2px solid #ef4444;color:#991b1b;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.fh{background:#fef9c3;border-bottom:2px solid #eab308;color:#854d0e;padding:0 2px;border-radius:3px}
+.sh{background:#ffedd5;border-bottom:2px solid #f97316;color:#9a3412;padding:0 2px;border-radius:3px}
+.ch{background:#f3e8ff;border-bottom:2px solid #a855f7;color:#6b21a8;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.rh{background:#dbeafe;border-bottom:2px solid #3b82f6;color:#1e40af;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
+.vh{background:#fce7f3;border-bottom:2px solid #ec4899;color:#9d174d;padding:0 2px;border-radius:3px}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
 
@@ -207,9 +207,90 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-wrap{text-align:center;padding:32px;color:#aaa;font-size:12px}
 @media print{.no-print{display:none!important}}
+
+/* ── Splash screen ── */
+#splash{position:fixed;inset:0;background:#f5f5f7;z-index:9999;display:flex;align-items:center;justify-content:center;padding:32px;transition:opacity .3s ease,transform .3s ease}
+#splash.hiding{opacity:0;transform:scale(.97);pointer-events:none}
+.splash-inner{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;width:100%;align-items:start}
+@media(max-width:700px){.splash-inner{grid-template-columns:1fr}}
+.splash-left{display:flex;flex-direction:column;gap:16px}
+.splash-card{background:#fff;border:1.5px solid #e0e0e0;border-radius:14px;padding:24px 26px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.sp-brand-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.sp-brand-name{font-size:22px;font-weight:900;letter-spacing:-.5px;color:#111}
+.sp-brand-ver{font-size:10px;font-weight:800;color:#6366f1;background:#ede9fe;padding:3px 9px;border-radius:99px}
+.sp-brand-sub{font-size:12px;color:#999;line-height:1.5}
+.sp-how-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:14px}
+.sp-steps{display:flex;flex-direction:column;gap:11px}
+.sp-step{display:flex;align-items:flex-start;gap:11px}
+.sp-num{width:22px;height:22px;border-radius:50%;background:#6366f1;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.sp-step-text{font-size:12px;color:#444;line-height:1.55}
+.sp-step-text strong{color:#111;font-weight:700}
+.sp-cta-card{background:#fff;border:1.5px solid #e0e0e0;border-radius:14px;padding:20px 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.sp-cta-label{font-size:12px;color:#999;font-weight:600}
+.sp-cta-btn{background:#6366f1;color:#fff;font-size:13px;font-weight:800;padding:11px 22px;border-radius:10px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background .15s,transform .15s;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;box-shadow:0 1px 4px rgba(99,102,241,.3)}
+.sp-cta-btn:hover{background:#4f46e5;transform:scale(1.02)}
+.sp-cta-btn:active{transform:scale(.97)}
+.sp-arrow{display:inline-block;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.sp-cta-btn:hover .sp-arrow{transform:translateX(5px)}
+.sp-info-card{background:#fff;border:1.5px solid #e0e0e0;border-radius:14px;padding:28px 26px;box-shadow:0 1px 4px rgba(0,0,0,.05);display:flex;flex-direction:column;gap:18px}
+.sp-info-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:4px}
+.sp-info-blurb{font-size:13px;color:#444;line-height:1.65}
+.sp-feat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.sp-feat{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:9px;padding:9px 11px}
+.sp-feat-icon{font-size:14px;margin-bottom:4px}
+.sp-feat-label{font-size:11px;font-weight:700;color:#333}
+.sp-feat-sub{font-size:10px;color:#aaa;margin-top:1px}
 </style>
 </head>
 <body>
+<div id="splash">
+  <div class="splash-inner">
+    <div class="splash-left">
+      <div class="splash-card">
+        <div class="sp-brand-row">
+          <span class="sp-brand-name">Copy Engine</span>
+          <span class="sp-brand-ver">v6.2</span>
+        </div>
+        <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
+      </div>
+      <div class="splash-card">
+        <div class="sp-how-title">How to use</div>
+        <div class="sp-steps">
+          <div class="sp-step"><div class="sp-num">1</div><div class="sp-step-text"><strong>Paste your copy</strong> into the editor — it analyses in real time.</div></div>
+          <div class="sp-step"><div class="sp-num">2</div><div class="sp-step-text"><strong>Review the highlights</strong> — red, amber, orange, purple, blue &amp; pink each flag something different.</div></div>
+          <div class="sp-step"><div class="sp-num">3</div><div class="sp-step-text"><strong>Pick your audience</strong> to score readability against a target profile.</div></div>
+          <div class="sp-step"><div class="sp-num">4</div><div class="sp-step-text"><strong>Run an AI Audit</strong> for a full rewrite suggestion and keyword report.</div></div>
+        </div>
+      </div>
+      <div class="sp-cta-card">
+        <span class="sp-cta-label">Ready to analyse your copy?</span>
+        <button class="sp-cta-btn" onclick="dismissSplash()">Start now <span class="sp-arrow">→</span></button>
+      </div>
+    </div>
+    <div class="sp-info-card">
+      <div>
+        <div class="sp-info-title">What is Copy Engine?</div>
+        <div class="sp-info-blurb">Copy Engine is an in-house tool that analyses your marketing copy in real time — highlighting passive voice, filler words, clichés, long sentences and repetition before your work goes live.</div>
+      </div>
+      <div>
+        <div class="sp-info-title">What it checks</div>
+        <div class="sp-feat-grid">
+          <div class="sp-feat"><div class="sp-feat-icon">🔴</div><div class="sp-feat-label">Passive voice</div><div class="sp-feat-sub">with active fix tips</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🟡</div><div class="sp-feat-label">Filler words</div><div class="sp-feat-sub">just, really, very…</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🟠</div><div class="sp-feat-label">Long sentences</div><div class="sp-feat-sub">30+ word flag</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🟣</div><div class="sp-feat-label">Clichés</div><div class="sp-feat-sub">with better alternatives</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🔵</div><div class="sp-feat-label">Repetition</div><div class="sp-feat-sub">nearby word reuse</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🩷</div><div class="sp-feat-label">Sentence variety</div><div class="sp-feat-sub">same-start detection</div></div>
+        </div>
+      </div>
+      <div>
+        <div class="sp-info-title" style="margin-bottom:6px">Also includes</div>
+        <div class="sp-info-blurb" style="font-size:12px">Readability score · Audience matcher · Tone detection · SEO keyword density · CTA detection · Version diff · AI Audit · PDF &amp; HTML export</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <div class="page" id="reportContent">
 
@@ -220,7 +301,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
     </div>
     <div class="btn-row no-print">
       <button class="btn btn-ghost btn-sm" onclick="fixAllFillers()">⚡ Fix Fillers</button>
-      <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ Copy Audit</button>
+      <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ AI Audit</button>
       <button class="btn btn-teal btn-sm" onclick="downloadHTML()">
         <svg width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
         HTML
@@ -337,32 +418,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
       <div class="card">
         <div class="card-title">SEO Keyword Density</div>
-        <p style="font-size:11px;color:#aaa;line-height:1.55;margin-bottom:10px">Add keywords to track density and exclude their words from repetition flags.</p>
-        <div style="display:flex;gap:6px;margin-bottom:8px">
-          <input id="targetKW" type="text" placeholder="Add keyword or phrase…"
-            style="flex:1;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff"
-            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e5e5'"
-            onkeydown="if(event.key==='Enter'){event.preventDefault();addKeyword()}">
-          <button class="btn btn-ghost btn-sm" onclick="addKeyword()" style="padding:9px 13px">Add</button>
-        </div>
-        <div id="keywordTagsList" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;min-height:0"></div>
+        <input id="targetKW" type="text" placeholder="Enter target keyword…"
+          style="width:100%;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;margin-bottom:10px;background:#fff"
+          onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e5e5'"
+          oninput="analyse();persistSave()">
         <div id="targetKWResult"></div>
         <hr class="divider-line" style="margin:10px 0">
         <div class="card-title" style="margin-bottom:9px">Top Keywords Found</div>
         <div id="kwList"><p style="font-size:11px;color:#ccc;font-style:italic">No keywords yet.</p></div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Brand Terms</div>
-        <p style="font-size:11px;color:#aaa;line-height:1.55;margin-bottom:10px">Words the engine will ignore — brand names, product names, proper nouns.</p>
-        <div style="display:flex;gap:6px;margin-bottom:10px">
-          <input id="brandTermInput" type="text" placeholder="e.g. Vodafone, iPhone…"
-            style="flex:1;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff"
-            onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e5e5'"
-            onkeydown="if(event.key==='Enter'||event.key===','){event.preventDefault();addBrandTerm()}">
-          <button class="btn btn-ghost btn-sm" onclick="addBrandTerm()" style="padding:9px 13px">Add</button>
-        </div>
-        <div id="brandTermsList" style="display:flex;flex-wrap:wrap;gap:6px;min-height:0"></div>
       </div>
 
       <div class="card no-print">
@@ -388,6 +451,12 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 </div>
 
 <script>
+function dismissSplash(){
+  const s=document.getElementById('splash');
+  s.classList.add('hiding');
+  setTimeout(()=>{ s.style.display='none'; },320);
+}
+
 const ta  = document.getElementById('editor-textarea');
 const ov  = document.getElementById('editor-overlay');
 const STORAGE_KEY = 'copyengine_v62';
@@ -412,30 +481,6 @@ const AUDIENCES = {
 
 const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true};
 let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[];
-let brandTerms=new Set();
-let auditData={passiveMatches:[],fillerMatches:[],clicheMatches:[],repeatWords:[],longSentences:[],totalWords:0};
-
-function addBrandTerm(){
-  const input=document.getElementById('brandTermInput');
-  const raw=input.value.trim().replace(/,/g,' ');
-  if(!raw) return;
-  raw.split(/\s+/).filter(Boolean).forEach(t=>brandTerms.add(t.toLowerCase()));
-  input.value='';
-  renderBrandTerms();
-  analyse();
-}
-
-function removeBrandTerm(term){
-  brandTerms.delete(term);
-  renderBrandTerms();
-  analyse();
-}
-
-function renderBrandTerms(){
-  const el=document.getElementById('brandTermsList');
-  if(!brandTerms.size){ el.innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">No brand terms added yet.</p>'; return; }
-  el.innerHTML=[...brandTerms].map(t=>`<span style="display:inline-flex;align-items:center;gap:5px;background:#ede9fe;color:#4f46e5;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px">${esc(t)}<span onclick="removeBrandTerm('${t.replace(/'/g,"\\'")}')" style="cursor:pointer;color:#a78bfa;font-size:15px;line-height:1">&times;</span></span>`).join('');
-}
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
@@ -443,12 +488,14 @@ document.getElementById('reportDate').innerText=new Date().toLocaleDateString('e
 function syncScroll(){ ov.scrollTop = ta.scrollTop; }
 ta.addEventListener('scroll', syncScroll);
 
-// ── Sync height to content ────────────────────────────────────────────────────
+// ── Sync overlay height to textarea content height ────────────────────────────
 function syncHeight(){
+  // Reset height to auto so it can shrink, then set to scrollHeight
   ta.style.height = 'auto';
   const h = Math.max(420, ta.scrollHeight);
   ta.style.height = h + 'px';
   ov.style.height  = h + 'px';
+  // Keep the wrapper tall enough
   ta.closest('.editor-wrap').style.minHeight = h + 'px';
 }
 
@@ -478,27 +525,15 @@ ta.addEventListener('paste', e=>{
 function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function splitSentences(text){
-  // Returns [{text, start, end}] with exact character offsets in the original string
-  const parts=[]; let buf='', bufStart=0;
+  const parts=[]; let buf='';
   for(let i=0;i<text.length;i++){
-    const ch=text[i];
-    if('.!?'.includes(ch) && i<text.length-1 && (text[i+1]===' '||text[i+1]==='\n')){
-      buf+=ch;
-      const trimmed=buf.trimEnd();
-      if(trimmed.trim().length>0) parts.push({text:trimmed,start:bufStart,end:bufStart+trimmed.length});
-      i++; // skip the space/newline separator
-      buf=''; bufStart=i+1;
-    } else if(ch==='\n'){
-      const trimmed=buf.trimEnd();
-      if(trimmed.trim().length>0) parts.push({text:trimmed,start:bufStart,end:bufStart+trimmed.length});
-      buf=''; bufStart=i+1;
-    } else {
-      buf+=ch;
+    buf+=text[i];
+    if('.!?'.includes(text[i])&&i<text.length-1&&text[i+1]===' '){
+      parts.push(buf.trimEnd()); buf=''; i++;
     }
   }
-  const trimmed=buf.trimEnd();
-  if(trimmed.trim().length>0) parts.push({text:trimmed,start:bufStart,end:bufStart+trimmed.length});
-  return parts;
+  if(buf.trim()) parts.push(buf.trimEnd());
+  return parts.filter(s=>s.trim().length>0);
 }
 
 function countSylls(word){
@@ -541,12 +576,11 @@ function analyse(){
   document.getElementById('readingTime').innerText =
     Math.ceil(lastWords.length/238)<=1?'< 1 min read':`${Math.ceil(lastWords.length/238)} min read`;
 
-  // Repetition — sentence index per word, excluding brand terms and keyword words
-  const kwExclusions=keywordWords();
+  // Repetition
   const wsMap={};
   lastSentences.forEach((s,si)=>{
-    s.text.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
-      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w)&&!brandTerms.has(w)&&!kwExclusions.has(w))
+    s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
       .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
   });
   const repeatSet=new Set(); let repeatCount=0;
@@ -554,140 +588,59 @@ function analyse(){
     for(let i=1;i<idxs.length;i++) if(idxs[i]-idxs[i-1]<=2){ repeatSet.add(w); repeatCount++; break; }
   });
 
-  // Variety — consecutive same-start sentences
-  const starts=lastSentences.map(s=>s.text.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g,'')||'');
+  // Variety
+  const starts=lastSentences.map(s=>s.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g,'')||'');
   const varietyIssues=new Set();
   for(let i=1;i<starts.length;i++) if(starts[i]&&starts[i]===starts[i-1]&&starts[i].length>2) varietyIssues.add(i);
 
-  // ── Sentence ranges come directly from splitSentences — no indexOf needed ──
   let pCount=0,fCount=0,cCount=0;
-  const sentRanges=lastSentences.map((s,si)=>({start:s.start,end:s.end,si}));
 
-  // ── Collect all annotations as absolute offsets into `text` ───────────────
-  const allAnns=[];
-  auditData={passiveMatches:[],fillerMatches:[],clicheMatches:[],repeatWords:[],longSentences:[],totalWords:lastWords.length};
-
-  sentRanges.forEach(({start:base,end:sentEnd,si})=>{
-    const sent=text.slice(base,sentEnd);
-    const local=[];
+  const sentHTMLs=lastSentences.map((sent,si)=>{
+    const ann=[];
 
     if(modes.filler) FILLERS.forEach(w=>{
-      if(brandTerms.has(w.toLowerCase())) return; // skip if brand term
       const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){
-        fCount++;
-        auditData.fillerMatches.push({word:w,context:sent.trim(),matchStart:m.index,matchEnd:m.index+m[0].length});
-        local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'fh',tip:null,pri:2});
-      }
+      while((m=re.exec(sent))!==null){ fCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'fh',tip:null}); }
     });
 
     if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
-      if(brandTerms.has(phrase.toLowerCase())) return; // skip if brand term
       const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){
-        cCount++;
-        auditData.clicheMatches.push({phrase:m[0],suggestion:tip,context:sent.trim(),matchStart:m.index,matchEnd:m.index+m[0].length});
-        local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'ch',tip,pri:2});
-      }
+      while((m=re.exec(sent))!==null){ cCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ch',tip}); }
     });
 
     if(modes.repeat) repeatSet.forEach(w=>{
       const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null) local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'rh',tip:'Repeated nearby — try a synonym',pri:1});
+      while((m=re.exec(sent))!==null) ann.push({start:m.index,end:m.index+m[0].length,cls:'rh',tip:'Repeated nearby — try a synonym'});
     });
 
     if(modes.passive){
       const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
-      while((m=pr.exec(sent))!==null){
-        pCount++;
-        auditData.passiveMatches.push({original:m[0],suggestion:getSug(m[0]),context:sent.trim(),matchStart:m.index,matchEnd:m.index+m[0].length});
-        local.push({start:base+m.index,end:base+m.index+m[0].length,cls:'ph',tip:getSug(m[0]),pri:3});
-      }
+      while((m=pr.exec(sent))!==null){ pCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ph',tip:getSug(m[0])}); }
     }
 
+    ann.sort((a,b)=>a.start-b.start||b.end-a.end);
+    const filtered=[]; let cursor=0;
+    for(const a of ann) if(a.start>=cursor){ filtered.push(a); cursor=a.end; }
+
+    let html='',pos=0;
+    for(const a of filtered){
+      if(a.start>pos) html+=esc(sent.slice(pos,a.start));
+      const inner=esc(sent.slice(a.start,a.end));
+      html+=a.tip
+        ?`<span class="${a.cls}" onclick="showTip(this)">${inner}<span class="tip">${a.tip}</span></span>`
+        :`<span class="${a.cls}">${inner}</span>`;
+      pos=a.end;
+    }
+    if(pos<sent.length) html+=esc(sent.slice(pos));
+
+    if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh">${html}</span>`;
     const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(modes.sentence&&wc>=30){
-      allAnns.push({start:base,end:sentEnd,cls:'sh',tip:null,pri:0,wrap:true});
-      auditData.longSentences.push({text:sent.trim(),words:wc});
-    }
-    if(modes.variety&&varietyIssues.has(si)) allAnns.push({start:base,end:sentEnd,cls:'vh',tip:null,pri:0,wrap:true});
-
-    allAnns.push(...local);
+    if(modes.sentence&&wc>=30) html=`<span class="sh">${html}</span>`;
+    return html;
   });
 
-  // Repeat words with their sentence contexts
-  repeatSet.forEach(w=>{
-    const hits=sentRanges.map(sr=>({sent:text.slice(sr.start,sr.end).trim(),si:sr.si}))
-      .filter(s=>new RegExp(`\\b${w}\\b`,'i').test(s.sent));
-    if(hits.length>=2) auditData.repeatWords.push({word:w,sentences:hits.slice(0,3).map(h=>h.sent)});
-  });
-
-  // ── Single-pass render ────────────────────────────────────────────────────
-  allAnns.sort((a,b)=>a.start-b.start||b.end-a.end||(b.pri-a.pri));
-  const inlineAnns=allAnns.filter(a=>!a.wrap);
-  const wrapAnns  =allAnns.filter(a=> a.wrap);
-
-  // ── Assign all inline annotations to their sentence, then deduplicate per-sentence ──
-  const resolvedBySent=new Map();
-  sentRanges.forEach(sr=>resolvedBySent.set(sr.si,[]));
-
-  // Assign each inline ann to its containing sentence
-  inlineAnns.forEach(a=>{
-    const sr=sentRanges.find(s=>a.start>=s.start&&a.end<=s.end);
-    if(sr) resolvedBySent.get(sr.si).push(a);
-  });
-
-  // Deduplicate within each sentence (sort by start, skip overlaps, highest priority wins)
-  resolvedBySent.forEach((anns,si)=>{
-    anns.sort((a,b)=>a.start-b.start||b.end-a.end||(b.pri-a.pri));
-    const deduped=[]; let cur=0;
-    for(const a of anns){ if(a.start>=cur){ deduped.push(a); cur=a.end; } }
-    resolvedBySent.set(si,deduped);
-  });
-
-  // Build wrap index
-  const sentWrapMap=new Map();
-  wrapAnns.forEach(w=>{
-    sentRanges.forEach(sr=>{
-      if(sr.start===w.start&&sr.end===w.end){
-        if(!sentWrapMap.has(sr.si)) sentWrapMap.set(sr.si,[]);
-        sentWrapMap.get(sr.si).push(w.cls);
-      }
-    });
-  });
-
-  let htmlOut='', textPos=0;
-
-  sentRanges.forEach(({start:sBase,end:sEnd,si})=>{
-    // Emit any whitespace/newlines before this sentence verbatim
-    if(sBase>textPos) htmlOut+=esc(text.slice(textPos,sBase));
-
-    // Build the sentence's inner HTML
-    const anns=resolvedBySent.get(si)||[];
-    let inner='', iPos=sBase;
-    for(const a of anns){
-      if(a.start>iPos) inner+=esc(text.slice(iPos,a.start));
-      const word=esc(text.slice(a.start,a.end));
-      inner+=a.tip
-        ?`<span class="${a.cls}" onclick="showTip(this)">${word}<span class="tip">${a.tip}</span></span>`
-        :`<span class="${a.cls}">${word}</span>`;
-      iPos=a.end;
-    }
-    if(iPos<sEnd) inner+=esc(text.slice(iPos,sEnd));
-
-    // Apply sentence-level wrappers
-    const wraps=sentWrapMap.get(si)||[];
-    let wrapped=inner;
-    for(const cls of wraps) wrapped=`<span class="${cls}">${wrapped}</span>`;
-
-    htmlOut+=wrapped;
-    textPos=sEnd;
-  });
-
-  // Emit any trailing text after last sentence
-  if(textPos<text.length) htmlOut+=esc(text.slice(textPos));
-
-  ov.innerHTML = htmlOut;
+  // Write to overlay — append a trailing newline so last line renders correctly
+  ov.innerHTML = sentHTMLs.join(' ') + '\n';
   syncScroll();
 
   document.getElementById('sPassive').innerText=pCount;
@@ -763,7 +716,7 @@ function updateVariety(sentences,issues){
   if(sentences.length<2){el.innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">Need 2+ sentences to analyse.</p>';return;}
   const total=sentences.length,ic=issues.size,score=Math.round(((total-ic)/total)*100);
   const col=score>=80?'#22c55e':score>=60?'#f59e0b':'#ef4444';
-  const lens=sentences.map(s=>s.text.trim().split(/\s+/).filter(w=>w.length>0).length);
+  const lens=sentences.map(s=>s.trim().split(/\s+/).filter(w=>w.length>0).length);
   const sh=lens.filter(l=>l<=10).length,md=lens.filter(l=>l>10&&l<=20).length,lg=lens.filter(l=>l>20).length;
   const fb=ic===0?'Great variety — no consecutive same-start sentences.':`${ic} sentence${ic>1?'s':''} start the same way as the previous one (pink highlight).`;
   el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:22px;font-weight:900;color:${col}">${score}%</span><span style="font-size:10px;color:#aaa">${ic} issue${ic!==1?'s':''}</span></div><div class="variety-track"><div class="variety-fill" style="width:${score}%;background:${col}"></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:9px 0">${[['Short',sh],['Medium',md],['Long',lg]].map(([l,n])=>`<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:900;color:#555">${n}</div><div style="font-size:9px;color:#bbb;font-weight:700;text-transform:uppercase;margin-top:2px">${l}</div></div>`).join('')}</div><p style="font-size:11px;color:#888;line-height:1.55">${fb}</p>`;
@@ -780,60 +733,17 @@ function detectCTA(text){
   }
 }
 
-// ── Multi-keyword tag management ──────────────────────────────────────────────
-let keywordTags=[]; // array of phrase strings
-
-function addKeyword(){
-  const input=document.getElementById('targetKW');
-  const val=input.value.trim().toLowerCase();
-  if(!val||keywordTags.includes(val)) { input.value=''; return; }
-  keywordTags.push(val);
-  input.value='';
-  renderKeywordTags();
-  analyse();
-}
-
-function removeKeyword(idx){
-  keywordTags.splice(idx,1);
-  renderKeywordTags();
-  analyse();
-}
-
-function renderKeywordTags(){
-  const el=document.getElementById('keywordTagsList');
-  if(!keywordTags.length){ el.innerHTML=''; return; }
-  el.innerHTML=keywordTags.map((t,i)=>`<span style="display:inline-flex;align-items:center;gap:5px;background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:700;padding:4px 10px;border-radius:99px;border:1.5px solid #bbf7d0">${esc(t)}<span onclick="removeKeyword(${i})" style="cursor:pointer;color:#86efac;font-size:15px;line-height:1">&times;</span></span>`).join('');
-}
-
-// Returns all individual words across all keyword tags — used to exempt from repetition
-function keywordWords(){
-  const words=new Set();
-  keywordTags.forEach(phrase=>phrase.split(/\s+/).filter(Boolean).forEach(w=>words.add(w.toLowerCase())));
-  return words;
-}
-
 function updateKW(words,text){
-  const total=words.length;
-  const res=document.getElementById('targetKWResult');
-  const kwWords=keywordWords();
-
-  // Show density for each keyword tag
-  if(keywordTags.length&&total>0){
-    res.innerHTML=keywordTags.map(tkw=>{
-      const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
-      const count=(text.match(re)||[]).length,pct=count/total*100,ps=pct.toFixed(2)+'%';
-      const cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low',lbl=pct>=2.5?'🔴 Too High':pct>=1.5?'🟢 Optimal':'🟡 Too Low';
-      const advice=pct>=2.5?'Reduce usage — may trigger keyword stuffing.':pct>=1.5?'Perfect range for SEO.':count===0?'Keyword not found in your copy.':'Increase usage to improve SEO relevance.';
-      return`<div class="kw-row ${cls}" style="background:#fafafa;border:1.5px solid #e5e5e5;border-radius:9px;padding:11px 13px;margin-bottom:7px"><div class="kw-meta" style="margin-bottom:5px"><span class="kw-word" style="font-size:13px">"${esc(tkw)}"</span><span class="kw-right" style="font-size:12px">${ps} <span class="kw-badge">${lbl}</span></span></div><div class="kw-track" style="margin-bottom:7px"><div class="kw-bar" style="width:${Math.min(100,pct*18)}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Found <strong style="color:#333">${count}×</strong> / ${total} words</span><span style="text-align:right;max-width:55%">${advice}</span></div></div>`;
-    }).join('');
-  } else {
-    res.innerHTML='';
-  }
-
-  // Top keywords found — exclude keyword tag words and brand terms from the frequency list
-  const allExcluded=new Set([...kwWords,...brandTerms]);
+  const total=words.length,tkw=document.getElementById('targetKW').value.trim().toLowerCase(),res=document.getElementById('targetKWResult');
+  if(tkw&&total>0){
+    const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
+    const count=(text.match(re)||[]).length,pct=count/total*100,ps=pct.toFixed(2)+'%';
+    const cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low',lbl=pct>=2.5?'🔴 Too High':pct>=1.5?'🟢 Optimal':'🟡 Too Low';
+    const advice=pct>=2.5?'Reduce usage — may trigger keyword stuffing.':pct>=1.5?'Perfect range for SEO.':count===0?'Keyword not found in your copy.':'Increase usage to improve SEO relevance.';
+    res.innerHTML=`<div class="kw-row ${cls}" style="background:#fafafa;border:1.5px solid #e5e5e5;border-radius:9px;padding:11px 13px"><div class="kw-meta" style="margin-bottom:5px"><span class="kw-word" style="font-size:13px">"${tkw}"</span><span class="kw-right" style="font-size:12px">${ps} <span class="kw-badge">${lbl}</span></span></div><div class="kw-track" style="margin-bottom:7px"><div class="kw-bar" style="width:${Math.min(100,pct*18)}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Found <strong style="color:#333">${count}×</strong> / ${total} words</span><span style="text-align:right;max-width:55%">${advice}</span></div></div>`;
+  }else{ res.innerHTML=tkw?'<p style="font-size:11px;color:#ccc;font-style:italic">Paste copy to measure density.</p>':''; }
   const freq={};
-  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c)&&!allExcluded.has(c))freq[c]=(freq[c]||0)+1;});
+  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c))freq[c]=(freq[c]||0)+1;});
   const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5);
   document.getElementById('kwList').innerHTML=sorted.length?sorted.map(([word,count])=>{
     const pct=count/total*100,ps=pct.toFixed(1)+'%',cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low',lbl=pct>=2.5?'High':pct>=1.5?'Optimal':'Low';
@@ -927,6 +837,7 @@ function persistSave(){
   try{
     localStorage.setItem(STORAGE_KEY,JSON.stringify({
       editorText:ta.value,
+      targetKW:document.getElementById('targetKW').value,
       audSelect:document.getElementById('audSelect').value,
       diffInput:document.getElementById('diffInput').value,
       drafts:drafts.slice(0,3),
@@ -938,6 +849,7 @@ function persistLoad(){
     const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return;
     const data=JSON.parse(raw);
     if(data.editorText) ta.value=data.editorText;
+    if(data.targetKW)   document.getElementById('targetKW').value=data.targetKW;
     if(data.audSelect)  document.getElementById('audSelect').value=data.audSelect;
     if(data.diffInput)  document.getElementById('diffInput').value=data.diffInput;
     if(data.drafts)     { drafts=data.drafts; renderDrafts(); }
@@ -961,114 +873,35 @@ function resetUI(){
   document.getElementById('audResult').innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">Select an audience to score your copy.</p>';
 }
 
-// ── Native Copy Audit ─────────────────────────────────────────────────────────
-function runAIAudit(){
-  const text=ta.value.trim();
-  if(!text){alert('Please paste some copy first.');return;}
+// ── AI Audit ──────────────────────────────────────────────────────────────────
+async function runAIAudit(){
+  const text=ta.value.trim(); if(!text){alert('Please paste some copy first.');return;}
   const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput');
   panel.classList.add('open');
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
-  renderAudit(out);
+  out.innerHTML='<div class="loading-wrap"><div class="spinner"></div><p>Analysing your copy…</p></div>';
+  const sys=`You are an elite Direct-Response Copy Editor and SEO Analyst. Return ONLY a raw JSON object — no markdown fences, no commentary. Shape: {"activeScore":"82%","readability":"Standard","wordCount":123,"passiveFlags":[{"original":"phrase","suggestion":"fix"}],"fillerWords":[{"word":"just","count":3}],"cliches":[{"phrase":"game changer","suggestion":"describe actual impact"}],"keywords":[{"word":"conversion","density":"2.1%","status":"Optimal"}],"rewrite":"Full rewritten lean version."}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:text}]})});
+    const data=await res.json();
+    const raw=(data.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    renderAI(JSON.parse(raw),text);
+  }catch(e){ out.innerHTML='<p style="color:#ef4444;font-size:12px;padding:8px 0">⚠️ Failed to load AI report. Please try again.</p>'; }
 }
 
-// Renders a sentence with the matched phrase highlighted in bold colour
-function ctxHTML(context,matchStart,matchEnd,colour){
-  const before=esc(context.slice(0,matchStart));
-  const match=esc(context.slice(matchStart,matchEnd));
-  const after=esc(context.slice(matchEnd));
-  return `<span style="font-size:12px;color:#555;line-height:1.7">${before}<mark style="background:${colour};padding:1px 3px;border-radius:3px;font-weight:700;color:#111">${match}</mark>${after}</span>`;
-}
-
-// Filler-specific tips based on the word
-function fillerTip(word,context){
-  const tips={
-    just:'Remove entirely — it weakens the claim. "Just" implies it\'s trivial.',
-    really:'Delete it. If the point needs emphasis, rewrite the whole phrase to be more specific.',
-    very:'Replace with a stronger single word. "Very important" → "critical". "Very easy" → "effortless".',
-    basically:'Cut it. Start with the actual point.',
-    actually:'Remove it. If you need contrast, use "In fact" or restructure the sentence.',
-    literally:'Delete unless you mean something is physically true. Usually just noise.',
-    simply:'Remove it. If something is genuinely simple, show that through clarity, not the word.',
-    totally:'Delete. It adds no meaning.',
-    perhaps:'Only keep if you genuinely mean uncertainty. Otherwise commit to the claim.',
-    maybe:'Same as "perhaps" — commit to the statement or reframe as conditional.',
-    quite:'Cut it. Weakens rather than qualifies. "Quite good" says less than "good".',
-    slightly:'Only keep if precision matters. Otherwise cut.',
-    rather:'Remove unless making a comparison. Usually just hedging.',
-    fairly:'Delete. Like "quite" — it hedges without adding meaning.',
-    highly:'Replace with a specific claim. "Highly effective" → state what it achieved.',
-    extremely:'Use a more precise word. "Extremely fast" → "sub-second" or "instant".',
-  };
-  return tips[word.toLowerCase()]||'Remove this word — it adds length without meaning.';
-}
-
-// Long sentence split advice
-function longTip(wc){
-  if(wc>50) return `At ${wc} words this is very long. Split into 2–3 sentences. Find the conjunction (and, but, which, because) and break there.`;
-  if(wc>40) return `At ${wc} words this is too long for most readers. Find one idea to move to its own sentence.`;
-  return `At ${wc} words this is over the 30-word guideline. Trim or split at the clearest natural break.`;
-}
-
-function renderAudit(out){
-  const d=auditData;
-  const readLabel=lastFK>=80?'Very Easy':lastFK>=70?'Easy':lastFK>=60?'Fairly Easy':lastFK>=50?'Standard':lastFK>=40?'Fairly Difficult':lastFK>=30?'Difficult':'Very Difficult';
-  const sc=lastScore>=85?'#16a34a':lastScore>=65?'#6366f1':'#ef4444';
-
-  function issueBlock(ctx,matchStart,matchEnd,colour,tip){
-    return `<div class="pass-item">
-      <div style="background:#f8f8f8;border-left:3px solid ${colour};padding:8px 11px;border-radius:0 6px 6px 0;margin-bottom:5px">
-        ${ctxHTML(ctx,matchStart,matchEnd,colour)}
-      </div>
-      <div style="font-size:11px;color:#555;padding:2px 0 0 2px;line-height:1.55">💡 ${tip}</div>
-    </div>`;
-  }
-
-  // Passive voice
-  const passiveHTML=d.passiveMatches.length
-    ?d.passiveMatches.map(f=>issueBlock(f.context,f.matchStart,f.matchEnd,'#fecaca',f.suggestion)).join('')
-    :'<p style="color:#16a34a;font-size:12px">✓ No passive voice detected.</p>';
-
-  // Fillers — dedupe by sentence so we don't show same sentence twice for same word
-  const fillerHTML=d.fillerMatches.length
-    ?d.fillerMatches.map(f=>issueBlock(f.context,f.matchStart,f.matchEnd,'#fef08a',fillerTip(f.word,f.context))).join('')
-    :'<p style="color:#16a34a;font-size:12px">✓ No filler words detected.</p>';
-
-  // Clichés
-  const clicheHTML=d.clicheMatches.length
-    ?d.clicheMatches.map(c=>issueBlock(c.context,c.matchStart,c.matchEnd,'#e9d5ff',c.suggestion)).join('')
-    :'<p style="color:#16a34a;font-size:12px">✓ No clichés detected.</p>';
-
-  // Repeats — show the two sentences it appears in
-  const repeatHTML=d.repeatWords.length
-    ?d.repeatWords.map(r=>{
-      const re=new RegExp(`\\b${r.word}\\b`,'i');
-      const sentenceBlocks=r.sentences.map(s=>{
-        const m=re.exec(s);
-        if(!m) return '';
-        return issueBlock(s,m.index,m.index+m[0].length,'#bfdbfe',`"${r.word}" appears in back-to-back sentences. Replace one with a synonym or restructure to remove it.`);
-      }).join('');
-      return `<div style="margin-bottom:6px;font-size:11px;font-weight:700;color:#3b82f6;text-transform:uppercase;letter-spacing:.05em">"${r.word}"</div>${sentenceBlocks}`;
-    }).join('')
-    :'<p style="color:#16a34a;font-size:12px">✓ No problematic repetition detected.</p>';
-
-  // Long sentences
-  const longHTML=d.longSentences.length
-    ?d.longSentences.map(s=>`<div class="pass-item">
-        <div style="background:#fff7ed;border-left:3px solid #f97316;padding:8px 11px;border-radius:0 6px 6px 0;margin-bottom:5px;font-size:12px;color:#555;line-height:1.7">${esc(s.text)}</div>
-        <div style="font-size:11px;color:#555;padding:2px 0 0 2px;line-height:1.55">💡 ${longTip(s.words)}</div>
-      </div>`).join('')
-    :'<p style="color:#16a34a;font-size:12px">✓ All sentences within recommended length.</p>';
-
-  out.innerHTML=`
-    <div class="ai-section">
-      <h4>Summary</h4>
-      <p><strong style="color:${sc}">${lastScore}%</strong> Active Voice Score &nbsp;·&nbsp; <strong>${readLabel}</strong> Readability &nbsp;·&nbsp; <strong>${d.totalWords}</strong> Words</p>
-    </div>
-    <div class="ai-section"><h4>🔴 Passive Voice (${d.passiveMatches.length})</h4>${passiveHTML}</div>
-    <div class="ai-section"><h4>🟡 Filler Words (${d.fillerMatches.length})</h4>${fillerHTML}</div>
-    <div class="ai-section"><h4>🟣 Clichés (${d.clicheMatches.length})</h4>${clicheHTML}</div>
-    <div class="ai-section"><h4>🔵 Repeated Words (${d.repeatWords.length})</h4>${repeatHTML}</div>
-    <div class="ai-section"><h4>🟠 Long Sentences (${d.longSentences.length})</h4>${longHTML}</div>`;
+function renderAI(r,original){
+  const passive=r.passiveFlags?.length?r.passiveFlags.map(f=>`<div class="pass-item"><div class="pass-orig">${esc(f.original)}</div><div class="pass-fix">→ ${esc(f.suggestion)}</div></div>`).join(''):'<p style="color:#aaa">None detected.</p>';
+  const fillers=r.fillerWords?.length?r.fillerWords.map(f=>`<li>"<strong>${f.word}</strong>" — ${f.count}×</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
+  const cliches=r.cliches?.length?r.cliches.map(c=>`<li>"<strong>${c.phrase}</strong>" — ${c.suggestion}</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
+  const kw=r.keywords?.length?`<table class="ai-kw-table"><thead><tr><th>Keyword</th><th>Density</th><th>Status</th></tr></thead><tbody>${r.keywords.map(k=>`<tr><td style="text-transform:capitalize">${k.word}</td><td style="color:#6366f1;font-family:monospace">${k.density}</td><td>${k.status==='Optimal'?'🟢':k.status==='High'?'🔴':'🟡'} ${k.status}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#aaa">No keywords extracted.</p>';
+  const ba=`<div class="ba-grid"><div class="ba-box ba-before"><div class="ba-label">Before</div><div class="ba-text">${esc(original)}</div></div><div class="ba-box ba-after"><div class="ba-label">After</div><div class="ba-text">${esc(r.rewrite||'')}</div></div></div>`;
+  document.getElementById('aiOutput').innerHTML=`
+    <div class="ai-section"><h4>Executive Summary</h4><p><strong>Active Score:</strong> ${r.activeScore} · <strong>Readability:</strong> ${r.readability} · <strong>Words:</strong> ${r.wordCount}</p></div>
+    <div class="ai-section"><h4>🔴 Passive Voice Flags</h4>${passive}</div>
+    <div class="ai-section"><h4>🟡 Filler Alerts</h4><ul>${fillers}</ul></div>
+    <div class="ai-section"><h4>🟣 Cliché Flags</h4><ul>${cliches}</ul></div>
+    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>
+    <div class="ai-section"><h4>✨ Before vs After</h4>${ba}</div>`;
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
