@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.2</title>
+<title>Copy Engine v6.5</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -29,67 +29,46 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .btn-teal:hover{background:#0f766e}
 .btn-sm{padding:8px 14px;font-size:11px}
 
-/* ── Editor: textarea on top, highlight div behind ── */
+/* ── Editor shell ── */
 .editor-shell{border:1.5px solid #e0e0e0;border-radius:14px;background:#fff;overflow:hidden;transition:border-color .2s;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 .editor-shell:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
-.editor-wrap{position:relative;min-height:420px}
 
-/* Both layers must share IDENTICAL typography so text aligns perfectly */
-#editor-textarea, #editor-overlay {
-  position:absolute;
-  top:0; left:0;
-  width:100%;
-  height:100%;
-  margin:0;
+/* ── Formatting toolbar ── */
+.fmt-bar{display:flex;align-items:center;gap:3px;padding:7px 12px;border-bottom:1px solid #f0f0f0;background:#fafafa;flex-wrap:wrap}
+.fmt-btn{display:inline-flex;align-items:center;justify-content:center;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #e5e5e5;background:#fff;color:#555;transition:all .12s;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;line-height:1;white-space:nowrap}
+.fmt-btn:hover{border-color:#6366f1;color:#6366f1;background:#faf9ff}
+.fmt-btn:active{transform:scale(.95);background:#ede9fe}
+.fmt-btn.active-fmt{background:#ede9fe;border-color:#6366f1;color:#6366f1}
+.fmt-sep{width:1px;height:18px;background:#e5e5e5;margin:0 3px;flex-shrink:0}
+
+/* ── contenteditable editor ── */
+#editor-ce{
+  min-height:420px;
   padding:22px;
   font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
   font-size:15px;
   line-height:1.85;
-  letter-spacing:normal;
-  word-spacing:normal;
-  white-space:pre-wrap;
+  color:#1a1a1a;
+  outline:none;
+  overflow-y:auto;
   word-wrap:break-word;
   overflow-wrap:break-word;
-  tab-size:4;
-  border:none;
-  outline:none;
-  overflow-y:scroll;
-  overflow-x:hidden;
-  box-sizing:border-box;
 }
-#editor-textarea {
-  color:transparent;
-  background:transparent;
-  caret-color:#6366f1;
-  resize:none;
-  z-index:2;
-  /* Ensure no browser-specific styling interferes */
-  -webkit-text-fill-color:transparent;
-}
-#editor-overlay {
-  color:#1a1a1a;
-  background:#fff;
-  pointer-events:none;
-  z-index:1;
-  border-radius:14px 14px 0 0;
-}
-/* Placeholder */
-#editor-textarea::placeholder{color:#bbb;-webkit-text-fill-color:#bbb}
+#editor-ce:empty:before{content:attr(data-placeholder);color:#bbb;pointer-events:none}
+/* Heading styles inside editor */
+#editor-ce h1{font-size:26px;font-weight:900;line-height:1.25;margin:18px 0 8px;color:#111}
+#editor-ce h2{font-size:20px;font-weight:800;line-height:1.3;margin:14px 0 6px;color:#111}
+#editor-ce h3{font-size:16px;font-weight:700;line-height:1.4;margin:12px 0 4px;color:#111}
+#editor-ce ul{padding-left:24px;margin:6px 0;list-style:disc}
+#editor-ce ol{padding-left:24px;margin:6px 0;list-style:decimal}
+#editor-ce li{margin:3px 0;line-height:1.7}
+#editor-ce p{margin:0 0 4px}
+#editor-ce br{display:block;content:""}
 
 .editor-footer{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-top:1px solid #f0f0f0;background:#fafafa;flex-wrap:wrap;gap:8px}
 .legend{display:flex;gap:12px;flex-wrap:wrap}
 .leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#888;font-weight:600}
 .leg-dot{width:9px;height:9px;border-radius:3px}
-
-/* ── Highlights ── */
-.ph{background:#fee2e2;border-bottom:2px solid #ef4444;color:#991b1b;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.fh{background:#fef9c3;border-bottom:2px solid #eab308;color:#854d0e;padding:0 2px;border-radius:3px}
-.sh{background:#ffedd5;border-bottom:2px solid #f97316;color:#9a3412;padding:0 2px;border-radius:3px}
-.ch{background:#f3e8ff;border-bottom:2px solid #a855f7;color:#6b21a8;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.rh{background:#dbeafe;border-bottom:2px solid #3b82f6;color:#1e40af;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.vh{background:#fce7f3;border-bottom:2px solid #ec4899;color:#9d174d;padding:0 2px;border-radius:3px}
-.tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
-.tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
 
 /* ── Stats ── */
 .stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:#e5e5e5;border:1.5px solid #e0e0e0;border-top:none;border-radius:0 0 14px 14px;overflow:hidden}
@@ -243,13 +222,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 </style>
 </head>
 <body>
+
 <div id="splash">
   <div class="splash-inner">
     <div class="splash-left">
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.2</span>
+          <span class="sp-brand-ver">v6.5</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -296,7 +276,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.2</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.5</span></div>
       <div class="brand-sub" id="reportDate"></div>
     </div>
     <div class="btn-row no-print">
@@ -325,10 +305,17 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
       </div>
 
       <div class="editor-shell">
-        <div class="editor-wrap">
-          <div id="editor-overlay" aria-hidden="true"></div>
-          <textarea id="editor-textarea" spellcheck="false" placeholder="Paste your marketing copy here…"></textarea>
+        <div class="fmt-bar no-print">
+          <button class="fmt-btn" id="fmt-h1" onmousedown="fmtBlock(event,'h1')" title="Heading 1">H1</button>
+          <button class="fmt-btn" id="fmt-h2" onmousedown="fmtBlock(event,'h2')" title="Heading 2">H2</button>
+          <button class="fmt-btn" id="fmt-h3" onmousedown="fmtBlock(event,'h3')" title="Heading 3">H3</button>
+          <div class="fmt-sep"></div>
+          <button class="fmt-btn" id="fmt-ul" onmousedown="fmtBlock(event,'ul')" title="Bullet list">&#8226; List</button>
+          <button class="fmt-btn" id="fmt-ol" onmousedown="fmtBlock(event,'ol')" title="Numbered list">1. List</button>
+          <div class="fmt-sep"></div>
+          <button class="fmt-btn" id="fmt-p"  onmousedown="fmtBlock(event,'p')"  title="Normal paragraph" style="color:#999">&#182; Normal</button>
         </div>
+        <div id="editor-ce" contenteditable="true" spellcheck="false" data-placeholder="Paste or type your marketing copy here…"></div>
         <div class="editor-footer">
           <div class="legend">
             <div class="leg-item"><div class="leg-dot" style="background:#fecaca;border:1px solid #ef4444"></div>Passive</div>
@@ -440,7 +427,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
         <div class="card-title">Quick Fix Tips</div>
         <ul class="tip-list">
           <li><span>→</span><span>Target <strong>1.5–2.5%</strong> keyword density.</span></li>
-          <li><span>→</span><span>Click <strong style="color:#fca5a5">red</strong> or <strong style="color:#c4b5fd">purple</strong> highlights for fix suggestions.</span></li>
+          <li><span>→</span><span>Use <strong>H1/H2/H3</strong> buttons to add real headings.</span></li>
           <li><span>→</span><span><strong style="color:#93c5fd">Blue</strong> = word repeated too close together.</span></li>
           <li><span>→</span><span><strong style="color:#f9a8d4">Pink</strong> = consecutive sentences starting the same way.</span></li>
           <li><span>→</span><span>Keep sentences <strong>under 30 words</strong> for maximum punch.</span></li>
@@ -451,15 +438,8 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 </div>
 
 <script>
-function dismissSplash(){
-  const s=document.getElementById('splash');
-  s.classList.add('hiding');
-  setTimeout(()=>{ s.style.display='none'; },320);
-}
-
-const ta  = document.getElementById('editor-textarea');
-const ov  = document.getElementById('editor-overlay');
-const STORAGE_KEY = 'copyengine_v62';
+const ce = document.getElementById('editor-ce');
+const STORAGE_KEY = 'copyengine_v65';
 
 const FILLERS = ['just','really','very','basically','actually','literally','simply','totally','perhaps','maybe','quite','slightly','rather','fairly','highly','extremely'];
 const STOP = new Set(['the','and','for','this','that','with','from','your','their','have','been','will','they','what','when','were','which','about','into','more','some','than','then','them','these','those','also','each','much','such','both','even','most','over','after','before','through','between','should','would','could','shall','does','doing','there','here','where','while','within','without','other','another','every','because','since','though','although','however','therefore','thus','hence','indeed','still','again','never','always','often','must','need','make','take','come','goes','like','many','well','back','only','same','good','high','long','great','small','large','next','last','first']);
@@ -484,42 +464,47 @@ let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-// ── Sync scroll between textarea and overlay ──────────────────────────────────
-function syncScroll(){ ov.scrollTop = ta.scrollTop; }
-ta.addEventListener('scroll', syncScroll);
+// ── Get plain text from editor ────────────────────────────────────────────────
+function getText(){ return ce.innerText||''; }
 
-// ── Sync overlay height to textarea content height ────────────────────────────
-function syncHeight(){
-  // Reset height to auto so it can shrink, then set to scrollHeight
-  ta.style.height = 'auto';
-  const h = Math.max(420, ta.scrollHeight);
-  ta.style.height = h + 'px';
-  ov.style.height  = h + 'px';
-  // Keep the wrapper tall enough
-  ta.closest('.editor-wrap').style.minHeight = h + 'px';
+// ── Formatting toolbar ────────────────────────────────────────────────────────
+function fmtBlock(e, tag){
+  e.preventDefault(); // prevent blur before execCommand
+  document.execCommand('formatBlock', false, tag==='ul'||tag==='ol' ? 'p' : tag);
+  if(tag==='ul') document.execCommand('insertUnorderedList', false, null);
+  if(tag==='ol') document.execCommand('insertOrderedList',   false, null);
+  ce.focus();
+  updateFmtBar();
+  onEditorInput();
 }
+
+function updateFmtBar(){
+  const tags=['h1','h2','h3','ul','ol','p'];
+  tags.forEach(t=>{
+    const btn=document.getElementById('fmt-'+t);
+    if(btn) btn.classList.remove('active-fmt');
+  });
+  const block=document.queryCommandValue('formatBlock').toLowerCase();
+  const inUL=document.queryCommandState('insertUnorderedList');
+  const inOL=document.queryCommandState('insertOrderedList');
+  if(inUL){ const b=document.getElementById('fmt-ul'); if(b) b.classList.add('active-fmt'); }
+  else if(inOL){ const b=document.getElementById('fmt-ol'); if(b) b.classList.add('active-fmt'); }
+  else if(block){ const b=document.getElementById('fmt-'+block); if(b) b.classList.add('active-fmt'); }
+}
+
+ce.addEventListener('keyup', updateFmtBar);
+ce.addEventListener('mouseup', updateFmtBar);
+ce.addEventListener('selectionchange', updateFmtBar);
 
 // ── Main input handler ────────────────────────────────────────────────────────
 function onEditorInput(){
-  syncHeight();
   clearTimeout(analyseTimer);
-  analyseTimer = setTimeout(()=>{ analyse(); scheduleSave(); persistSave(); }, 80);
+  analyseTimer = setTimeout(()=>{ analyse(); scheduleSave(); persistSave(); }, 120);
 }
+ce.addEventListener('input', onEditorInput);
 
-ta.addEventListener('input', onEditorInput);
-
-// Strip HTML on paste, insert plain text
-ta.addEventListener('paste', e=>{
-  e.preventDefault();
-  const text = (e.clipboardData||window.clipboardData).getData('text/plain');
-  // Insert at cursor
-  const start = ta.selectionStart, end = ta.selectionEnd;
-  const before = ta.value.slice(0, start);
-  const after  = ta.value.slice(end);
-  ta.value = before + text + after;
-  ta.selectionStart = ta.selectionEnd = start + text.length;
-  onEditorInput();
-});
+// ── Paste: keep rich formatting as-is ────────────────────────────────────────
+// No paste interception — browser handles it natively in contenteditable
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -554,20 +539,9 @@ function toggleMode(btn){
   analyse();
 }
 
-function showTip(el){
-  const t=el.querySelector('.tip'); if(!t) return;
-  const vis=t.style.display==='block';
-  document.querySelectorAll('.tip').forEach(x=>x.style.display='none');
-  t.style.display=vis?'none':'block';
-}
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.ph')&&!e.target.closest('.ch')&&!e.target.closest('.rh'))
-    document.querySelectorAll('.tip').forEach(t=>t.style.display='none');
-});
-
-// ── Core analysis ─────────────────────────────────────────────────────────────
+// ── Core analysis (runs on plain text) ───────────────────────────────────────
 function analyse(){
-  const text = ta.value;
+  const text = getText();
   if(!text.trim()){ resetUI(); return; }
 
   lastWords     = text.trim().split(/\s+/).filter(w=>w.length>0);
@@ -595,53 +569,20 @@ function analyse(){
 
   let pCount=0,fCount=0,cCount=0;
 
-  const sentHTMLs=lastSentences.map((sent,si)=>{
-    const ann=[];
-
+  lastSentences.forEach(sent=>{
     if(modes.filler) FILLERS.forEach(w=>{
-      const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){ fCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'fh',tip:null}); }
+      const re=new RegExp(`\\b${w}\\b`,'gi');
+      let m; while((m=re.exec(sent))!==null) fCount++;
     });
-
-    if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
-      const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){ cCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ch',tip}); }
+    if(modes.cliche) Object.entries(CLICHES).forEach(([phrase])=>{
+      const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi');
+      let m; while((m=re.exec(sent))!==null) cCount++;
     });
-
-    if(modes.repeat) repeatSet.forEach(w=>{
-      const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null) ann.push({start:m.index,end:m.index+m[0].length,cls:'rh',tip:'Repeated nearby — try a synonym'});
-    });
-
     if(modes.passive){
-      const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
-      while((m=pr.exec(sent))!==null){ pCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ph',tip:getSug(m[0])}); }
+      const pr=new RegExp(PASSIVE_RE.source,'gi');
+      let m; while((m=pr.exec(sent))!==null) pCount++;
     }
-
-    ann.sort((a,b)=>a.start-b.start||b.end-a.end);
-    const filtered=[]; let cursor=0;
-    for(const a of ann) if(a.start>=cursor){ filtered.push(a); cursor=a.end; }
-
-    let html='',pos=0;
-    for(const a of filtered){
-      if(a.start>pos) html+=esc(sent.slice(pos,a.start));
-      const inner=esc(sent.slice(a.start,a.end));
-      html+=a.tip
-        ?`<span class="${a.cls}" onclick="showTip(this)">${inner}<span class="tip">${a.tip}</span></span>`
-        :`<span class="${a.cls}">${inner}</span>`;
-      pos=a.end;
-    }
-    if(pos<sent.length) html+=esc(sent.slice(pos));
-
-    if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh">${html}</span>`;
-    const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(modes.sentence&&wc>=30) html=`<span class="sh">${html}</span>`;
-    return html;
   });
-
-  // Write to overlay — append a trailing newline so last line renders correctly
-  ov.innerHTML = sentHTMLs.join(' ') + '\n';
-  syncScroll();
 
   document.getElementById('sPassive').innerText=pCount;
   document.getElementById('sFiller').innerText =fCount;
@@ -718,7 +659,7 @@ function updateVariety(sentences,issues){
   const col=score>=80?'#22c55e':score>=60?'#f59e0b':'#ef4444';
   const lens=sentences.map(s=>s.trim().split(/\s+/).filter(w=>w.length>0).length);
   const sh=lens.filter(l=>l<=10).length,md=lens.filter(l=>l>10&&l<=20).length,lg=lens.filter(l=>l>20).length;
-  const fb=ic===0?'Great variety — no consecutive same-start sentences.':`${ic} sentence${ic>1?'s':''} start the same way as the previous one (pink highlight).`;
+  const fb=ic===0?'Great variety — no consecutive same-start sentences.':`${ic} sentence${ic>1?'s':''} start the same way as the previous one.`;
   el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:22px;font-weight:900;color:${col}">${score}%</span><span style="font-size:10px;color:#aaa">${ic} issue${ic!==1?'s':''}</span></div><div class="variety-track"><div class="variety-fill" style="width:${score}%;background:${col}"></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:9px 0">${[['Short',sh],['Medium',md],['Long',lg]].map(([l,n])=>`<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:900;color:#555">${n}</div><div style="font-size:9px;color:#bbb;font-weight:700;text-transform:uppercase;margin-top:2px">${l}</div></div>`).join('')}</div><p style="font-size:11px;color:#888;line-height:1.55">${fb}</p>`;
 }
 
@@ -780,7 +721,7 @@ function runDiffAlgo(oldW,newW){
 }
 
 function runDiff(){
-  const oldText=document.getElementById('diffInput').value.trim(),newText=ta.value.trim();
+  const oldText=document.getElementById('diffInput').value.trim(),newText=getText().trim();
   if(!oldText||!newText){showToast('⚠️ Paste a previous version into the diff box first');return;}
   const oldWords=oldText.split(/\s+/).filter(w=>w.length>0),newWords=newText.split(/\s+/).filter(w=>w.length>0);
   const dr=runDiffAlgo(oldWords,newWords);
@@ -807,17 +748,20 @@ function calcScore(text){
 }
 
 function fixAllFillers(){
-  let t=ta.value; if(!t.trim()) return;
+  const text=getText(); if(!text.trim()) return;
+  let t=text;
   FILLERS.forEach(w=>{t=t.replace(new RegExp(`\\s?\\b${w}\\b\\s?`,'gi'),' ');});
-  ta.value=t.replace(/ {2,}/g,' ').replace(/ ([.,!?;:])/g,'$1').trim();
+  t=t.replace(/ {2,}/g,' ').replace(/ ([.,!?;:])/g,'$1').trim();
+  ce.innerText=t;
   onEditorInput();
+  showToast('⚡ Fillers removed');
 }
 
 // ── Autosave drafts ───────────────────────────────────────────────────────────
 function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveDraft,3000); }
 function saveDraft(){
-  const text=ta.value.trim(); if(!text) return;
-  drafts.unshift({text,preview:text.slice(0,42).replace(/\n/g,' ')+(text.length>42?'…':''),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),score:lastScore});
+  const text=getText().trim(); if(!text) return;
+  drafts.unshift({html:ce.innerHTML,preview:text.slice(0,42).replace(/\n/g,' ')+(text.length>42?'…':''),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),score:lastScore});
   if(drafts.length>3) drafts.pop();
   renderDrafts(); persistSave(); showToast('✓ Draft saved');
 }
@@ -828,7 +772,7 @@ function renderDrafts(){
 }
 function restoreDraft(i){
   if(!drafts[i]) return;
-  ta.value=drafts[i].text;
+  ce.innerHTML=drafts[i].html||'';
   onEditorInput(); showToast('↩ Draft restored');
 }
 
@@ -836,7 +780,7 @@ function restoreDraft(i){
 function persistSave(){
   try{
     localStorage.setItem(STORAGE_KEY,JSON.stringify({
-      editorText:ta.value,
+      editorHTML:ce.innerHTML,
       targetKW:document.getElementById('targetKW').value,
       audSelect:document.getElementById('audSelect').value,
       diffInput:document.getElementById('diffInput').value,
@@ -848,17 +792,16 @@ function persistLoad(){
   try{
     const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return;
     const data=JSON.parse(raw);
-    if(data.editorText) ta.value=data.editorText;
+    if(data.editorHTML) ce.innerHTML=data.editorHTML;
     if(data.targetKW)   document.getElementById('targetKW').value=data.targetKW;
     if(data.audSelect)  document.getElementById('audSelect').value=data.audSelect;
     if(data.diffInput)  document.getElementById('diffInput').value=data.diffInput;
     if(data.drafts)     { drafts=data.drafts; renderDrafts(); }
-    if(data.editorText){ onEditorInput(); showToast('↩ Progress restored'); }
+    if(data.editorHTML){ onEditorInput(); showToast('↩ Progress restored'); }
   }catch(e){}
 }
 
 function resetUI(){
-  ov.innerHTML='';
   ['sPassive','sFiller','sCliche','sRepeat','sWords','sChars'].forEach(id=>document.getElementById(id).innerText='0');
   const fill=document.getElementById('gFill'); fill.style.strokeDashoffset='0'; fill.style.stroke='#e5e5e5';
   document.getElementById('gNum').innerText='—';
@@ -875,7 +818,7 @@ function resetUI(){
 
 // ── AI Audit ──────────────────────────────────────────────────────────────────
 async function runAIAudit(){
-  const text=ta.value.trim(); if(!text){alert('Please paste some copy first.');return;}
+  const text=getText().trim(); if(!text){alert('Please paste some copy first.');return;}
   const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput');
   panel.classList.add('open');
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
@@ -905,6 +848,12 @@ function renderAI(r,original){
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+function dismissSplash(){
+  const s=document.getElementById('splash');
+  s.classList.add('hiding');
+  setTimeout(()=>{ s.style.display='none'; },320);
+}
 
 function downloadHTML(){
   const blob=new Blob([document.documentElement.outerHTML],{type:'text/html;charset=utf-8'});
