@@ -183,23 +183,47 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .ai-close{background:none;border:none;font-size:20px;color:#ccc;cursor:pointer;line-height:1;padding:0 4px}
 .ai-close:hover{color:#555}
 .ai-body{padding:18px}
-.ai-section{border-left:2px solid #f0f0f0;padding-left:13px;margin-bottom:18px}
+.ai-section{margin-bottom:22px}
 .ai-section:last-child{margin-bottom:0}
-.ai-section h4{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#6366f1;margin-bottom:8px}
-.ai-section p,.ai-section li{font-size:12px;color:#444;line-height:1.65}
-.ai-section ul{list-style:disc;padding-left:16px}
-.pass-item{margin-bottom:9px}
-.pass-orig{font-size:12px;color:#ef4444;text-decoration:line-through;line-height:1.5}
-.pass-fix{font-size:12px;color:#16a34a;line-height:1.5}
-.ai-kw-table{width:100%;border-collapse:collapse;font-size:12px}
-.ai-kw-table th{text-align:left;color:#bbb;font-weight:700;padding-bottom:6px;font-size:11px}
-.ai-kw-table td{padding:5px 0;border-top:1px solid #f5f5f5;color:#333;font-weight:600}
+.ai-section-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0f0f0}
+.ai-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.ai-sum-chip{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:10px;padding:10px 12px;text-align:center}
+.ai-sum-val{font-size:20px;font-weight:900;color:#111;line-height:1}
+.ai-sum-lbl{font-size:9px;color:#bbb;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.ai-verdict{background:#f8f7ff;border:1.5px solid #ede9fe;border-radius:10px;padding:12px 14px;font-size:12px;color:#4c1d95;line-height:1.65;margin-top:8px}
+
+/* Issue cards */
+.issue-card{border:1.5px solid #f0f0f0;border-radius:10px;padding:12px 14px;margin-bottom:8px;transition:border-color .15s}
+.issue-card:last-child{margin-bottom:0}
+.issue-card:hover{border-color:#d0d0d0}
+.issue-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:7px}
+.issue-tag{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;padding:3px 8px;border-radius:99px}
+.tag-passive{background:#fee2e2;color:#991b1b}
+.tag-filler{background:#fef9c3;color:#854d0e}
+.tag-cliche{background:#f3e8ff;color:#6b21a8}
+.tag-long{background:#ffedd5;color:#9a3412}
+.tag-repeat{background:#dbeafe;color:#1e40af}
+.tag-kw{background:#dcfce7;color:#166534}
+.issue-locate{background:none;border:1.5px solid #e0e0e0;border-radius:7px;font-size:10px;font-weight:700;color:#888;cursor:pointer;padding:3px 9px;white-space:nowrap;transition:all .15s;font-family:inherit}
+.issue-locate:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
+.issue-phrase{font-size:12px;font-weight:700;color:#111;background:#f5f5f5;border-radius:6px;padding:4px 8px;display:inline-block;margin-bottom:6px;font-family:monospace}
+.issue-why{font-size:11px;color:#888;line-height:1.6;margin-bottom:5px}
+.issue-fix{font-size:11px;color:#16a34a;background:#f0fdf4;border-radius:6px;padding:6px 9px;line-height:1.6;border-left:2px solid #86efac}
+.issue-fix strong{color:#15803d}
+
+/* Rewrite */
 .ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+@media(max-width:700px){.ba-grid{grid-template-columns:1fr}}
 .ba-box{border:1.5px solid #e5e5e5;border-radius:9px;padding:12px}
 .ba-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px}
 .ba-before .ba-label{color:#ef4444}.ba-after .ba-label{color:#16a34a}
-.ba-text{font-size:12px;color:#444;line-height:1.7}
+.ba-text{font-size:12px;color:#444;line-height:1.7;white-space:pre-wrap}
 .ba-after .ba-text{color:#166534;background:#f0fdf4;padding:9px;border-radius:7px}
+.ai-none{font-size:11px;color:#ccc;font-style:italic}
+
+/* Locate flash */
+@keyframes locateFlash{0%{background:rgba(99,102,241,.35)}100%{background:transparent}}
+.locate-flash{animation:locateFlash 1.8s ease-out forwards !important}
 
 .toast{position:fixed;bottom:28px;right:28px;background:#111;color:#fff;font-size:12px;font-weight:600;padding:11px 18px;border-radius:10px;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.2)}
 .toast.show{opacity:1;transform:translateY(0)}
@@ -480,7 +504,7 @@ const AUDIENCES = {
 };
 
 const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true};
-let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[];
+let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],auditIssues=[];
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
@@ -869,35 +893,215 @@ function resetUI(){
   document.getElementById('audResult').innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">Select an audience to score your copy.</p>';
 }
 
-// ── AI Audit ──────────────────────────────────────────────────────────────────
-async function runAIAudit(){
-  const text=ta.value.trim(); if(!text){alert('Please paste some copy first.');return;}
+// ── AI Audit (fully local — no API) ──────────────────────────────────────────
+function runAIAudit(){
+  const text=ta.value; // use raw value, not trimmed, so charIdx matches ta.value exactly
+  if(!text.trim()){alert('Please paste some copy first.');return;}
   const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput');
   panel.classList.add('open');
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
-  out.innerHTML='<div class="loading-wrap"><div class="spinner"></div><p>Analysing your copy…</p></div>';
-  const sys=`You are an elite Direct-Response Copy Editor and SEO Analyst. Return ONLY a raw JSON object — no markdown fences, no commentary. Shape: {"activeScore":"82%","readability":"Standard","wordCount":123,"passiveFlags":[{"original":"phrase","suggestion":"fix"}],"fillerWords":[{"word":"just","count":3}],"cliches":[{"phrase":"game changer","suggestion":"describe actual impact"}],"keywords":[{"word":"conversion","density":"2.1%","status":"Optimal"}],"rewrite":"Full rewritten lean version."}`;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:text}]})});
-    const data=await res.json();
-    const raw=(data.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
-    renderAI(JSON.parse(raw),text);
-  }catch(e){ out.innerHTML='<p style="color:#ef4444;font-size:12px;padding:8px 0">⚠️ Failed to load AI report. Please try again.</p>'; }
+
+  const issues=[];
+
+  // ── Passive voice ──
+  const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
+  while((m=pr.exec(text))!==null){
+    const phrase=m[0];
+    const sentStart=text.lastIndexOf('.',m.index-1)+1;
+    const sentEnd=text.indexOf('.',m.index);
+    const sentence=text.slice(Math.max(0,sentStart),sentEnd>-1?sentEnd+1:text.length).trim();
+    const sug=getSug(phrase);
+    const before=sentence.slice(0,sentence.toLowerCase().indexOf(phrase.toLowerCase())).trim();
+    const subjectWords=before.split(/\s+/).slice(-3).join(' ');
+    issues.push({
+      type:'passive', phrase, searchPhrase:phrase, charIdx:m.index,
+      why:`"${phrase}" buries the subject and weakens the action. Passive voice forces readers to work harder and makes the copy feel corporate.`,
+      fix:sug!=='Rewrite with an active verb'
+        ?`Replace with the active form — ${sug.replace('Active: ','')}`
+        :`Rewrite so the subject acts: instead of "…${phrase}…", lead with who or what is doing it${subjectWords?` — likely "${subjectWords}"`:''}.`
+    });
+  }
+
+  // ── Filler words ──
+  FILLERS.forEach(w=>{
+    const re=new RegExp(`\\b${w}\\b`,'gi'); let fm;
+    while((fm=re.exec(text))!==null){
+      const phrase=fm[0];
+      const sentStart=text.lastIndexOf('.',fm.index-1)+1;
+      const sentEnd=text.indexOf('.',fm.index);
+      const sentence=text.slice(Math.max(0,sentStart),sentEnd>-1?sentEnd+1:text.length).trim();
+      const withoutFiller=sentence.replace(new RegExp(`\\s?\\b${w}\\b\\s?`,'gi'),' ').replace(/\s{2,}/g,' ').trim();
+      issues.push({
+        type:'filler', phrase, searchPhrase:phrase, charIdx:fm.index,
+        why:`"${w}" adds length without meaning. Readers skip it instinctively — which means the words around it lose impact too.`,
+        fix:`Remove it entirely. "${sentence}" becomes: "${withoutFiller}"`
+      });
+    }
+  });
+
+  // ── Clichés ──
+  Object.entries(CLICHES).forEach(([clichePhrase,tip])=>{
+    const re=new RegExp(`\\b${clichePhrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi'); let cm;
+    while((cm=re.exec(text))!==null){
+      const phrase=cm[0];
+      const sentStart=text.lastIndexOf('.',cm.index-1)+1;
+      const sentEnd=text.indexOf('.',cm.index);
+      const sentence=text.slice(Math.max(0,sentStart),sentEnd>-1?sentEnd+1:text.length).trim();
+      issues.push({
+        type:'cliche', phrase, searchPhrase:phrase, charIdx:cm.index,
+        why:`"${phrase}" is overused to the point of meaning nothing. Readers see it and switch off — it signals lazy thinking.`,
+        fix:tip
+      });
+    }
+  });
+
+  // ── Long sentences ──
+  lastSentences.forEach(sent=>{
+    const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
+    if(wc>=30){
+      // searchPhrase = first 40 chars of the real sentence (no ellipsis) — guaranteed to exist in text
+      const searchPhrase=sent.slice(0,40);
+      const charIdx=text.indexOf(searchPhrase);
+      const midPoint=Math.floor(sent.length/2);
+      const splitPoint=sent.indexOf(' ',midPoint);
+      const half1=sent.slice(0,splitPoint).trim();
+      const half2=sent.slice(splitPoint+1).trim();
+      issues.push({
+        type:'long_sentence',
+        phrase:sent.length>70?sent.slice(0,70)+'…':sent, // display only
+        searchPhrase,
+        charIdx:charIdx>-1?charIdx:0,
+        why:`At ${wc} words, this sentence asks readers to hold too much in working memory. In marketing copy, long sentences bury the point and invite skimming.`,
+        fix:`Split it into two: "${half1}." then "${half2[0].toUpperCase()+half2.slice(1)}"`
+      });
+    }
+  });
+
+  // ── Repetition ──
+  const wsMap2={};
+  lastSentences.forEach((s,si)=>{
+    s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
+      .forEach(w=>{ if(!wsMap2[w]) wsMap2[w]=[]; wsMap2[w].push({si,sent:s}); });
+  });
+  Object.entries(wsMap2).forEach(([w,hits])=>{
+    for(let i=1;i<hits.length;i++){
+      if(hits[i].si-hits[i-1].si<=2){
+        // Find the second occurrence in text (the repeated one)
+        const firstIdx=text.toLowerCase().indexOf(w);
+        const secondIdx=firstIdx>-1?text.toLowerCase().indexOf(w,firstIdx+w.length):-1;
+        const charIdx=secondIdx>-1?secondIdx:firstIdx;
+        issues.push({
+          type:'repetition', phrase:w, searchPhrase:w,
+          charIdx:charIdx>-1?charIdx:0,
+          why:`"${w}" appears in consecutive or near-consecutive sentences. Repetition without intent reads as a limited vocabulary and draws attention away from the message.`,
+          fix:`Replace the second use with a synonym or restructure one of the sentences to remove it entirely.`
+        });
+        break;
+      }
+    }
+  });
+
+  // Deduplicate by phrase+type, sort by impact, cap at 12
+  const seen=new Set();
+  const typeOrder={passive:0,cliche:1,long_sentence:2,filler:3,repetition:4};
+  const deduped=issues
+    .filter(i=>{ const k=i.type+'|'+i.phrase.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; })
+    .sort((a,b)=>(typeOrder[a.type]??5)-(typeOrder[b.type]??5))
+    .slice(0,12);
+
+  auditIssues=deduped;
+  renderAI(deduped, text);
 }
 
-function renderAI(r,original){
-  const passive=r.passiveFlags?.length?r.passiveFlags.map(f=>`<div class="pass-item"><div class="pass-orig">${esc(f.original)}</div><div class="pass-fix">→ ${esc(f.suggestion)}</div></div>`).join(''):'<p style="color:#aaa">None detected.</p>';
-  const fillers=r.fillerWords?.length?r.fillerWords.map(f=>`<li>"<strong>${f.word}</strong>" — ${f.count}×</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
-  const cliches=r.cliches?.length?r.cliches.map(c=>`<li>"<strong>${c.phrase}</strong>" — ${c.suggestion}</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
-  const kw=r.keywords?.length?`<table class="ai-kw-table"><thead><tr><th>Keyword</th><th>Density</th><th>Status</th></tr></thead><tbody>${r.keywords.map(k=>`<tr><td style="text-transform:capitalize">${k.word}</td><td style="color:#6366f1;font-family:monospace">${k.density}</td><td>${k.status==='Optimal'?'🟢':k.status==='High'?'🔴':'🟡'} ${k.status}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#aaa">No keywords extracted.</p>';
-  const ba=`<div class="ba-grid"><div class="ba-box ba-before"><div class="ba-label">Before</div><div class="ba-text">${esc(original)}</div></div><div class="ba-box ba-after"><div class="ba-label">After</div><div class="ba-text">${esc(r.rewrite||'')}</div></div></div>`;
-  document.getElementById('aiOutput').innerHTML=`
-    <div class="ai-section"><h4>Executive Summary</h4><p><strong>Active Score:</strong> ${r.activeScore} · <strong>Readability:</strong> ${r.readability} · <strong>Words:</strong> ${r.wordCount}</p></div>
-    <div class="ai-section"><h4>🔴 Passive Voice Flags</h4>${passive}</div>
-    <div class="ai-section"><h4>🟡 Filler Alerts</h4><ul>${fillers}</ul></div>
-    <div class="ai-section"><h4>🟣 Cliché Flags</h4><ul>${cliches}</ul></div>
-    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>
-    <div class="ai-section"><h4>✨ Before vs After</h4>${ba}</div>`;
+// Scroll the editor to a detected issue by its index in auditIssues
+function locateIssue(i){
+  const issue=auditIssues[i]; if(!issue) return;
+  const text=ta.value;
+  const searchPhrase=issue.searchPhrase||issue.phrase;
+
+  // Verify stored charIdx still points to the right place, else search
+  let idx=(typeof issue.charIdx==='number' && issue.charIdx>=0
+    && text.slice(issue.charIdx, issue.charIdx+searchPhrase.length).toLowerCase()===searchPhrase.toLowerCase())
+    ? issue.charIdx
+    : text.toLowerCase().indexOf(searchPhrase.toLowerCase());
+
+  if(idx===-1){showToast('⚠️ Could not locate in editor');return;}
+
+  ta.focus();
+  ta.selectionStart=idx;
+  ta.selectionEnd=idx+searchPhrase.length;
+
+  const lineHeight=parseFloat(getComputedStyle(ta).lineHeight)||26;
+  const lineIdx=text.slice(0,idx).split('\n').length-1;
+  ta.scrollTop=Math.max(0,lineIdx*lineHeight-(ta.clientHeight/3));
+  syncScroll();
+
+  // Flash the corresponding overlay span — match by charIdx position in overlay text
+  // Walk overlay spans and find one whose text appears at approximately the right position
+  const spans=ov.querySelectorAll('span.ph,span.fh,span.ch,span.sh,span.rh,span.vh');
+  let matched=null;
+  const phraseLower=searchPhrase.toLowerCase().trim().slice(0,30);
+  for(const s of spans){
+    const t=s.textContent.replace(/\s+/g,' ').trim().toLowerCase();
+    if(t===phraseLower||t.startsWith(phraseLower)||phraseLower.startsWith(t.slice(0,10))){
+      matched=s; break;
+    }
+  }
+  if(matched){
+    matched.classList.remove('locate-flash');
+    void matched.offsetWidth;
+    matched.classList.add('locate-flash');
+    setTimeout(()=>matched.classList.remove('locate-flash'),2000);
+  }
+  showToast('↑ Jumped to issue');
+}
+
+function renderAI(issues, text){
+  const out=document.getElementById('aiOutput');
+  const typeMap={
+    passive:  {tag:'tag-passive', label:'Passive Voice',  icon:'🔴'},
+    filler:   {tag:'tag-filler',  label:'Filler Word',    icon:'🟡'},
+    cliche:   {tag:'tag-cliche',  label:'Cliché',         icon:'🟣'},
+    long_sentence:{tag:'tag-long',label:'Long Sentence',  icon:'🟠'},
+    repetition:{tag:'tag-repeat', label:'Repetition',     icon:'🔵'},
+  };
+
+  // Summary
+  const fkLabel=lastFK>=80?'Very Easy':lastFK>=70?'Easy':lastFK>=60?'Fairly Easy':lastFK>=50?'Standard':lastFK>=40?'Fairly Difficult':lastFK>=30?'Difficult':'Very Difficult';
+  const scoreCol=lastScore>85?'#22c55e':lastScore>65?'#6366f1':'#ef4444';
+  const chips=`<div class="ai-summary-grid">
+    <div class="ai-sum-chip"><div class="ai-sum-val" style="color:${scoreCol}">${lastScore}%</div><div class="ai-sum-lbl">Active Score</div></div>
+    <div class="ai-sum-chip"><div class="ai-sum-val">${fkLabel}</div><div class="ai-sum-lbl">Readability</div></div>
+    <div class="ai-sum-chip"><div class="ai-sum-val">${lastWords.length}</div><div class="ai-sum-lbl">Words</div></div>
+  </div>`;
+
+  // Issue cards
+  const issueHTML=issues.length
+    ?issues.map((issue,i)=>{
+      const t=typeMap[issue.type]||{tag:'tag-passive',label:'Issue',icon:'⚠️'};
+      const displayPhrase=issue.phrase.length>80?issue.phrase.slice(0,80)+'…':issue.phrase;
+      return `<div class="issue-card">
+        <div class="issue-card-head">
+          <span class="issue-tag ${t.tag}">${t.icon} ${t.label}</span>
+          <button class="issue-locate" onclick="locateIssue(${i})">Show me →</button>
+        </div>
+        <div class="issue-phrase">${esc(displayPhrase)}</div>
+        <div class="issue-why">${esc(issue.why)}</div>
+        <div class="issue-fix"><strong>Fix:</strong> ${esc(issue.fix)}</div>
+      </div>`;
+    }).join('')
+    :'<p class="ai-none">No issues found — your copy is clean.</p>';
+
+  out.innerHTML=`
+    <div class="ai-section">
+      <div class="ai-section-title">Summary</div>
+      ${chips}
+    </div>
+    <div class="ai-section">
+      <div class="ai-section-title">Issues — ${issues.length} found</div>
+      ${issueHTML}
+    </div>`;
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
