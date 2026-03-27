@@ -265,18 +265,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .seo-sec-name{font-weight:700;margin-right:6px}
 .seo-sec-pct{font-size:10px;font-variant-numeric:tabular-nums;font-weight:700}
 
-/* ── Folder Nav Bar ── */
-#folderNav{background:#fff;border-bottom:1.5px solid #e5e5e5;padding:0 32px;display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.04)}
-#folderNav::-webkit-scrollbar{display:none}
-.folder-tab{display:inline-flex;align-items:center;gap:7px;padding:11px 16px;font-size:12px;font-weight:700;color:#999;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s;border-top:none;border-left:none;border-right:none;background:none;font-family:inherit;flex-shrink:0}
+/* ── Folder Tabs Row ── */
+#folderTabsRow{scrollbar-width:none}
+#folderTabs::-webkit-scrollbar{display:none}
+.folder-tab{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;font-size:12px;font-weight:700;color:#aaa;cursor:pointer;border:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s;background:none;font-family:inherit;flex-shrink:0;margin-bottom:-1.5px}
 .folder-tab:hover{color:#555}
 .folder-tab.active{color:#111;border-bottom-color:#6366f1}
 .folder-tab-count{font-size:9px;font-weight:800;background:#f0f0f0;color:#888;padding:2px 6px;border-radius:99px;line-height:1}
 .folder-tab.active .folder-tab-count{background:#ede9fe;color:#6366f1}
-.folder-nav-actions{display:flex;align-items:center;gap:6px;margin-left:auto;padding-left:16px;flex-shrink:0}
-.folder-create-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#555;transition:all .15s;white-space:nowrap;font-family:inherit}
-.folder-create-btn:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
-.folder-no-folders{padding:12px 0;font-size:11px;color:#ccc;font-style:italic}
 
 /* ── History Modal (shared base) ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -355,14 +351,6 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 </style>
 </head>
 <body>
-<!-- ── Folder Nav Bar ── -->
-<div id="folderNav" class="no-print">
-  <div id="folderTabs" style="display:flex;align-items:center;gap:0"></div>
-  <div class="folder-nav-actions">
-    <button class="folder-create-btn" onclick="openCreateFolderModal()">+ New Folder</button>
-  </div>
-</div>
-
 <!-- ── Modal: Create Folder ── -->
 <div class="modal-overlay" id="modalCreateFolder">
   <div class="modal-box">
@@ -496,6 +484,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
     <div class="btn-row no-print">
       <button class="btn btn-ghost btn-sm" onclick="fixAllFillers()">⚡ Fix Fillers</button>
       <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ AI Audit</button>
+      <button class="btn btn-ghost btn-sm" onclick="openCreateFolderModal()">📁 New Folder</button>
       <button class="btn btn-teal btn-sm" onclick="downloadHTML()">
         <svg width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
         HTML
@@ -505,6 +494,11 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
         PDF
       </button>
     </div>
+  </div>
+
+  <!-- Folder tabs row — only shown when folders exist -->
+  <div id="folderTabsRow" class="no-print" style="display:none;margin-bottom:20px;margin-top:-16px;border-bottom:1.5px solid #e5e5e5;padding-bottom:0">
+    <div id="folderTabs" style="display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none"></div>
   </div>
 
   <div class="main-grid">
@@ -1310,10 +1304,13 @@ function genId(){
 // ── Folder Nav ────────────────────────────────────────────────────────────────
 function renderFolderNav(){
   const tabs = document.getElementById('folderTabs');
+  const row  = document.getElementById('folderTabsRow');
   if(!folders.length){
-    tabs.innerHTML = '<span class="folder-no-folders" style="padding:0 4px">No folders yet</span>';
+    row.style.display = 'none';
+    tabs.innerHTML = '';
     return;
   }
+  row.style.display = 'block';
   tabs.innerHTML = folders.map(f=>{
     const isActive = f.id === activeFolderId;
     return `<button class="folder-tab${isActive?' active':''}" onclick="setActiveFolder('${f.id}')">
