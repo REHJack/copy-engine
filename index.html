@@ -265,6 +265,20 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .seo-sec-name{font-weight:700;margin-right:6px}
 .seo-sec-pct{font-size:10px;font-variant-numeric:tabular-nums;font-weight:700}
 
+/* ── Brand Terms ── */
+.bt-input-row{display:flex;gap:6px;margin-bottom:10px}
+.bt-input{flex:1;padding:7px 10px;border:1.5px solid #e5e5e5;border-radius:7px;font-size:11px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff}
+.bt-input:focus{border-color:#6366f1}
+.bt-input::placeholder{color:#ccc}
+.bt-add-btn{padding:7px 10px;border:1.5px solid #e5e5e5;border-radius:7px;background:#fff;font-size:11px;font-weight:700;color:#6366f1;cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap}
+.bt-add-btn:hover{border-color:#6366f1;background:#f8f7ff}
+.bt-chips{display:flex;flex-wrap:wrap;gap:5px;min-height:0}
+.bt-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 8px 4px 10px;background:#f0f0ff;border:1.5px solid #c7d2fe;border-radius:99px;font-size:11px;font-weight:700;color:#4338ca;line-height:1}
+.bt-chip-x{background:none;border:none;padding:0;margin:0;cursor:pointer;font-size:13px;line-height:1;color:#a5b4fc;transition:color .15s;font-family:inherit}
+.bt-chip-x:hover{color:#4338ca}
+.bt-empty{font-size:11px;color:#ccc;font-style:italic}
+.bt-hint{font-size:10px;color:#9ca3af;margin-top:8px;line-height:1.5}
+
 /* ── Folder Tabs Row ── */
 #folderTabsRow{scrollbar-width:none}
 #folderTabs::-webkit-scrollbar{display:none}
@@ -694,6 +708,21 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
         <div id="kwList"><p style="font-size:11px;color:#ccc;font-style:italic">No keywords yet.</p></div>
       </div>
 
+      <!-- ── Brand Terms card ── -->
+      <div class="card no-print">
+        <div class="card-title">Brand Terms</div>
+        <p style="font-size:11px;color:#888;line-height:1.5;margin:0 0 10px">Add brand names or product terms that should never be flagged as filler, clichés, or repetition.</p>
+        <div class="bt-input-row">
+          <input class="bt-input" id="btInput" type="text" placeholder="e.g. Paramount, CoPilot…" maxlength="60"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addBrandTerm();}">
+          <button class="bt-add-btn" onclick="addBrandTerm()">Add</button>
+        </div>
+        <div class="bt-chips" id="btChips">
+          <span class="bt-empty" id="btEmpty">No brand terms added.</span>
+        </div>
+        <p class="bt-hint" id="btHint" style="display:none">⚠️ Session only — brand terms reset when you close the tab.</p>
+      </div>
+
       <div class="history-panel no-print">
         <div class="history-panel-head">
           <span class="history-panel-title">Project History</span>
@@ -870,7 +899,7 @@ function analyse(){
   const wsMap={};
   lastSentences.forEach((s,si)=>{
     s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
-      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w)&&!isBrandTerm(w))
       .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
   });
   const repeatSet=new Set(); let repeatCount=0;
@@ -902,16 +931,19 @@ function analyse(){
     const ann=[];
 
     if(modes.filler) FILLERS.forEach(w=>{
+      if(isBrandTerm(w)) return;
       const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
       while((m=re.exec(sent))!==null){ fCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'fh',tip:null}); }
     });
 
     if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
+      if(isBrandTerm(phrase)) return;
       const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi'); let m;
       while((m=re.exec(sent))!==null){ cCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ch',tip}); }
     });
 
     if(modes.repeat) repeatSet.forEach(w=>{
+      if(isBrandTerm(w)) return;
       const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
       while((m=re.exec(sent))!==null) ann.push({start:m.index,end:m.index+m[0].length,cls:'rh',tip:'Repeated nearby — try a synonym'});
     });
@@ -1039,6 +1071,67 @@ function detectCTA(text){
 
 // Secondary keyword state
 let secKWs = []; // array of strings
+
+// ── Brand Terms (session-only — never persisted) ────────────────────────────
+let brandTerms = []; // array of lowercase strings
+
+function addBrandTerm(){
+  const inp = document.getElementById('btInput');
+  const val = inp.value.trim();
+  if(!val) return;
+  const lc = val.toLowerCase();
+  if(brandTerms.includes(lc)){ showToast('⚠️ Already in brand terms'); inp.value=''; return; }
+  if(brandTerms.length >= 20){ showToast('⚠️ Maximum 20 brand terms'); return; }
+  brandTerms.push(lc);
+  inp.value = '';
+  renderBrandTerms();
+  analyse();
+}
+
+function removeBrandTerm(i){
+  brandTerms.splice(i, 1);
+  renderBrandTerms();
+  analyse();
+}
+
+function renderBrandTerms(){
+  const chips  = document.getElementById('btChips');
+  const empty  = document.getElementById('btEmpty');
+  const hint   = document.getElementById('btHint');
+  if(!chips) return;
+
+  // Remove existing chips (but keep the empty span in DOM)
+  Array.from(chips.querySelectorAll('.bt-chip')).forEach(el => el.remove());
+
+  if(brandTerms.length === 0){
+    empty.style.display = '';
+    hint.style.display  = 'none';
+  } else {
+    empty.style.display = 'none';
+    hint.style.display  = '';
+    brandTerms.forEach((term, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'bt-chip';
+      chip.innerHTML = `${esc(term)}<button class="bt-chip-x" onclick="removeBrandTerm(${i})" title="Remove">×</button>`;
+      chips.appendChild(chip);
+    });
+  }
+}
+
+// Returns true if a word/phrase should be skipped because it matches a brand term
+function isBrandTerm(str){
+  if(!brandTerms.length) return false;
+  const lc = str.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
+  return brandTerms.some(t => {
+    // Exact match
+    if(lc === t) return true;
+    // Multi-word brand term contained within a phrase (e.g. "deep dive" in cliche list)
+    if(t.includes(' ') && lc.includes(t)) return true;
+    return false;
+  });
+}
+
+
 
 function addSecondaryKW(){
   if(secKWs.length>=5){ showToast('⚠️ Maximum 5 secondary keywords'); return; }
@@ -1226,7 +1319,7 @@ function updateKW(words, text){
 
   // — Top keywords found —
   const freq={};
-  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c))freq[c]=(freq[c]||0)+1;});
+  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c)&&!isBrandTerm(c))freq[c]=(freq[c]||0)+1;});
   const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5);
   document.getElementById('kwList').innerHTML=sorted.length?sorted.map(([word,cnt])=>{
     const p=cnt/total*100,ps=p.toFixed(1)+'%';
@@ -1287,13 +1380,13 @@ function calcScore(text){
   const words=text.trim().split(/\s+/).filter(w=>w.length>0); if(!words.length) return 0;
   const pr=new RegExp(PASSIVE_RE.source,'gi');
   let p=(text.match(pr)||[]).length,f=0;
-  FILLERS.forEach(w=>{f+=(text.match(new RegExp(`\\b${w}\\b`,'gi'))||[]).length;});
+  FILLERS.forEach(w=>{if(isBrandTerm(w)) return; f+=(text.match(new RegExp(`\\b${w}\\b`,'gi'))||[]).length;});
   return Math.max(0,100-Math.round(((p*5)+(f*2))/(words.length)*100));
 }
 
 function fixAllFillers(){
   let t=ta.value; if(!t.trim()) return;
-  FILLERS.forEach(w=>{t=t.replace(new RegExp(`\\s?\\b${w}\\b\\s?`,'gi'),' ');});
+  FILLERS.forEach(w=>{if(isBrandTerm(w)) return; t=t.replace(new RegExp(`\\s?\\b${w}\\b\\s?`,'gi'),' ');});
   ta.value=t.replace(/ {2,}/g,' ').replace(/ ([.,!?;:])/g,'$1').trim();
   onEditorInput();
 }
@@ -1761,6 +1854,7 @@ function runAIAudit(){
 
   // ── Filler words ──
   FILLERS.forEach(w=>{
+    if(isBrandTerm(w)) return;
     const re=new RegExp(`\\b${w}\\b`,'gi'); let fm;
     while((fm=re.exec(text))!==null){
       const phrase=fm[0];
@@ -1778,6 +1872,7 @@ function runAIAudit(){
 
   // ── Clichés ──
   Object.entries(CLICHES).forEach(([clichePhrase,tip])=>{
+    if(isBrandTerm(clichePhrase)) return;
     const re=new RegExp(`\\b${clichePhrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi'); let cm;
     while((cm=re.exec(text))!==null){
       const phrase=cm[0];
@@ -1818,7 +1913,7 @@ function runAIAudit(){
   const wsMap2={};
   lastSentences.forEach((s,si)=>{
     s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
-      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w)&&!isBrandTerm(w))
       .forEach(w=>{ if(!wsMap2[w]) wsMap2[w]=[]; wsMap2[w].push({si,sent:s}); });
   });
   Object.entries(wsMap2).forEach(([w,hits])=>{
