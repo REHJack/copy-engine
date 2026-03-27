@@ -380,6 +380,59 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .sp-feat-icon{font-size:14px;margin-bottom:4px}
 .sp-feat-label{font-size:11px;font-weight:700;color:#333}
 .sp-feat-sub{font-size:10px;color:#aaa;margin-top:1px}
+
+/* ── How it works button on splash ── */
+.sp-guide-card{background:#fff;border:1.5px solid #e0e0e0;border-radius:14px;padding:16px 26px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.sp-guide-label{font-size:12px;color:#999;font-weight:600}
+.sp-guide-btn{background:#fff;color:#6366f1;font-size:12px;font-weight:800;padding:9px 18px;border-radius:10px;border:1.5px solid #c7d2fe;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:all .15s;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+.sp-guide-btn:hover{background:#f8f7ff;border-color:#6366f1}
+
+/* ── Feature Guide page ── */
+#guideView{position:fixed;inset:0;background:#f5f5f7;z-index:9998;display:none;overflow-y:auto}
+#guideView.open{display:block}
+.guide-page{max-width:780px;margin:0 auto;padding:48px 32px 80px}
+.guide-back-bar{display:flex;align-items:center;gap:12px;margin-bottom:40px}
+.guide-back-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 16px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#555;transition:all .15s;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.guide-back-btn:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
+.guide-brand{display:flex;align-items:center;gap:10px}
+.guide-brand-name{font-size:15px;font-weight:900;letter-spacing:-.3px;color:#111}
+.guide-brand-ver{font-size:10px;font-weight:800;color:#6366f1;background:#ede9fe;padding:3px 9px;border-radius:99px}
+.guide-header{margin-bottom:48px}
+.guide-header-title{font-size:28px;font-weight:900;letter-spacing:-.5px;color:#111;margin-bottom:8px}
+.guide-header-sub{font-size:14px;color:#888;line-height:1.6;max-width:560px}
+.guide-toc{background:#fff;border:1.5px solid #e5e5e5;border-radius:14px;padding:22px 26px;margin-bottom:48px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.guide-toc-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:14px}
+.guide-toc-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+@media(max-width:600px){.guide-toc-grid{grid-template-columns:1fr}}
+.guide-toc-item{font-size:12px;color:#6366f1;font-weight:600;cursor:pointer;padding:3px 0;text-decoration:none;display:block;transition:color .15s}
+.guide-toc-item:hover{color:#4f46e5}
+.guide-section{margin-bottom:48px;scroll-margin-top:24px}
+.guide-section-anchor{display:block;height:0;visibility:hidden}
+.guide-section-title{font-size:18px;font-weight:900;color:#111;letter-spacing:-.3px;margin-bottom:4px;display:flex;align-items:center;gap:10px}
+.guide-section-divider{border:none;border-top:1.5px solid #e5e5e5;margin:16px 0 20px}
+.guide-body{font-size:13px;color:#444;line-height:1.75}
+.guide-body p{margin-bottom:12px}
+.guide-body p:last-child{margin-bottom:0}
+.guide-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#6366f1;background:#ede9fe;padding:3px 10px;border-radius:99px;display:inline-block;margin-bottom:14px}
+.guide-sub-heading{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:20px 0 8px}
+.guide-callout{background:#f8f7ff;border:1.5px solid #c7d2fe;border-radius:10px;padding:14px 16px;font-size:12px;color:#3730a3;line-height:1.65;margin:14px 0}
+.guide-callout strong{color:#312e81}
+.guide-tip{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px 16px;font-size:12px;color:#166534;line-height:1.65;margin:14px 0}
+.guide-tip strong{color:#14532d}
+.guide-warn{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:10px;padding:14px 16px;font-size:12px;color:#9a3412;line-height:1.65;margin:14px 0}
+.guide-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px}
+.guide-table th{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb;text-align:left;padding:8px 12px;border-bottom:1.5px solid #e5e5e5;background:#fafafa}
+.guide-table td{padding:9px 12px;border-bottom:1px solid #f0f0f0;color:#444;line-height:1.55;vertical-align:top}
+.guide-table tr:last-child td{border-bottom:none}
+.guide-table tbody tr:hover td{background:#fafafa}
+.guide-dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.guide-formula{background:#f5f5f7;border:1.5px solid #e5e5e5;border-radius:9px;padding:14px 18px;font-size:12px;font-family:monospace;color:#111;margin:14px 0;line-height:1.6}
+.guide-highlight-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f5f5f5}
+.guide-highlight-row:last-child{border-bottom:none}
+.guide-highlight-dot{width:28px;height:28px;border-radius:7px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;margin-top:1px}
+.guide-highlight-content{}
+.guide-highlight-name{font-size:12px;font-weight:800;color:#111;margin-bottom:2px}
+.guide-highlight-desc{font-size:11px;color:#888;line-height:1.5}
 </style>
 </head>
 <body>
@@ -488,6 +541,10 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
       <div class="sp-cta-card">
         <span class="sp-cta-label">Ready to analyse your copy?</span>
         <button class="sp-cta-btn" onclick="dismissSplash()">Start now <span class="sp-arrow">→</span></button>
+      </div>
+      <div class="sp-guide-card">
+        <span class="sp-guide-label">New to the tool?</span>
+        <button class="sp-guide-btn" onclick="openGuide()">ℹ️ How it works</button>
       </div>
     </div>
     <div class="sp-info-card">
@@ -2051,6 +2108,352 @@ function downloadPDF(){
 }
 
 window.addEventListener('DOMContentLoaded', persistLoad);
+
+function openGuide(){
+  document.getElementById('splash').style.display='none';
+  document.getElementById('guideView').classList.add('open');
+  document.getElementById('guideView').scrollTop = 0;
+}
+function closeGuide(){
+  document.getElementById('guideView').classList.remove('open');
+  document.getElementById('splash').style.display='flex';
+}
 </script>
+
+<!-- Feature Guide View -->
+<div id="guideView">
+  <div class="guide-page">
+
+    <div class="guide-back-bar">
+      <button class="guide-back-btn" onclick="closeGuide()">&#8592; Back to Copy Engine</button>
+      <div class="guide-brand">
+        <span class="guide-brand-name">Copy Engine</span>
+        <span class="guide-brand-ver">v6.4</span>
+      </div>
+    </div>
+
+    <div class="guide-header">
+      <div class="guide-header-title">How it works</div>
+      <div class="guide-header-sub">A complete guide to every feature in Copy Engine &mdash; what it does, how it is calculated, and how to get the most from it.</div>
+    </div>
+
+    <div class="guide-toc">
+      <div class="guide-toc-title">Contents</div>
+      <div class="guide-toc-grid">
+        <a class="guide-toc-item" onclick="document.getElementById('g-editor').scrollIntoView({behavior:'smooth'})">The Editor and Highlight Toggles</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-score').scrollIntoView({behavior:'smooth'})">Active Voice Score</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-passive').scrollIntoView({behavior:'smooth'})">&#128308; Passive Voice</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-filler').scrollIntoView({behavior:'smooth'})">&#128993; Filler Words</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-long').scrollIntoView({behavior:'smooth'})">&#128992; Long Sentences</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-cliche').scrollIntoView({behavior:'smooth'})">&#128995; Clich&eacute;s</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-repeat').scrollIntoView({behavior:'smooth'})">&#128309; Repetition</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-variety').scrollIntoView({behavior:'smooth'})">&#129392; Sentence Variety</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-read').scrollIntoView({behavior:'smooth'})">Readability Score</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-audience').scrollIntoView({behavior:'smooth'})">Audience Matcher</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-tone').scrollIntoView({behavior:'smooth'})">Tone Detection</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-seo').scrollIntoView({behavior:'smooth'})">SEO Keywords</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-brand').scrollIntoView({behavior:'smooth'})">Brand Terms</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-cta').scrollIntoView({behavior:'smooth'})">CTA Detection</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-diff').scrollIntoView({behavior:'smooth'})">Version Diff</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-audit').scrollIntoView({behavior:'smooth'})">Copy Audit</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-drafts').scrollIntoView({behavior:'smooth'})">Saved Drafts and Folders</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-export').scrollIntoView({behavior:'smooth'})">Export: PDF and HTML</a>
+      </div>
+    </div>
+
+    <div class="guide-section" id="g-editor">
+      <div class="guide-section-title">The Editor and Highlight Toggles</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Paste any copy into the editor and Copy Engine analyses it immediately. No button to press &mdash; the tool works in real time as you type or paste.</p>
+        <p>Six types of issue are highlighted using colour coding. Use the toggle pills above the editor to switch any highlight type on or off. This is useful when you want to focus on one problem at a time without visual noise from the others.</p>
+      </div>
+      <table class="guide-table">
+        <thead><tr><th>Colour</th><th>What it flags</th></tr></thead>
+        <tbody>
+          <tr><td><span class="guide-dot" style="background:#fee2e2;box-shadow:0 2px 0 #ef4444"></span>Red</td><td>Passive voice</td></tr>
+          <tr><td><span class="guide-dot" style="background:#fef9c3;box-shadow:0 2px 0 #eab308"></span>Yellow</td><td>Filler words</td></tr>
+          <tr><td><span class="guide-dot" style="background:#ffedd5;box-shadow:0 2px 0 #f97316"></span>Orange</td><td>Long sentences (30+ words)</td></tr>
+          <tr><td><span class="guide-dot" style="background:#f3e8ff;box-shadow:0 2px 0 #a855f7"></span>Purple</td><td>Clich&eacute;s</td></tr>
+          <tr><td><span class="guide-dot" style="background:#dbeafe;box-shadow:0 2px 0 #3b82f6"></span>Blue</td><td>Repeated words</td></tr>
+          <tr><td><span class="guide-dot" style="background:#fce7f3;box-shadow:0 2px 0 #ec4899"></span>Pink</td><td>Sentence variety issues</td></tr>
+        </tbody>
+      </table>
+      <div class="guide-body"><p>Click any highlighted word or phrase to see a tooltip explaining what the issue is and how to fix it.</p></div>
+    </div>
+
+    <div class="guide-section" id="g-score">
+      <div class="guide-section-title">Active Voice Score</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>A percentage score from 0 to 100% that measures how direct and active your writing is. The higher the score, the cleaner the copy.</p>
+      </div>
+      <div class="guide-sub-heading">How it is calculated</div>
+      <div class="guide-body">
+        <p>The tool counts passive voice constructions and filler words across your text, then applies a weighted penalty based on how frequently they appear relative to your total word count. Passive phrases carry a heavier penalty than filler words, because passive voice has a greater impact on clarity and reader engagement.</p>
+      </div>
+      <table class="guide-table">
+        <thead><tr><th>Score</th><th>Rating</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>Above 85%</td><td>Excellent</td><td>Lean and direct &mdash; your copy is working hard</td></tr>
+          <tr><td>65 to 85%</td><td>Good</td><td>A few fixes will sharpen it further</td></tr>
+          <tr><td>Below 65%</td><td>Needs work</td><td>Too much passive voice or filler dragging it down</td></tr>
+        </tbody>
+      </table>
+      <div class="guide-callout"><strong>Why it matters:</strong> Active copy is easier to read, more persuasive, and feels more confident. "We reduced costs by 30%" lands harder than "Costs were reduced by 30%."</div>
+    </div>
+
+    <div class="guide-section" id="g-passive">
+      <div class="guide-section-title">&#128308; Passive Voice</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Passive voice occurs when the subject of a sentence receives the action rather than performing it. <em>"The report was written by Sarah"</em> is passive. <em>"Sarah wrote the report"</em> is active.</p>
+      </div>
+      <div class="guide-sub-heading">How it is detected</div>
+      <div class="guide-body">
+        <p>Copy Engine uses pattern matching to identify common passive constructions &mdash; forms of "to be" (is, was, were, been, being) followed by a past participle such as written, approved, or delivered.</p>
+      </div>
+      <div class="guide-sub-heading">How to fix it</div>
+      <div class="guide-body">
+        <p>The tooltip on each flagged phrase will usually suggest an active alternative. The general fix is to ask: who is doing this? Then put them at the front of the sentence.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Passive voice buries the subject, weakens the verb, and makes copy feel corporate and distant. Marketing copy almost always performs better when it is direct and action-led.</div>
+    </div>
+
+    <div class="guide-section" id="g-filler">
+      <div class="guide-section-title">&#128993; Filler Words</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Filler words add length but not meaning. Words like <em>just, really, very, quite, essentially, actually, basically</em> and similar weaken the sentences they appear in.</p>
+      </div>
+      <div class="guide-sub-heading">How it is detected</div>
+      <div class="guide-body">
+        <p>The tool matches against a curated list of filler words. Any match in your copy is flagged. Brand Terms you have added are exempt from this check.</p>
+      </div>
+      <div class="guide-tip"><strong>Quick fix:</strong> The Fix Fillers button in the top bar removes all detected filler words in one click. Use it as a starting point, then review &mdash; occasionally context matters and a filler word is genuinely needed.</div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Every unnecessary word is a moment where a reader can disengage. Tighter copy converts better.</div>
+    </div>
+
+    <div class="guide-section" id="g-long">
+      <div class="guide-section-title">&#128992; Long Sentences</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Any sentence of 30 words or more is flagged in orange.</p>
+      </div>
+      <div class="guide-sub-heading">How it is detected</div>
+      <div class="guide-body">
+        <p>The tool splits your copy into individual sentences and counts the words in each. Sentences at or above the 30-word threshold are highlighted.</p>
+      </div>
+      <div class="guide-sub-heading">How to fix it</div>
+      <div class="guide-body">
+        <p>Look for conjunctions such as <em>and, but, because, which, that</em> &mdash; these are often natural split points. One idea per sentence is a reliable rule of thumb.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Long sentences are harder to process, especially on screen. Web readers scan rather than read. Short sentences hold attention better and improve comprehension across all audiences.</div>
+    </div>
+
+    <div class="guide-section" id="g-cliche">
+      <div class="guide-section-title">&#128995; Clich&eacute;s</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Overused phrases that have lost their impact &mdash; <em>hit the ground running, game-changer, move the needle, best-in-class</em> and so on.</p>
+      </div>
+      <div class="guide-sub-heading">How it is detected</div>
+      <div class="guide-body">
+        <p>Matched against a library of known marketing clich&eacute;s. The tooltip on each flagged phrase suggests a more specific or literal alternative.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Clich&eacute;s signal lazy writing and erode trust. When a phrase has been used thousands of times, it no longer creates any impression on the reader. Specificity beats vague superlatives every time.</div>
+    </div>
+
+    <div class="guide-section" id="g-repeat">
+      <div class="guide-section-title">&#128309; Repetition</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Words used multiple times in close proximity, creating a noticeable pattern that disrupts reading flow.</p>
+      </div>
+      <div class="guide-sub-heading">How it is detected</div>
+      <div class="guide-body">
+        <p>The tool uses character-proximity detection, looking for the same word appearing within a defined window of surrounding text. Common short words and stop words are excluded automatically. Words added as Brand Terms are also excluded. Topic words &mdash; those spread broadly and consistently throughout the copy &mdash; are distinguished from genuine repetition clusters, so the tool flags localised overuse rather than penalising words that appear throughout a longer piece by design.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Repeated words make copy feel unpolished and narrow. Varied vocabulary signals craft and keeps readers engaged.</div>
+    </div>
+
+    <div class="guide-section" id="g-variety">
+      <div class="guide-section-title">&#129392; Sentence Variety</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Flags groups of consecutive sentences that start with the same word &mdash; for example, three sentences in a row beginning with <em>"We"</em>.</p>
+      </div>
+      <div class="guide-sub-heading">How it is detected</div>
+      <div class="guide-body">
+        <p>The tool checks the opening word of each sentence and identifies runs of two or more sentences with identical starts. These are highlighted pink in the editor. The sidebar panel shows a breakdown of your sentence length distribution &mdash; short, medium, and long &mdash; so you can see whether your copy has a healthy rhythm or leans too heavily in one direction.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Copy where every sentence starts the same way creates a monotonous rhythm that loses readers. A mix of sentence structures and openings &mdash; and a balance of short and long sentences &mdash; gives copy energy and flow. A piece composed entirely of short sentences can feel choppy; entirely long ones can feel exhausting.</div>
+    </div>
+
+    <div class="guide-section" id="g-read">
+      <div class="guide-section-title">Readability Score</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>A plain-English label describing how easy or difficult your copy is to read, ranging from <em>Very Easy</em> through to <em>Very Difficult</em>.</p>
+      </div>
+      <div class="guide-sub-heading">How it is calculated</div>
+      <div class="guide-body">
+        <p>Using the Flesch Reading Ease Score (FRES) formula:</p>
+      </div>
+      <div class="guide-formula">FRES = 206.835 &minus; (1.015 &times; average sentence length) &minus; (84.6 &times; average syllables per word)</div>
+      <div class="guide-body">
+        <p>The higher the score, the easier the read. The formula weights syllable complexity more heavily than sentence length, because vocabulary complexity is a stronger predictor of reading difficulty than sentence structure alone.</p>
+      </div>
+      <table class="guide-table">
+        <thead><tr><th>Score</th><th>Label</th><th>Typical use</th></tr></thead>
+        <tbody>
+          <tr><td>80 to 100</td><td>Very Easy</td><td>Broad consumer campaigns</td></tr>
+          <tr><td>70 to 79</td><td>Easy</td><td>Email marketing, landing pages</td></tr>
+          <tr><td>60 to 69</td><td>Fairly Easy</td><td>Blogs, social copy</td></tr>
+          <tr><td>50 to 59</td><td>Standard</td><td>General B2B content</td></tr>
+          <tr><td>40 to 49</td><td>Fairly Difficult</td><td>Professional and trade content</td></tr>
+          <tr><td>30 to 39</td><td>Difficult</td><td>Technical or academic audiences</td></tr>
+          <tr><td>Below 30</td><td>Very Difficult</td><td>Specialist and legal copy</td></tr>
+        </tbody>
+      </table>
+      <div class="guide-callout"><strong>Why it matters:</strong> Matching your readability level to your audience is one of the most overlooked factors in copy performance. Consumer-facing copy that scores in the Difficult range will lose readers before they convert.</div>
+    </div>
+
+    <div class="guide-section" id="g-audience">
+      <div class="guide-section-title">Audience Matcher</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Scores your copy against a chosen audience profile &mdash; General Public, Consumer, Professional, C-Suite, Technical, or Academic.</p>
+      </div>
+      <div class="guide-sub-heading">How it is calculated</div>
+      <div class="guide-body">
+        <p>Three factors are combined into a single score out of 100:</p>
+      </div>
+      <table class="guide-table">
+        <thead><tr><th>Factor</th><th>Weight</th><th>What it measures</th></tr></thead>
+        <tbody>
+          <tr><td>Readability</td><td>40 points</td><td>How well your Flesch score aligns with the target audience's expected reading level</td></tr>
+          <tr><td>Sentence length</td><td>30 points</td><td>How close your average sentence length is to the ideal for that audience</td></tr>
+          <tr><td>Issue rate</td><td>30 points</td><td>How few passive voice and filler word problems your copy contains</td></tr>
+        </tbody>
+      </table>
+      <div class="guide-callout"><strong>Why it matters:</strong> A piece of copy that scores well overall might still be wrong for the audience you are writing for. A C-Suite piece should read differently to a consumer email. This score tells you whether the register is right, not just whether the copy is clean.</div>
+    </div>
+
+    <div class="guide-section" id="g-tone">
+      <div class="guide-section-title">Tone Detection</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Identifies the dominant tone of your copy from a set of profiles: Conversational, Formal, Promotional, Technical, or Neutral.</p>
+      </div>
+      <div class="guide-sub-heading">How it is detected</div>
+      <div class="guide-body">
+        <p>The tool analyses vocabulary patterns. Contractions, short sentences, and informal words suggest a Conversational tone. Domain-specific terminology suggests Technical. Words like <em>offer, save, exclusive</em> suggest Promotional, and so on. The profile with the strongest signal match is shown.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Tone mismatch is one of the most common issues in marketing copy. A formal tone in a consumer campaign, or a promotional tone in a technical white paper, undermines credibility.</div>
+    </div>
+
+    <div class="guide-section" id="g-seo">
+      <div class="guide-section-title">SEO Keywords</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>A suite of tools for checking how well your copy is optimised for search. The panel covers primary keyword density and placement, secondary keyword coverage, and a breakdown of the most frequently used meaningful words in your copy.</p>
+      </div>
+      <div class="guide-sub-heading">Primary Keyword</div>
+      <div class="guide-body">
+        <p>Enter your main target keyword. The tool shows density (how often it appears as a percentage of total words), placement (whether it appears within the first 100 words &mdash; a strong SEO signal), and a combined Focus Score.</p>
+        <p>Density targets adjust automatically based on your content type, because the right keyword density for a 200-word ad is different to a 2,000-word article. Short-form copy calls for a higher percentage; long-form copy requires a lower one to avoid appearing repetitive.</p>
+      </div>
+      <table class="guide-table">
+        <thead><tr><th>Status</th><th>What it means</th></tr></thead>
+        <tbody>
+          <tr><td>Too Low</td><td>Not enough mentions &mdash; search engines may not associate the page with this term</td></tr>
+          <tr><td>Optimal</td><td>In the recommended range for your content type</td></tr>
+          <tr><td>Too High</td><td>Overuse detected &mdash; risks appearing as keyword stuffing</td></tr>
+        </tbody>
+      </table>
+      <div class="guide-sub-heading">Secondary Keywords</div>
+      <div class="guide-body">
+        <p>Add up to 5 supporting keywords. The tool checks whether each one appears in your copy and calculates a Depth Score &mdash; how many of your secondary keywords are present and accounted for.</p>
+      </div>
+      <div class="guide-callout"><strong>Why secondary keywords matter:</strong> Search engines reward topical coverage, not just primary keyword repetition. Secondary keywords demonstrate that your content covers the subject comprehensively.</div>
+      <div class="guide-sub-heading">Top Keywords Found</div>
+      <div class="guide-body">
+        <p>Automatically surfaces the five most frequently used meaningful words in your copy. Useful for checking whether your copy is actually about what you think it is about &mdash; and for spotting unintentional keyword overuse.</p>
+      </div>
+    </div>
+
+    <div class="guide-section" id="g-brand">
+      <div class="guide-section-title">Brand Terms</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>A session-based list of words and phrases that should never be flagged as filler words, clich&eacute;s, or repetition. Add any brand names, product names, or proprietary terms and the tool will ignore them when scanning for issues.</p>
+      </div>
+      <div class="guide-warn"><strong>Important:</strong> Brand Terms are not saved between sessions, because the tool is used across multiple clients and projects. You will need to re-add them each time you open the tool.</div>
+    </div>
+
+    <div class="guide-section" id="g-cta">
+      <div class="guide-section-title">CTA Detection</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Detects whether your copy contains a call to action, matched against a library of common CTA phrases such as <em>get started, book a demo, sign up, find out more, download</em> and so on.</p>
+        <p>The tool indicates whether you have one or two CTAs. A single CTA is fine. Multiple can reinforce, but too many can dilute the message and confuse the reader about what to do next.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Copy without a CTA is copy without a purpose. Even if the writing is strong, a missing or weak call to action leaves readers with nowhere to go.</div>
+    </div>
+
+    <div class="guide-section" id="g-diff">
+      <div class="guide-section-title">Version Diff</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>A comparison tool that shows exactly what changed between two versions of your copy. Paste an earlier version into the Version Diff panel, then click Compare Versions.</p>
+        <p>Added words are highlighted in green and removed words in red. A score delta shows whether your edits improved or reduced the Active Voice Score, so you can see at a glance whether the revision moved in the right direction.</p>
+      </div>
+      <div class="guide-callout"><strong>Why it matters:</strong> Editing is iterative. The diff tool makes it easy to review changes without losing track of what you changed and why.</div>
+    </div>
+
+    <div class="guide-section" id="g-audit">
+      <div class="guide-section-title">Copy Audit</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>A consolidated view of all detected issues in your copy &mdash; passive voice, fillers, clich&eacute;s, long sentences, and repetition &mdash; listed as individual issue cards. Each card shows the problematic phrase, an explanation of why it is an issue, a specific fix suggestion, and a <em>Show me</em> button that jumps the editor directly to that location.</p>
+        <p>Click the Audit button in the top bar to open the panel. It slides out below the editor and can be closed at any time.</p>
+      </div>
+      <div class="guide-tip"><strong>Note:</strong> The Copy Audit runs entirely in your browser. No internet connection is required and no data is sent anywhere.</div>
+    </div>
+
+    <div class="guide-section" id="g-drafts">
+      <div class="guide-section-title">Saved Drafts and Folders</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>A history system for saving, organising, and retrieving previous versions of your copy. Create folders to organise work by client or project, then save entries into them. Each saved entry records the copy, score, date, and time. Click any entry to reload it into the editor.</p>
+      </div>
+      <div class="guide-sub-heading">How to use it</div>
+      <div class="guide-body">
+        <p>Click New Folder in the top bar to create a folder. Use the Save button to save the current copy into a folder. Switch between folders using the tabs that appear below the top bar.</p>
+      </div>
+      <div class="guide-warn"><strong>Important:</strong> Drafts are saved in your browser's local storage. They are specific to the browser and device you are using. Clearing your browser data will permanently remove all saved drafts.</div>
+    </div>
+
+    <div class="guide-section" id="g-export">
+      <div class="guide-section-title">Export: PDF and HTML</div>
+      <hr class="guide-section-divider">
+      <div class="guide-sub-heading">PDF Export</div>
+      <div class="guide-body">
+        <p>Produces a formatted copy audit document including the editor content, scores, and sidebar analysis. Useful for sharing with clients or keeping as a record of a piece at a particular point in time.</p>
+      </div>
+      <div class="guide-sub-heading">HTML Export</div>
+      <div class="guide-body">
+        <p>Downloads a standalone copy of the entire tool, including your current copy and settings. The file can be opened in any browser without an internet connection, making it useful for archiving or sharing a working snapshot of the tool.</p>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding-top:16px">
+      <button class="guide-back-btn" onclick="closeGuide()">&#8592; Back to Copy Engine</button>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
