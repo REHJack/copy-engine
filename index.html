@@ -579,12 +579,14 @@ const TONE_AGG  = ['crush','dominate','destroy','kill','smash','win','beat','att
 const TONE_FORM = ['furthermore','therefore','henceforth','pursuant','accordingly','notwithstanding','herein','whereas','thereby','wherein'];
 const TONE_CONV = ['you','your','we','our','hey','awesome','great','love','easy','quick','simple','fun','together','discover','imagine'];
 const AUDIENCES = {
-  general:      {fk:[70,100],passive:3, filler:5, sentLen:18,desc:'Short sentences, plain English, conversational tone.'},
-  consumer:     {fk:[65,100],passive:4, filler:6, sentLen:20,desc:'Benefit-led, punchy, emotionally engaging.'},
-  professional: {fk:[50,75], passive:6, filler:4, sentLen:24,desc:'Clear and structured. Some industry terminology is fine.'},
-  csuite:       {fk:[45,70], passive:5, filler:3, sentLen:22,desc:'Concise, outcome-focused, credible. No fluff.'},
-  technical:    {fk:[30,60], passive:7, filler:3, sentLen:28,desc:'Precise language, detail-rich, jargon acceptable.'},
-  academic:     {fk:[0,45],  passive:15,filler:2, sentLen:35,desc:'Formal, evidence-based, complex structure tolerated.'},
+  // fk: [min, max] Reading Ease range. passive/filler: % tolerance thresholds.
+  // sentLen: target avg words per sentence. Research source: NotebookLM synthesis, March 2026.
+  general:      {fk:[60,75], passive:5,  filler:4,  sentLen:17, desc:'Approachable and conversational. Plain English, no jargon, short sentences.'},
+  consumer:     {fk:[70,85], passive:3,  filler:8,  sentLen:14, desc:'Benefit-led and punchy. Conversational tone — some informal phrasing is a plus.'},
+  professional: {fk:[50,65], passive:10, filler:3,  sentLen:20, desc:'Formal and authoritative. Clear structure, business terminology is fine.'},
+  csuite:       {fk:[40,55], passive:7,  filler:2,  sentLen:17, desc:'Assertive and ROI-focused. Directness signals conviction — no hedging.'},
+  technical:    {fk:[30,50], passive:20, filler:2,  sentLen:22, desc:'Precise and matter-of-fact. High passive voice is expected — focus stays on the process.'},
+  academic:     {fk:[0,35],  passive:25, filler:1,  sentLen:25, desc:'Analytical and formal. Dense prose and passive voice signal rigour.'},
 };
 
 const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true};
@@ -825,9 +827,11 @@ function updateAudience(){
   const fkScore=Math.round(((Math.max(fkMin,Math.min(fkMax,lastFK))-fkMin)/(fkMax-fkMin||1))*40);
   const avgLen=lastSentences.length?lastWords.length/lastSentences.length:0;
   const lenScore=Math.round(Math.max(0,30-(Math.abs(avgLen-prof.sentLen)*3)));
-  const ir=((parseInt(document.getElementById('sPassive').innerText)||0)+(parseInt(document.getElementById('sFiller').innerText)||0))/(lastWords.length||1)*100;
-  const issueScore=Math.round(Math.max(0,30-(Math.max(0,ir-prof.passive)*4)));
-  const total=Math.min(100,fkScore+lenScore+issueScore);
+  const passiveRate=(parseInt(document.getElementById('sPassive').innerText)||0)/(lastWords.length||1)*100;
+  const fillerRate=(parseInt(document.getElementById('sFiller').innerText)||0)/(lastWords.length||1)*100;
+  const passiveScore=Math.round(Math.max(0,15-(Math.max(0,passiveRate-prof.passive)*3)));
+  const fillerScore=Math.round(Math.max(0,15-(Math.max(0,fillerRate-prof.filler)*3)));
+  const total=Math.min(100,fkScore+lenScore+passiveScore+fillerScore);
   const col=total>=75?'#22c55e':total>=50?'#f59e0b':'#ef4444';
   const lbl=total>=75?'Strong Match':total>=50?'Partial Match':'Poor Match';
   const fkLabel=lastFK>=80?'Very Easy':lastFK>=70?'Easy':lastFK>=60?'Fairly Easy':lastFK>=50?'Standard':lastFK>=40?'Fairly Difficult':lastFK>=30?'Difficult':'Very Difficult';
