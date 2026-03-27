@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.3</title>
+<title>Copy Engine v6.4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -265,6 +265,61 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .seo-sec-name{font-weight:700;margin-right:6px}
 .seo-sec-pct{font-size:10px;font-variant-numeric:tabular-nums;font-weight:700}
 
+/* ── Folder Nav Bar ── */
+#folderNav{background:#fff;border-bottom:1.5px solid #e5e5e5;padding:0 32px;display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;z-index:100;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+#folderNav::-webkit-scrollbar{display:none}
+.folder-tab{display:inline-flex;align-items:center;gap:7px;padding:11px 16px;font-size:12px;font-weight:700;color:#999;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s;border-top:none;border-left:none;border-right:none;background:none;font-family:inherit;flex-shrink:0}
+.folder-tab:hover{color:#555}
+.folder-tab.active{color:#111;border-bottom-color:#6366f1}
+.folder-tab-count{font-size:9px;font-weight:800;background:#f0f0f0;color:#888;padding:2px 6px;border-radius:99px;line-height:1}
+.folder-tab.active .folder-tab-count{background:#ede9fe;color:#6366f1}
+.folder-nav-actions{display:flex;align-items:center;gap:6px;margin-left:auto;padding-left:16px;flex-shrink:0}
+.folder-create-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#555;transition:all .15s;white-space:nowrap;font-family:inherit}
+.folder-create-btn:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
+.folder-no-folders{padding:12px 0;font-size:11px;color:#ccc;font-style:italic}
+
+/* ── History Modal (shared base) ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);width:100%;max-width:480px;padding:28px;transform:scale(.96);transition:transform .2s}
+.modal-overlay.open .modal-box{transform:scale(1)}
+.modal-title{font-size:15px;font-weight:900;color:#111;margin-bottom:6px}
+.modal-sub{font-size:12px;color:#999;margin-bottom:20px;line-height:1.5}
+.modal-input{width:100%;padding:10px 13px;border:1.5px solid #e5e5e5;border-radius:9px;font-size:13px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;margin-bottom:14px}
+.modal-input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:4px}
+.modal-btn{padding:9px 18px;border-radius:9px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid transparent;transition:all .15s;font-family:inherit}
+.modal-btn-cancel{background:#fff;border-color:#e0e0e0;color:#555}
+.modal-btn-cancel:hover{border-color:#999;color:#111}
+.modal-btn-confirm{background:#6366f1;color:#fff;border-color:#6366f1}
+.modal-btn-confirm:hover{background:#4f46e5}
+.modal-btn-danger{background:#ef4444;color:#fff;border-color:#ef4444}
+.modal-btn-danger:hover{background:#dc2626}
+.modal-folder-select{width:100%;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;background:#fff;outline:none;cursor:pointer;transition:border-color .2s;margin-bottom:14px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23999' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.modal-folder-select:focus{border-color:#6366f1}
+.modal-meta{font-size:10px;color:#bbb;background:#f8fafc;border-radius:7px;padding:8px 11px;border:1.5px solid #f0f0f0;margin-bottom:14px;display:flex;gap:16px}
+.modal-meta span{display:flex;flex-direction:column;gap:2px}
+.modal-meta strong{font-size:12px;color:#111;font-weight:800}
+
+/* ── History Panel (replaces Saved Drafts) ── */
+.history-panel{background:#fff;border:1.5px solid #e5e5e5;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.history-panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px}
+.history-panel-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#bbb}
+.history-save-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #e0e0e0;background:#fff;color:#555;transition:all .15s;font-family:inherit}
+.history-save-btn:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
+.history-empty{font-size:11px;color:#ccc;font-style:italic;text-align:center;padding:12px 0}
+.history-item{display:flex;justify-content:space-between;align-items:flex-start;background:#fafafa;border:1.5px solid #f0f0f0;border-radius:9px;padding:9px 11px;margin-bottom:6px;cursor:pointer;transition:all .15s;gap:8px}
+.history-item:last-child{margin-bottom:0}
+.history-item:hover{border-color:#6366f1;background:#faf9ff}
+.history-item-left{flex:1;min-width:0}
+.history-item-name{font-size:11px;font-weight:700;color:#111;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-item-meta{font-size:10px;color:#bbb}
+.history-item-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.history-item-score{font-size:12px;font-weight:800;color:#6366f1}
+.history-item-del{background:none;border:none;color:#ddd;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s;font-family:inherit}
+.history-item-del:hover{color:#ef4444}
+.history-no-folder{font-size:11px;color:#ccc;font-style:italic;padding:8px 0}
+
 /* ── Splash screen ── */
 #splash{position:fixed;inset:0;background:#f5f5f7;z-index:9999;display:flex;align-items:center;justify-content:center;padding:32px;transition:opacity .3s ease,transform .3s ease}
 #splash.hiding{opacity:0;transform:scale(.97);pointer-events:none}
@@ -300,13 +355,95 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 </style>
 </head>
 <body>
+<!-- ── Folder Nav Bar ── -->
+<div id="folderNav" class="no-print">
+  <div id="folderTabs" style="display:flex;align-items:center;gap:0"></div>
+  <div class="folder-nav-actions">
+    <button class="folder-create-btn" onclick="openCreateFolderModal()">+ New Folder</button>
+  </div>
+</div>
+
+<!-- ── Modal: Create Folder ── -->
+<div class="modal-overlay" id="modalCreateFolder">
+  <div class="modal-box">
+    <div class="modal-title">New Client Folder</div>
+    <div class="modal-sub">Give this folder a client name. You can create up to 10 folders.</div>
+    <input class="modal-input" id="inputFolderName" type="text" placeholder="e.g. Acme Corp" maxlength="40" oninput="document.getElementById('btnCreateFolder').disabled=!this.value.trim()">
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalCreateFolder')">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" id="btnCreateFolder" onclick="confirmCreateFolder()" disabled>Create Folder</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Save Entry ── -->
+<div class="modal-overlay" id="modalSaveEntry">
+  <div class="modal-box">
+    <div class="modal-title">Save to Folder</div>
+    <div class="modal-sub">Name this entry and choose where to save it.</div>
+    <input class="modal-input" id="inputEntryName" type="text" placeholder="e.g. Homepage Hero v2" maxlength="60" oninput="document.getElementById('btnSaveEntry').disabled=!this.value.trim()">
+    <select class="modal-folder-select" id="selectSaveFolder"></select>
+    <div class="modal-meta" id="saveMeta">
+      <span><strong id="metaScore">—</strong>Active Score</span>
+      <span><strong id="metaDate">—</strong>Date</span>
+      <span><strong id="metaTime">—</strong>Time</span>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalSaveEntry')">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" id="btnSaveEntry" onclick="confirmSaveEntry()" disabled>Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Overwrite Entry ── -->
+<div class="modal-overlay" id="modalOverwriteEntry">
+  <div class="modal-box">
+    <div class="modal-title">Update Entry</div>
+    <div class="modal-sub">You've opened a saved entry. Save changes back to the same entry, or save as a new entry.</div>
+    <div class="modal-meta" id="overwriteMeta">
+      <span><strong id="owMetaScore">—</strong>New Score</span>
+      <span><strong id="owMetaDate">—</strong>Date</span>
+      <span><strong id="owMetaTime">—</strong>Time</span>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalOverwriteEntry')">Cancel</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalOverwriteEntry');openSaveNewModal()">Save as New</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmOverwriteEntry()">Update Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Delete Entry ── -->
+<div class="modal-overlay" id="modalDeleteEntry">
+  <div class="modal-box">
+    <div class="modal-title">Delete Entry?</div>
+    <div class="modal-sub" id="deleteEntryMsg">This entry will be permanently removed.</div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalDeleteEntry')">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDeleteEntry()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Delete Folder ── -->
+<div class="modal-overlay" id="modalDeleteFolder">
+  <div class="modal-box">
+    <div class="modal-title">Delete Folder?</div>
+    <div class="modal-sub" id="deleteFolderMsg">This folder and all its saved entries will be permanently removed.</div>
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalDeleteFolder')">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDeleteFolder()">Delete Folder</button>
+    </div>
+  </div>
+</div>
+
 <div id="splash">
   <div class="splash-inner">
     <div class="splash-left">
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.3</span>
+          <span class="sp-brand-ver">v6.4</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -353,7 +490,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.3</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.4</span></div>
       <div class="brand-sub" id="reportDate"></div>
     </div>
     <div class="btn-row no-print">
@@ -536,12 +673,12 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
         <div id="kwList"><p style="font-size:11px;color:#ccc;font-style:italic">No keywords yet.</p></div>
       </div>
 
-      <div class="card no-print">
-        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-          <span>Saved Drafts</span>
-          <span style="font-size:10px;color:#bbb;font-weight:500;text-transform:none;letter-spacing:0">Click to restore</span>
+      <div class="history-panel no-print">
+        <div class="history-panel-head">
+          <span class="history-panel-title">Project History</span>
+          <button class="history-save-btn" onclick="openSaveModal()">💾 Save</button>
         </div>
-        <div id="draftList" style="margin-top:10px"><p style="font-size:11px;color:#ccc;font-style:italic">No drafts yet.</p></div>
+        <div id="historyList"><p class="history-empty">Create a folder to start saving.</p></div>
       </div>
 
       <div class="tip-card no-print">
@@ -567,7 +704,6 @@ function dismissSplash(){
 
 const ta  = document.getElementById('editor-textarea');
 const ov  = document.getElementById('editor-overlay');
-const STORAGE_KEY = 'copyengine_v63';
 
 const FILLERS = ['just','really','very','basically','actually','literally','simply','totally','perhaps','maybe','quite','slightly','rather','fairly','highly','extremely'];
 const STOP = new Set(['the','and','for','this','that','with','from','your','their','have','been','will','they','what','when','were','which','about','into','more','some','than','then','them','these','those','also','each','much','such','both','even','most','over','after','before','through','between','should','would','could','shall','does','doing','there','here','where','while','within','without','other','another','every','because','since','though','although','however','therefore','thus','hence','indeed','still','again','never','always','often','must','need','make','take','come','goes','like','many','well','back','only','same','good','high','long','great','small','large','next','last','first']);
@@ -579,18 +715,16 @@ const TONE_AGG  = ['crush','dominate','destroy','kill','smash','win','beat','att
 const TONE_FORM = ['furthermore','therefore','henceforth','pursuant','accordingly','notwithstanding','herein','whereas','thereby','wherein'];
 const TONE_CONV = ['you','your','we','our','hey','awesome','great','love','easy','quick','simple','fun','together','discover','imagine'];
 const AUDIENCES = {
-  // fk: [min, max] Reading Ease range. passive/filler: % tolerance thresholds.
-  // sentLen: target avg words per sentence. Research source: NotebookLM synthesis, March 2026.
-  general:      {fk:[60,75], passive:5,  filler:4,  sentLen:17, desc:'Approachable and conversational. Plain English, no jargon, short sentences.'},
-  consumer:     {fk:[70,85], passive:3,  filler:8,  sentLen:14, desc:'Benefit-led and punchy. Conversational tone — some informal phrasing is a plus.'},
-  professional: {fk:[50,65], passive:10, filler:3,  sentLen:20, desc:'Formal and authoritative. Clear structure, business terminology is fine.'},
-  csuite:       {fk:[40,55], passive:7,  filler:2,  sentLen:17, desc:'Assertive and ROI-focused. Directness signals conviction — no hedging.'},
-  technical:    {fk:[30,50], passive:20, filler:2,  sentLen:22, desc:'Precise and matter-of-fact. High passive voice is expected — focus stays on the process.'},
-  academic:     {fk:[0,35],  passive:25, filler:1,  sentLen:25, desc:'Analytical and formal. Dense prose and passive voice signal rigour.'},
+  general:      {fk:[70,100],passive:3, filler:5, sentLen:18,desc:'Short sentences, plain English, conversational tone.'},
+  consumer:     {fk:[65,100],passive:4, filler:6, sentLen:20,desc:'Benefit-led, punchy, emotionally engaging.'},
+  professional: {fk:[50,75], passive:6, filler:4, sentLen:24,desc:'Clear and structured. Some industry terminology is fine.'},
+  csuite:       {fk:[45,70], passive:5, filler:3, sentLen:22,desc:'Concise, outcome-focused, credible. No fluff.'},
+  technical:    {fk:[30,60], passive:7, filler:3, sentLen:28,desc:'Precise language, detail-rich, jargon acceptable.'},
+  academic:     {fk:[0,45],  passive:15,filler:2, sentLen:35,desc:'Formal, evidence-based, complex structure tolerated.'},
 };
 
 const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true};
-let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],auditIssues=[];
+let analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],auditIssues=[];
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
@@ -620,7 +754,7 @@ function onEditorInput(){
   heightTimer = setTimeout(syncHeight, 150);
   // Analysis fires on next tick — imperceptible delay, doesn't block keystrokes
   clearTimeout(analyseTimer);
-  analyseTimer = setTimeout(()=>{ analyse(); scheduleSave(); persistSave(); }, 0);
+  analyseTimer = setTimeout(()=>{ analyse(); persistSave(); }, 0);
 }
 
 ta.addEventListener('input', onEditorInput);
@@ -827,11 +961,9 @@ function updateAudience(){
   const fkScore=Math.round(((Math.max(fkMin,Math.min(fkMax,lastFK))-fkMin)/(fkMax-fkMin||1))*40);
   const avgLen=lastSentences.length?lastWords.length/lastSentences.length:0;
   const lenScore=Math.round(Math.max(0,30-(Math.abs(avgLen-prof.sentLen)*3)));
-  const passiveRate=(parseInt(document.getElementById('sPassive').innerText)||0)/(lastWords.length||1)*100;
-  const fillerRate=(parseInt(document.getElementById('sFiller').innerText)||0)/(lastWords.length||1)*100;
-  const passiveScore=Math.round(Math.max(0,15-(Math.max(0,passiveRate-prof.passive)*3)));
-  const fillerScore=Math.round(Math.max(0,15-(Math.max(0,fillerRate-prof.filler)*3)));
-  const total=Math.min(100,fkScore+lenScore+passiveScore+fillerScore);
+  const ir=((parseInt(document.getElementById('sPassive').innerText)||0)+(parseInt(document.getElementById('sFiller').innerText)||0))/(lastWords.length||1)*100;
+  const issueScore=Math.round(Math.max(0,30-(Math.max(0,ir-prof.passive)*4)));
+  const total=Math.min(100,fkScore+lenScore+issueScore);
   const col=total>=75?'#22c55e':total>=50?'#f59e0b':'#ef4444';
   const lbl=total>=75?'Strong Match':total>=50?'Partial Match':'Poor Match';
   const fkLabel=lastFK>=80?'Very Easy':lastFK>=70?'Easy':lastFK>=60?'Fairly Easy':lastFK>=50?'Standard':lastFK>=40?'Fairly Difficult':lastFK>=30?'Difficult':'Very Difficult';
@@ -1145,42 +1277,322 @@ function fixAllFillers(){
   onEditorInput();
 }
 
-// ── Autosave drafts ───────────────────────────────────────────────────────────
-function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveDraft,3000); }
-function saveDraft(){
-  const text=ta.value.trim(); if(!text) return;
-  drafts.unshift({text,preview:text.slice(0,42).replace(/\n/g,' ')+(text.length>42?'…':''),time:new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),score:lastScore});
-  if(drafts.length>3) drafts.pop();
-  renderDrafts(); persistSave(); showToast('✓ Draft saved');
-}
-function renderDrafts(){
-  document.getElementById('draftList').innerHTML=drafts.length
-    ?drafts.map((d,i)=>`<div class="draft-item" onclick="restoreDraft(${i})"><div><div class="draft-meta">${d.preview}</div><div class="draft-time">Saved at ${d.time}</div></div><div class="draft-score">${d.score}%</div></div>`).join('')
-    :'<p style="font-size:11px;color:#ccc;font-style:italic">No drafts yet.</p>';
-}
-function restoreDraft(i){
-  if(!drafts[i]) return;
-  ta.value=drafts[i].text;
-  onEditorInput(); showToast('↩ Draft restored');
+// ── Folders & History ────────────────────────────────────────────────────────
+const FOLDERS_KEY = 'ce_folders_v1';
+const SESSION_KEY = 'copyengine_v63';
+const MAX_FOLDERS = 10;
+const MAX_SAVES   = 5;
+
+// Runtime state
+let folders = [];        // [{id, name, saves:[{id,name,date,time,score,text,audience,kw,secKWs,diffInput,contentType,brandTerms}]}]
+let activeFolderId = null;
+let openEntryId    = null; // currently loaded entry id (for overwrite)
+let pendingDeleteEntryId   = null;
+let pendingDeleteFolderId  = null;
+
+function foldersLoad(){
+  try{
+    const raw = localStorage.getItem(FOLDERS_KEY);
+    if(raw) folders = JSON.parse(raw);
+  }catch(e){ folders=[]; }
+  renderFolderNav();
+  renderHistory();
 }
 
-// ── Persistence ───────────────────────────────────────────────────────────────
+function foldersSave(){
+  try{ localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders)); }catch(e){}
+}
+
+function genId(){
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+// ── Folder Nav ────────────────────────────────────────────────────────────────
+function renderFolderNav(){
+  const tabs = document.getElementById('folderTabs');
+  if(!folders.length){
+    tabs.innerHTML = '<span class="folder-no-folders" style="padding:0 4px">No folders yet</span>';
+    return;
+  }
+  tabs.innerHTML = folders.map(f=>{
+    const isActive = f.id === activeFolderId;
+    return `<button class="folder-tab${isActive?' active':''}" onclick="setActiveFolder('${f.id}')">
+      ${esc(f.name)}<span class="folder-tab-count">${f.saves.length}/${MAX_SAVES}</span>
+    </button>`;
+  }).join('');
+}
+
+function setActiveFolder(id){
+  activeFolderId = id;
+  renderFolderNav();
+  renderHistory();
+}
+
+// ── History Panel ─────────────────────────────────────────────────────────────
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(!folders.length){
+    el.innerHTML = '<p class="history-empty">Create a folder to start saving.</p>';
+    return;
+  }
+  const folder = folders.find(f=>f.id===activeFolderId);
+  if(!folder){
+    el.innerHTML = '<p class="history-empty">Select a folder above.</p>';
+    return;
+  }
+  if(!folder.saves.length){
+    el.innerHTML = `<p class="history-empty">No saves yet.<br>Hit 💾 Save to add one.</p>
+      <button onclick="openDeleteFolderModal('${folder.id}')" style="margin-top:8px;background:none;border:none;font-size:10px;color:#e0e0e0;cursor:pointer;font-family:inherit;font-weight:700;width:100%;text-align:center;padding:4px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#e0e0e0'">Delete folder</button>`;
+    return;
+  }
+  el.innerHTML = folder.saves.map(s=>{
+    const isOpen = s.id === openEntryId;
+    return `<div class="history-item${isOpen?' active':''}" style="${isOpen?'border-color:#6366f1;background:#faf9ff':''}" onclick="loadEntry('${folder.id}','${s.id}')">
+      <div class="history-item-left">
+        <div class="history-item-name">${esc(s.name)}</div>
+        <div class="history-item-meta">${s.date} · ${s.time}</div>
+      </div>
+      <div class="history-item-right">
+        <span class="history-item-score">${s.score}%</span>
+        <button class="history-item-del" title="Delete entry" onclick="event.stopPropagation();openDeleteEntryModal('${folder.id}','${s.id}','${esc(s.name)}')" >×</button>
+      </div>
+    </div>`;
+  }).join('') +
+  `<button onclick="openDeleteFolderModal('${folder.id}')" style="margin-top:6px;background:none;border:none;font-size:10px;color:#e0e0e0;cursor:pointer;font-family:inherit;font-weight:700;width:100%;text-align:center;padding:4px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#e0e0e0'">Delete folder</button>`;
+}
+
+// ── Load an entry into the editor ─────────────────────────────────────────────
+function loadEntry(folderId, entryId){
+  const folder = folders.find(f=>f.id===folderId);
+  if(!folder) return;
+  const entry = folder.saves.find(s=>s.id===entryId);
+  if(!entry) return;
+
+  ta.value = entry.text || '';
+  if(entry.audience) document.getElementById('audSelect').value = entry.audience;
+  if(entry.kw) document.getElementById('targetKW').value = entry.kw;
+  if(entry.contentType) document.getElementById('seoContentType').value = entry.contentType;
+  if(entry.diffInput) document.getElementById('diffInput').value = entry.diffInput;
+  if(entry.secKWs && Array.isArray(entry.secKWs)){ secKWs = entry.secKWs; renderSecKWInputs(); }
+  // Brand Terms: restore if present (session-only; they were captured at save time)
+  if(entry.brandTerms && Array.isArray(entry.brandTerms) && typeof renderBrandTerms === 'function'){
+    brandTerms = entry.brandTerms; renderBrandTerms();
+  }
+
+  openEntryId = entryId;
+  activeFolderId = folderId;
+  onEditorInput();
+  renderFolderNav();
+  renderHistory();
+  showToast('↩ Entry loaded');
+}
+
+// ── Save modal ────────────────────────────────────────────────────────────────
+function openSaveModal(){
+  if(!ta.value.trim()){ showToast('⚠️ Nothing to save — editor is empty'); return; }
+  if(!folders.length){ showToast('⚠️ Create a folder first'); return; }
+
+  // If an entry is currently open, offer overwrite shortcut
+  if(openEntryId){
+    const folder = folders.find(f=>f.saves.some(s=>s.id===openEntryId));
+    if(folder){
+      const entry = folder.saves.find(s=>s.id===openEntryId);
+      const now = new Date();
+      document.getElementById('owMetaScore').textContent = lastScore+'%';
+      document.getElementById('owMetaDate').textContent  = now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      document.getElementById('owMetaTime').textContent  = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+      openModal('modalOverwriteEntry');
+      return;
+    }
+  }
+
+  openSaveNewModal();
+}
+
+function openSaveNewModal(){
+  // Populate folder select
+  const sel = document.getElementById('selectSaveFolder');
+  sel.innerHTML = folders.map(f=>`<option value="${f.id}">${esc(f.name)} (${f.saves.length}/${MAX_SAVES})</option>`).join('');
+  if(activeFolderId) sel.value = activeFolderId;
+
+  // Pre-populate meta
+  const now = new Date();
+  document.getElementById('metaScore').textContent = lastScore+'%';
+  document.getElementById('metaDate').textContent  = now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('metaTime').textContent  = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('inputEntryName').value  = '';
+  document.getElementById('btnSaveEntry').disabled = true;
+  openModal('modalSaveEntry');
+  setTimeout(()=>document.getElementById('inputEntryName').focus(),100);
+}
+
+function confirmSaveEntry(){
+  const name   = document.getElementById('inputEntryName').value.trim();
+  const fid    = document.getElementById('selectSaveFolder').value;
+  if(!name||!fid) return;
+
+  const folder = folders.find(f=>f.id===fid);
+  if(!folder){ showToast('⚠️ Folder not found'); return; }
+  if(folder.saves.length>=MAX_SAVES){
+    showToast(`⚠️ Folder is full (${MAX_SAVES} saves max)`);
+    closeModal('modalSaveEntry'); return;
+  }
+
+  const now = new Date();
+  const entry = {
+    id:         genId(),
+    name,
+    date:       now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    time:       now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    score:      lastScore,
+    text:       ta.value,
+    audience:   document.getElementById('audSelect').value,
+    kw:         document.getElementById('targetKW').value,
+    contentType:document.getElementById('seoContentType').value,
+    diffInput:  document.getElementById('diffInput').value,
+    secKWs:     [...secKWs],
+    brandTerms: typeof brandTerms!=='undefined'?[...brandTerms]:[],
+  };
+
+  folder.saves.unshift(entry);
+  openEntryId = entry.id;
+  activeFolderId = fid;
+  foldersSave();
+  closeModal('modalSaveEntry');
+  renderFolderNav();
+  renderHistory();
+  showToast('✓ Saved to '+folder.name);
+}
+
+function confirmOverwriteEntry(){
+  const folder = folders.find(f=>f.saves.some(s=>s.id===openEntryId));
+  if(!folder) return;
+  const idx = folder.saves.findIndex(s=>s.id===openEntryId);
+  if(idx===-1) return;
+
+  const now = new Date();
+  const existing = folder.saves[idx];
+  folder.saves[idx] = {
+    ...existing,
+    date:       now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    time:       now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    score:      lastScore,
+    text:       ta.value,
+    audience:   document.getElementById('audSelect').value,
+    kw:         document.getElementById('targetKW').value,
+    contentType:document.getElementById('seoContentType').value,
+    diffInput:  document.getElementById('diffInput').value,
+    secKWs:     [...secKWs],
+    brandTerms: typeof brandTerms!=='undefined'?[...brandTerms]:[],
+  };
+
+  foldersSave();
+  closeModal('modalOverwriteEntry');
+  renderFolderNav();
+  renderHistory();
+  showToast('✓ Entry updated');
+}
+
+// ── Create Folder modal ───────────────────────────────────────────────────────
+function openCreateFolderModal(){
+  if(folders.length>=MAX_FOLDERS){ showToast(`⚠️ Maximum ${MAX_FOLDERS} folders reached`); return; }
+  document.getElementById('inputFolderName').value='';
+  document.getElementById('btnCreateFolder').disabled=true;
+  openModal('modalCreateFolder');
+  setTimeout(()=>document.getElementById('inputFolderName').focus(),100);
+}
+
+function confirmCreateFolder(){
+  const name = document.getElementById('inputFolderName').value.trim();
+  if(!name) return;
+  const folder = { id:genId(), name, saves:[] };
+  folders.push(folder);
+  activeFolderId = folder.id;
+  foldersSave();
+  closeModal('modalCreateFolder');
+  renderFolderNav();
+  renderHistory();
+  showToast('✓ Folder created: '+name);
+}
+
+// ── Delete modals ─────────────────────────────────────────────────────────────
+function openDeleteEntryModal(folderId, entryId, entryName){
+  pendingDeleteEntryId = {folderId, entryId};
+  document.getElementById('deleteEntryMsg').textContent = `"${entryName}" will be permanently removed.`;
+  openModal('modalDeleteEntry');
+}
+
+function confirmDeleteEntry(){
+  if(!pendingDeleteEntryId) return;
+  const {folderId, entryId} = pendingDeleteEntryId;
+  const folder = folders.find(f=>f.id===folderId);
+  if(folder){ folder.saves = folder.saves.filter(s=>s.id!==entryId); }
+  if(openEntryId===entryId) openEntryId=null;
+  foldersSave();
+  closeModal('modalDeleteEntry');
+  renderFolderNav();
+  renderHistory();
+  showToast('✓ Entry deleted');
+  pendingDeleteEntryId=null;
+}
+
+function openDeleteFolderModal(folderId){
+  pendingDeleteFolderId = folderId;
+  const folder = folders.find(f=>f.id===folderId);
+  document.getElementById('deleteFolderMsg').textContent = folder
+    ? `"${folder.name}" and all ${folder.saves.length} saved ${folder.saves.length===1?'entry':'entries'} will be permanently removed.`
+    : 'This folder will be permanently removed.';
+  openModal('modalDeleteFolder');
+}
+
+function confirmDeleteFolder(){
+  folders = folders.filter(f=>f.id!==pendingDeleteFolderId);
+  if(activeFolderId===pendingDeleteFolderId) activeFolderId = folders.length?folders[0].id:null;
+  foldersSave();
+  closeModal('modalDeleteFolder');
+  renderFolderNav();
+  renderHistory();
+  showToast('✓ Folder deleted');
+  pendingDeleteFolderId=null;
+}
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function openModal(id){
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+}
+// Close modal on overlay click
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
+});
+// Enter key in folder/entry name inputs
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  if(document.getElementById('modalCreateFolder').classList.contains('open')){
+    if(!document.getElementById('btnCreateFolder').disabled) confirmCreateFolder();
+  } else if(document.getElementById('modalSaveEntry').classList.contains('open')){
+    if(!document.getElementById('btnSaveEntry').disabled) confirmSaveEntry();
+  }
+});
+
+// ── Persistence (editor session state only — no brand terms, no KW tags) ──────
 function persistSave(){
   try{
-    localStorage.setItem(STORAGE_KEY,JSON.stringify({
+    localStorage.setItem(SESSION_KEY,JSON.stringify({
       editorText:ta.value,
       targetKW:document.getElementById('targetKW').value,
       seoContentType:document.getElementById('seoContentType').value,
       secKWs:secKWs,
       audSelect:document.getElementById('audSelect').value,
       diffInput:document.getElementById('diffInput').value,
-      drafts:drafts.slice(0,3),
     }));
   }catch(e){}
 }
 function persistLoad(){
   try{
-    const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return;
+    const raw=localStorage.getItem(SESSION_KEY); if(!raw) return;
     const data=JSON.parse(raw);
     if(data.editorText) ta.value=data.editorText;
     if(data.targetKW)   document.getElementById('targetKW').value=data.targetKW;
@@ -1188,9 +1600,9 @@ function persistLoad(){
     if(data.secKWs&&Array.isArray(data.secKWs)){ secKWs=data.secKWs; renderSecKWInputs(); }
     if(data.audSelect)  document.getElementById('audSelect').value=data.audSelect;
     if(data.diffInput)  document.getElementById('diffInput').value=data.diffInput;
-    if(data.drafts)     { drafts=data.drafts; renderDrafts(); }
     if(data.editorText){ onEditorInput(); showToast('↩ Progress restored'); }
   }catch(e){}
+  foldersLoad();
 }
 
 function resetUI(){
