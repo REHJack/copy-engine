@@ -274,7 +274,25 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .folder-tab-count{font-size:9px;font-weight:800;background:#f0f0f0;color:#888;padding:2px 6px;border-radius:99px;line-height:1}
 .folder-tab.active .folder-tab-count{background:#ede9fe;color:#6366f1}
 
-/* ── History Modal (shared base) ── */
+/* ── Folder Tab Dropdown ── */
+.folder-dropdown{position:fixed;background:#fff;border:1.5px solid #e5e5e5;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:500;min-width:260px;max-width:320px;padding:8px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .15s,transform .15s}
+.folder-dropdown.open{opacity:1;transform:translateY(0);pointer-events:all}
+.folder-dropdown-header{display:flex;justify-content:space-between;align-items:center;padding:6px 8px 8px;border-bottom:1px solid #f0f0f0;margin-bottom:6px}
+.folder-dropdown-name{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb}
+.folder-dropdown-close{background:none;border:none;font-size:18px;color:#ccc;cursor:pointer;line-height:1;padding:0;font-family:inherit;transition:color .15s}
+.folder-dropdown-close:hover{color:#555}
+.folder-dropdown-entry{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.folder-dropdown-entry:hover{background:#f5f5ff}
+.folder-dropdown-entry.is-open{background:#f0eeff}
+.folder-dropdown-entry-left{flex:1;min-width:0}
+.folder-dropdown-entry-name{font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.folder-dropdown-entry-meta{font-size:10px;color:#bbb;margin-top:1px}
+.folder-dropdown-entry-score{font-size:12px;font-weight:800;color:#6366f1;flex-shrink:0}
+.folder-dropdown-entry-del{background:none;border:none;color:#e0e0e0;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s;font-family:inherit;flex-shrink:0}
+.folder-dropdown-entry-del:hover{color:#ef4444}
+.folder-dropdown-empty{font-size:11px;color:#ccc;font-style:italic;padding:10px 8px;text-align:center}
+
+
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
 .modal-box{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);width:100%;max-width:480px;padding:28px;transform:scale(.96);transition:transform .2s}
@@ -351,6 +369,15 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 </style>
 </head>
 <body>
+<!-- ── Folder Tab Dropdown ── -->
+<div class="folder-dropdown no-print" id="folderDropdown">
+  <div class="folder-dropdown-header">
+    <span class="folder-dropdown-name" id="folderDropdownName"></span>
+    <button class="folder-dropdown-close" onclick="closeFolderDropdown()">×</button>
+  </div>
+  <div id="folderDropdownEntries"></div>
+</div>
+
 <!-- ── Modal: Create Folder ── -->
 <div class="modal-overlay" id="modalCreateFolder">
   <div class="modal-box">
@@ -1311,9 +1338,9 @@ function renderFolderNav(){
     return;
   }
   row.style.display = 'block';
-  tabs.innerHTML = folders.map(f=>{
+  tabs.innerHTML = folders.map((f,i)=>{
     const isActive = f.id === activeFolderId;
-    return `<button class="folder-tab${isActive?' active':''}" onclick="setActiveFolder('${f.id}')">
+    return `<button class="folder-tab${isActive?' active':''}" id="ftab-${f.id}" onclick="onFolderTabClick('${f.id}',this)">
       ${esc(f.name)}<span class="folder-tab-count">${f.saves.length}/${MAX_SAVES}</span>
     </button>`;
   }).join('');
@@ -1324,6 +1351,82 @@ function setActiveFolder(id){
   renderFolderNav();
   renderHistory();
 }
+
+// ── Folder Tab Dropdown ───────────────────────────────────────────────────────
+let dropdownFolderId = null;
+
+function onFolderTabClick(folderId, btnEl){
+  const dd = document.getElementById('folderDropdown');
+  // Toggle: if already open for this folder, close it
+  if(dd.classList.contains('open') && dropdownFolderId === folderId){
+    closeFolderDropdown(); return;
+  }
+  // Set as active folder
+  activeFolderId = folderId;
+  dropdownFolderId = folderId;
+  renderFolderNav();
+  renderHistory();
+  openFolderDropdown(folderId, btnEl);
+}
+
+function openFolderDropdown(folderId, anchorEl){
+  const folder = folders.find(f=>f.id===folderId);
+  if(!folder) return;
+  const dd = document.getElementById('folderDropdown');
+
+  // Header name
+  document.getElementById('folderDropdownName').textContent = folder.name;
+
+  // Entries
+  const entriesEl = document.getElementById('folderDropdownEntries');
+  if(!folder.saves.length){
+    entriesEl.innerHTML = '<div class="folder-dropdown-empty">No saves yet — hit 💾 Save to add one.</div>';
+  } else {
+    entriesEl.innerHTML = folder.saves.map(s=>{
+      const isOpen = s.id === openEntryId;
+      return `<div class="folder-dropdown-entry${isOpen?' is-open':''}" onclick="loadEntryFromDropdown('${folder.id}','${s.id}')">
+        <div class="folder-dropdown-entry-left">
+          <div class="folder-dropdown-entry-name">${esc(s.name)}</div>
+          <div class="folder-dropdown-entry-meta">${s.date} · ${s.time}</div>
+        </div>
+        <span class="folder-dropdown-entry-score">${s.score}%</span>
+        <button class="folder-dropdown-entry-del" title="Delete entry"
+          onclick="event.stopPropagation();openDeleteEntryModal('${folder.id}','${s.id}','${esc(s.name)}')">×</button>
+      </div>`;
+    }).join('');
+  }
+
+  // Position below the anchor tab
+  const rect = anchorEl.getBoundingClientRect();
+  dd.style.top  = (rect.bottom + 6) + 'px';
+  dd.style.left = rect.left + 'px';
+
+  // Nudge left if it would overflow the viewport
+  dd.classList.add('open');
+  const ddRect = dd.getBoundingClientRect();
+  if(ddRect.right > window.innerWidth - 12){
+    dd.style.left = (window.innerWidth - ddRect.width - 12) + 'px';
+  }
+}
+
+function closeFolderDropdown(){
+  document.getElementById('folderDropdown').classList.remove('open');
+  dropdownFolderId = null;
+}
+
+function loadEntryFromDropdown(folderId, entryId){
+  closeFolderDropdown();
+  loadEntry(folderId, entryId);
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e=>{
+  const dd = document.getElementById('folderDropdown');
+  if(!dd.classList.contains('open')) return;
+  if(dd.contains(e.target)) return;
+  if(e.target.closest('.folder-tab')) return; // tab clicks handled by onFolderTabClick
+  closeFolderDropdown();
+});
 
 // ── History Panel ─────────────────────────────────────────────────────────────
 function renderHistory(){
@@ -1529,6 +1632,11 @@ function confirmDeleteEntry(){
   closeModal('modalDeleteEntry');
   renderFolderNav();
   renderHistory();
+  // Refresh dropdown if it's open for this folder
+  if(dropdownFolderId===folderId){
+    const anchorEl = document.getElementById('ftab-'+folderId);
+    if(anchorEl) openFolderDropdown(folderId, anchorEl);
+  }
   showToast('✓ Entry deleted');
   pendingDeleteEntryId=null;
 }
