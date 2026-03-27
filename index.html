@@ -32,14 +32,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 /* ── Editor: textarea on top, highlight div behind ── */
 .editor-shell{border:1.5px solid #e0e0e0;border-radius:14px;background:#fff;overflow:hidden;transition:border-color .2s;box-shadow:0 1px 6px rgba(0,0,0,.05)}
 .editor-shell:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
-.editor-wrap{position:relative;min-height:420px}
+/* The wrap is the actual scroller — both inner layers are overflow:hidden */
+.editor-wrap{position:relative;min-height:420px;overflow-y:auto;overflow-x:hidden}
 
-/* Both layers must share IDENTICAL typography so text aligns perfectly */
+/* Both layers: identical typography, no scroll, no border, fills the wrap */
 #editor-textarea, #editor-overlay {
   position:absolute;
   top:0; left:0;
   width:100%;
-  height:100%;
   margin:0;
   padding:22px;
   font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;
@@ -53,8 +53,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
   tab-size:4;
   border:none;
   outline:none;
-  overflow-y:scroll;
-  overflow-x:hidden;
+  overflow:hidden;
   box-sizing:border-box;
 }
 #editor-textarea {
@@ -63,8 +62,9 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
   caret-color:#6366f1;
   resize:none;
   z-index:2;
-  /* Ensure no browser-specific styling interferes */
   -webkit-text-fill-color:transparent;
+  /* Stretch to fill wrap so clicks register everywhere */
+  min-height:100%;
 }
 #editor-overlay {
   color:#1a1a1a;
@@ -81,13 +81,13 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .leg-item{display:flex;align-items:center;gap:5px;font-size:10px;color:#888;font-weight:600}
 .leg-dot{width:9px;height:9px;border-radius:3px}
 
-/* ── Highlights ── */
-.ph{background:#fee2e2;border-bottom:2px solid #ef4444;color:#991b1b;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.fh{background:#fef9c3;border-bottom:2px solid #eab308;color:#854d0e;padding:0 2px;border-radius:3px}
-.sh{background:#ffedd5;border-bottom:2px solid #f97316;color:#9a3412;padding:0 2px;border-radius:3px}
-.ch{background:#f3e8ff;border-bottom:2px solid #a855f7;color:#6b21a8;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.rh{background:#dbeafe;border-bottom:2px solid #3b82f6;color:#1e40af;padding:0 2px;border-radius:3px;cursor:pointer;position:relative}
-.vh{background:#fce7f3;border-bottom:2px solid #ec4899;color:#9d174d;padding:0 2px;border-radius:3px}
+/* ── Highlights — zero padding/border so overlay text flow matches textarea exactly ── */
+.ph{background:#fee2e2;box-shadow:0 2px 0 #ef4444;color:#991b1b;border-radius:2px;cursor:pointer;position:relative}
+.fh{background:#fef9c3;box-shadow:0 2px 0 #eab308;color:#854d0e;border-radius:2px}
+.sh{background:#ffedd5;box-shadow:0 2px 0 #f97316;color:#9a3412;border-radius:2px}
+.ch{background:#f3e8ff;box-shadow:0 2px 0 #a855f7;color:#6b21a8;border-radius:2px;cursor:pointer;position:relative}
+.rh{background:#dbeafe;box-shadow:0 2px 0 #3b82f6;color:#1e40af;border-radius:2px;cursor:pointer;position:relative}
+.vh{background:#fce7f3;box-shadow:0 2px 0 #ec4899;color:#9d174d;border-radius:2px}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
 
@@ -508,17 +508,22 @@ let drafts=[],saveTimer=null,analyseTimer=null,lastScore=0,lastFK=60,lastWords=[
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
-// ── Sync scroll between textarea and overlay ──────────────────────────────────
-function syncScroll(){ ov.scrollTop = ta.scrollTop; }
-ta.addEventListener('scroll', syncScroll);
+// ── No scroll sync needed — the wrap div is the scroller, both layers are static ──
+// Keep stub so any legacy calls don't error
+function syncScroll(){}
 
-// ── Sync overlay height to textarea content height ────────────────────────────
+// ── Sync both layers to content height ───────────────────────────────────────
 function syncHeight(){
+  // Measure natural content height via the overlay (it's already rendered with correct content)
+  // Then set both layers and the wrap min-height explicitly
+  const wrap = ta.closest('.editor-wrap');
+  // Reset to auto to get true scrollHeight
   ta.style.height = 'auto';
-  const h = Math.max(420, ta.scrollHeight);
+  ov.style.height = 'auto';
+  const h = Math.max(420, ta.scrollHeight, ov.scrollHeight);
   ta.style.height = h + 'px';
-  ov.style.height  = h + 'px';
-  ta.closest('.editor-wrap').style.minHeight = h + 'px';
+  ov.style.height = h + 'px';
+  wrap.style.minHeight = h + 'px';
 }
 
 // ── Main input handler ────────────────────────────────────────────────────────
@@ -546,15 +551,33 @@ ta.addEventListener('paste', e=>{
 function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function splitSentences(text){
+  // Returns sentence strings (used for analysis: FK, repetition, variety)
+  return splitSentencesWithSeps(text).map(p=>p.text);
+}
+
+// Returns [{text, sep}] where sep is the whitespace/newline that followed it
+// This lets the overlay reconstruct the original spacing faithfully.
+function splitSentencesWithSeps(text){
+  // Each part: { text, sep } where text+sep exactly reconstructs the original.
+  // CRITICAL: text+sep must be lossless — no trimming — so overlay stays
+  // character-for-character identical to the textarea for correct cursor mapping.
   const parts=[]; let buf='';
   for(let i=0;i<text.length;i++){
-    buf+=text[i];
-    if('.!?'.includes(text[i])&&i<text.length-1&&text[i+1]===' '){
-      parts.push(buf.trimEnd()); buf=''; i++;
+    const ch=text[i];
+    if('.!?'.includes(ch)&&i<text.length-1&&text[i+1]===' '){
+      // Sentence end: punctuation + space separator
+      buf+=ch;
+      parts.push({text:buf, sep:' '}); buf=''; i++;
+    } else if(ch==='\n'){
+      // Line break separator — buf may be empty (blank line) or have content
+      parts.push({text:buf, sep:'\n'}); buf='';
+    } else {
+      buf+=ch;
     }
   }
-  if(buf.trim()) parts.push(buf.trimEnd());
-  return parts.filter(s=>s.trim().length>0);
+  // Remaining buffer with no trailing separator
+  parts.push({text:buf, sep:''});
+  return parts;
 }
 
 function countSylls(word){
@@ -592,7 +615,8 @@ function analyse(){
   if(!text.trim()){ resetUI(); return; }
 
   lastWords     = text.trim().split(/\s+/).filter(w=>w.length>0);
-  lastSentences = splitSentences(text);
+  const sentParts = splitSentencesWithSeps(text);
+  lastSentences = sentParts.filter(p=>p.text.trim().length>0).map(p=>p.text);
 
   document.getElementById('readingTime').innerText =
     Math.ceil(lastWords.length/238)<=1?'< 1 min read':`${Math.ceil(lastWords.length/238)} min read`;
@@ -616,7 +640,20 @@ function analyse(){
 
   let pCount=0,fCount=0,cCount=0;
 
-  const sentHTMLs=lastSentences.map((sent,si)=>{
+  // Build sentence index mapping: sentParts includes ALL segments (even blank-line ones).
+  // Variety/repetition detection used sentence index from lastSentences (non-empty only).
+  // We need to map sentParts index → lastSentences index for variety checks.
+  let sentIdx = 0;
+  const sentHTMLs = sentParts.map((part) => {
+    const sent = part.text;
+    const sep  = part.sep;
+
+    if(!sent.trim()){
+      // Blank / whitespace-only segment — emit as-is to preserve character positions
+      return esc(sent) + sep;
+    }
+
+    const si = sentIdx++;
     const ann=[];
 
     if(modes.filler) FILLERS.forEach(w=>{
@@ -657,10 +694,10 @@ function analyse(){
     if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh">${html}</span>`;
     const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
     if(modes.sentence&&wc>=30) html=`<span class="sh">${html}</span>`;
-    return html;
+    return html + sep;
   });
 
-  ov.innerHTML = sentHTMLs.join(' ') + '\n';
+  ov.innerHTML = sentHTMLs.join('');
   syncScroll();
 
   document.getElementById('sPassive').innerText=pCount;
@@ -1032,10 +1069,10 @@ function locateIssue(i){
   ta.selectionStart=idx;
   ta.selectionEnd=idx+searchPhrase.length;
 
+  const wrap = ta.closest('.editor-wrap');
   const lineHeight=parseFloat(getComputedStyle(ta).lineHeight)||26;
   const lineIdx=text.slice(0,idx).split('\n').length-1;
-  ta.scrollTop=Math.max(0,lineIdx*lineHeight-(ta.clientHeight/3));
-  syncScroll();
+  wrap.scrollTop=Math.max(0,lineIdx*lineHeight-(wrap.clientHeight/3));
 
   // Flash the corresponding overlay span — match by charIdx position in overlay text
   // Walk overlay spans and find one whose text appears at approximately the right position
