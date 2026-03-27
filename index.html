@@ -207,8 +207,9 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-wrap{text-align:center;padding:32px;color:#aaa;font-size:12px}
 @media print{.no-print{display:none!important}}
+
 /* ── Splash screen ── */
-#splash{position:fixed;inset:0;background:#f5f5f7;z-index:9999;display:flex;align-items:center;justify-content:center;padding:32px;overflow-y:auto;transition:opacity .3s ease,transform .3s ease}
+#splash{position:fixed;inset:0;background:#f5f5f7;z-index:9999;display:flex;align-items:center;justify-content:center;padding:32px;transition:opacity .3s ease,transform .3s ease}
 #splash.hiding{opacity:0;transform:scale(.97);pointer-events:none}
 .splash-inner{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:860px;width:100%;align-items:start}
 @media(max-width:700px){.splash-inner{grid-template-columns:1fr}}
@@ -246,7 +247,10 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
   <div class="splash-inner">
     <div class="splash-left">
       <div class="splash-card">
-        <div class="sp-brand-row"><span class="sp-brand-name">Copy Engine</span><span class="sp-brand-ver">v6.8</span></div>
+        <div class="sp-brand-row">
+          <span class="sp-brand-name">Copy Engine</span>
+          <span class="sp-brand-ver">v6.2</span>
+        </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
       <div class="splash-card">
@@ -255,33 +259,33 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
           <div class="sp-step"><div class="sp-num">1</div><div class="sp-step-text"><strong>Paste your copy</strong> into the editor — it analyses in real time.</div></div>
           <div class="sp-step"><div class="sp-num">2</div><div class="sp-step-text"><strong>Review the highlights</strong> — red, amber, orange, purple, blue &amp; pink each flag something different.</div></div>
           <div class="sp-step"><div class="sp-num">3</div><div class="sp-step-text"><strong>Pick your audience</strong> to score readability against a target profile.</div></div>
-          <div class="sp-step"><div class="sp-num">4</div><div class="sp-step-text"><strong>Run a Copy Audit</strong> for a full analysis and keyword report.</div></div>
+          <div class="sp-step"><div class="sp-num">4</div><div class="sp-step-text"><strong>Run an AI Audit</strong> for a full rewrite suggestion and keyword report.</div></div>
         </div>
       </div>
       <div class="sp-cta-card">
         <span class="sp-cta-label">Ready to analyse your copy?</span>
-        <button class="sp-cta-btn" onclick="dismissSplash()">Start now <span class="sp-arrow">&#8594;</span></button>
+        <button class="sp-cta-btn" onclick="dismissSplash()">Start now <span class="sp-arrow">→</span></button>
       </div>
     </div>
     <div class="sp-info-card">
       <div>
         <div class="sp-info-title">What is Copy Engine?</div>
-        <div class="sp-info-blurb">Copy Engine analyses your marketing copy in real time — highlighting passive voice, filler words, clich&eacute;s, long sentences and repetition before your work goes live.</div>
+        <div class="sp-info-blurb">Copy Engine is an in-house tool that analyses your marketing copy in real time — highlighting passive voice, filler words, clichés, long sentences and repetition before your work goes live.</div>
       </div>
       <div>
         <div class="sp-info-title">What it checks</div>
         <div class="sp-feat-grid">
-          <div class="sp-feat"><div class="sp-feat-icon">&#128308;</div><div class="sp-feat-label">Passive voice</div><div class="sp-feat-sub">with active fix tips</div></div>
-          <div class="sp-feat"><div class="sp-feat-icon">&#128993;</div><div class="sp-feat-label">Filler words</div><div class="sp-feat-sub">just, really, very&hellip;</div></div>
-          <div class="sp-feat"><div class="sp-feat-icon">&#128992;</div><div class="sp-feat-label">Long sentences</div><div class="sp-feat-sub">30+ word flag</div></div>
-          <div class="sp-feat"><div class="sp-feat-icon">&#128995;</div><div class="sp-feat-label">Clich&eacute;s</div><div class="sp-feat-sub">with better alternatives</div></div>
-          <div class="sp-feat"><div class="sp-feat-icon">&#128994;</div><div class="sp-feat-label">Repetition</div><div class="sp-feat-sub">nearby word reuse</div></div>
-          <div class="sp-feat"><div class="sp-feat-icon">&#129319;</div><div class="sp-feat-label">Sentence variety</div><div class="sp-feat-sub">same-start detection</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🔴</div><div class="sp-feat-label">Passive voice</div><div class="sp-feat-sub">with active fix tips</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🟡</div><div class="sp-feat-label">Filler words</div><div class="sp-feat-sub">just, really, very…</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🟠</div><div class="sp-feat-label">Long sentences</div><div class="sp-feat-sub">30+ word flag</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🟣</div><div class="sp-feat-label">Clichés</div><div class="sp-feat-sub">with better alternatives</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🔵</div><div class="sp-feat-label">Repetition</div><div class="sp-feat-sub">nearby word reuse</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🩷</div><div class="sp-feat-label">Sentence variety</div><div class="sp-feat-sub">same-start detection</div></div>
         </div>
       </div>
       <div>
         <div class="sp-info-title" style="margin-bottom:6px">Also includes</div>
-        <div class="sp-info-blurb" style="font-size:12px">Readability score &middot; Audience matcher &middot; Tone detection &middot; SEO keyword density &middot; CTA detection &middot; Version diff &middot; Copy Audit &middot; PDF &amp; HTML export</div>
+        <div class="sp-info-blurb" style="font-size:12px">Readability score · Audience matcher · Tone detection · SEO keyword density · CTA detection · Version diff · AI Audit · PDF &amp; HTML export</div>
       </div>
     </div>
   </div>
@@ -297,7 +301,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
     </div>
     <div class="btn-row no-print">
       <button class="btn btn-ghost btn-sm" onclick="fixAllFillers()">⚡ Fix Fillers</button>
-      <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ Copy Audit</button>
+      <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ AI Audit</button>
       <button class="btn btn-teal btn-sm" onclick="downloadHTML()">
         <svg width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
         HTML
@@ -414,33 +418,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
       <div class="card">
         <div class="card-title">SEO Keyword Density</div>
-        <div id="kwTagWrap" onclick="document.getElementById('kwTagInput').focus()" style="display:flex;flex-wrap:wrap;gap:5px;padding:7px 9px;border:1.5px solid #e5e5e5;border-radius:8px;background:#fff;margin-bottom:8px;cursor:text;min-height:36px;align-items:center;transition:border-color .2s"></div>
-        <div style="display:flex;gap:6px;margin-bottom:10px">
-          <input id="kwTagInput" type="text" placeholder="Type keyword, press Enter…"
-            style="flex:1;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff"
-            onfocus="this.style.borderColor='#6366f1';document.getElementById('kwTagWrap').style.borderColor='#6366f1'"
-            onblur="this.style.borderColor='#e5e5e5';document.getElementById('kwTagWrap').style.borderColor='#e5e5e5'"
-            onkeydown="kwTagKeydown(event)">
-          <button onclick="kwTagAdd()" style="padding:9px 13px;background:#6366f1;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Add</button>
-        </div>
+        <input id="targetKW" type="text" placeholder="Enter target keyword…"
+          style="width:100%;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;margin-bottom:10px;background:#fff"
+          onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e5e5e5'"
+          oninput="analyse();persistSave()">
         <div id="targetKWResult"></div>
         <hr class="divider-line" style="margin:10px 0">
         <div class="card-title" style="margin-bottom:9px">Top Keywords Found</div>
         <div id="kwList"><p style="font-size:11px;color:#ccc;font-style:italic">No keywords yet.</p></div>
-      </div>
-
-      <div class="card no-print">
-        <div class="card-title">Brand &amp; Protected Terms</div>
-        <p style="font-size:11px;color:#aaa;line-height:1.55;margin-bottom:10px">Terms added here won&apos;t be flagged by the repetition detector.</p>
-        <div id="brandTagWrap" onclick="document.getElementById('brandTagInput').focus()" style="display:flex;flex-wrap:wrap;gap:5px;padding:7px 9px;border:1.5px solid #e5e5e5;border-radius:8px;background:#fff;margin-bottom:8px;cursor:text;min-height:36px;align-items:center;transition:border-color .2s"></div>
-        <div style="display:flex;gap:6px">
-          <input id="brandTagInput" type="text" placeholder="Add term, press Enter…"
-            style="flex:1;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;background:#fff"
-            onfocus="this.style.borderColor='#6366f1';document.getElementById('brandTagWrap').style.borderColor='#6366f1'"
-            onblur="this.style.borderColor='#e5e5e5';document.getElementById('brandTagWrap').style.borderColor='#e5e5e5'"
-            onkeydown="brandTagKeydown(event)">
-          <button onclick="brandTagAdd()" style="padding:9px 13px;background:#111;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap">Add</button>
-        </div>
       </div>
 
       <div class="card no-print">
@@ -466,6 +451,12 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 </div>
 
 <script>
+function dismissSplash(){
+  const s=document.getElementById('splash');
+  s.classList.add('hiding');
+  setTimeout(()=>{ s.style.display='none'; },320);
+}
+
 const ta  = document.getElementById('editor-textarea');
 const ov  = document.getElementById('editor-overlay');
 const STORAGE_KEY = 'copyengine_v62';
@@ -499,12 +490,10 @@ ta.addEventListener('scroll', syncScroll);
 
 // ── Sync overlay height to textarea content height ────────────────────────────
 function syncHeight(){
-  // Reset height to auto so it can shrink, then set to scrollHeight
   ta.style.height = 'auto';
   const h = Math.max(420, ta.scrollHeight);
   ta.style.height = h + 'px';
   ov.style.height  = h + 'px';
-  // Keep the wrapper tall enough
   ta.closest('.editor-wrap').style.minHeight = h + 'px';
 }
 
@@ -521,7 +510,6 @@ ta.addEventListener('input', onEditorInput);
 ta.addEventListener('paste', e=>{
   e.preventDefault();
   const text = (e.clipboardData||window.clipboardData).getData('text/plain');
-  // Insert at cursor
   const start = ta.selectionStart, end = ta.selectionEnd;
   const before = ta.value.slice(0, start);
   const after  = ta.value.slice(end);
@@ -589,7 +577,7 @@ function analyse(){
   const wsMap={};
   lastSentences.forEach((s,si)=>{
     s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
-      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w)&&!brandTags.includes(w)&&!kwTags.includes(w))
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w))
       .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
   });
   const repeatSet=new Set(); let repeatCount=0;
@@ -648,7 +636,6 @@ function analyse(){
     return html;
   });
 
-  // Write to overlay — append a trailing newline so last line renders correctly
   ov.innerHTML = sentHTMLs.join(' ') + '\n';
   syncScroll();
 
@@ -743,17 +730,14 @@ function detectCTA(text){
 }
 
 function updateKW(words,text){
-  const total=words.length,res=document.getElementById('targetKWResult');
-  if(kwTags.length&&total>0){
-    res.innerHTML=kwTags.map(tkw=>{
-      const re=new RegExp(`\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\b`,'gi');
-      const count=(text.match(re)||[]).length,pct=count/total*100,ps=pct.toFixed(2)+'%';
-      const cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low';
-      const lbl=pct>=2.5?'🔴 Too High':pct>=1.5?'🟢 Optimal':'🟡 Too Low';
-      const advice=pct>=2.5?'Reduce usage — may trigger keyword stuffing.':pct>=1.5?'Perfect range for SEO.':count===0?'Keyword not found in your copy.':'Increase usage to improve SEO relevance.';
-      return `<div class="kw-row ${cls}" style="background:#fafafa;border:1.5px solid #e5e5e5;border-radius:9px;padding:11px 13px;margin-bottom:8px"><div class="kw-meta" style="margin-bottom:5px"><span class="kw-word" style="font-size:13px">"${tkw}"</span><span class="kw-right" style="font-size:12px">${ps} <span class="kw-badge">${lbl}</span></span></div><div class="kw-track" style="margin-bottom:7px"><div class="kw-bar" style="width:${Math.min(100,pct*18)}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Found <strong style="color:#333">${count}&times;</strong> / ${total} words</span><span style="text-align:right;max-width:55%">${advice}</span></div></div>`;
-    }).join('');
-  }else{ res.innerHTML=''; }
+  const total=words.length,tkw=document.getElementById('targetKW').value.trim().toLowerCase(),res=document.getElementById('targetKWResult');
+  if(tkw&&total>0){
+    const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
+    const count=(text.match(re)||[]).length,pct=count/total*100,ps=pct.toFixed(2)+'%';
+    const cls=pct>=2.5?'s-high':pct>=1.5?'s-opt':'s-low',lbl=pct>=2.5?'🔴 Too High':pct>=1.5?'🟢 Optimal':'🟡 Too Low';
+    const advice=pct>=2.5?'Reduce usage — may trigger keyword stuffing.':pct>=1.5?'Perfect range for SEO.':count===0?'Keyword not found in your copy.':'Increase usage to improve SEO relevance.';
+    res.innerHTML=`<div class="kw-row ${cls}" style="background:#fafafa;border:1.5px solid #e5e5e5;border-radius:9px;padding:11px 13px"><div class="kw-meta" style="margin-bottom:5px"><span class="kw-word" style="font-size:13px">"${tkw}"</span><span class="kw-right" style="font-size:12px">${ps} <span class="kw-badge">${lbl}</span></span></div><div class="kw-track" style="margin-bottom:7px"><div class="kw-bar" style="width:${Math.min(100,pct*18)}%"></div></div><div style="display:flex;justify-content:space-between;font-size:10px;color:#aaa"><span>Found <strong style="color:#333">${count}×</strong> / ${total} words</span><span style="text-align:right;max-width:55%">${advice}</span></div></div>`;
+  }else{ res.innerHTML=tkw?'<p style="font-size:11px;color:#ccc;font-style:italic">Paste copy to measure density.</p>':''; }
   const freq={};
   words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c))freq[c]=(freq[c]||0)+1;});
   const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,5);
@@ -849,8 +833,7 @@ function persistSave(){
   try{
     localStorage.setItem(STORAGE_KEY,JSON.stringify({
       editorText:ta.value,
-      kwTags:kwTags,
-      brandTags:brandTags,
+      targetKW:document.getElementById('targetKW').value,
       audSelect:document.getElementById('audSelect').value,
       diffInput:document.getElementById('diffInput').value,
       drafts:drafts.slice(0,3),
@@ -862,8 +845,7 @@ function persistLoad(){
     const raw=localStorage.getItem(STORAGE_KEY); if(!raw) return;
     const data=JSON.parse(raw);
     if(data.editorText) ta.value=data.editorText;
-    if(data.kwTags&&Array.isArray(data.kwTags)){kwTags=data.kwTags;renderKwTags();}
-    if(data.brandTags&&Array.isArray(data.brandTags)){brandTags=data.brandTags;renderBrandTags();}
+    if(data.targetKW)   document.getElementById('targetKW').value=data.targetKW;
     if(data.audSelect)  document.getElementById('audSelect').value=data.audSelect;
     if(data.diffInput)  document.getElementById('diffInput').value=data.diffInput;
     if(data.drafts)     { drafts=data.drafts; renderDrafts(); }
@@ -888,43 +870,19 @@ function resetUI(){
 }
 
 // ── AI Audit ──────────────────────────────────────────────────────────────────
-function runAIAudit(){
+async function runAIAudit(){
   const text=ta.value.trim(); if(!text){alert('Please paste some copy first.');return;}
   const panel=document.getElementById('aiPanel'),out=document.getElementById('aiOutput');
   panel.classList.add('open');
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
-  const words=text.split(/\s+/).filter(w=>w.length>0),total=words.length;
-  // Passive flags
-  const passiveFlags=[];
-  const pr=new RegExp(PASSIVE_RE.source,'gi'); let pm;
-  while((pm=pr.exec(text))!==null){
-    if(!passiveFlags.find(f=>f.original===pm[0]))
-      passiveFlags.push({original:pm[0],suggestion:getSug(pm[0])});
-  }
-  // Filler counts
-  const fillerCounts={};
-  FILLERS.forEach(w=>{
-    const matches=text.match(new RegExp(`\\b${w}\\b`,'gi'));
-    if(matches&&matches.length) fillerCounts[w]=matches.length;
-  });
-  const fillerWords=Object.entries(fillerCounts).map(([word,count])=>({word,count}));
-  // Clichés
-  const clicheFlags=[];
-  Object.entries(CLICHES).forEach(([phrase,suggestion])=>{
-    const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi');
-    if(re.test(text)) clicheFlags.push({phrase,suggestion});
-  });
-  // Top keywords
-  const freq={};
-  words.forEach(w=>{const c=w.toLowerCase().replace(/[^a-z]/g,'');if(c.length>3&&!FILLERS.includes(c)&&!STOP.has(c))freq[c]=(freq[c]||0)+1;});
-  const topKW=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([word,count])=>{
-    const pct=count/total*100;
-    return{word,density:pct.toFixed(1)+'%',status:pct>=2.5?'High':pct>=1.5?'Optimal':'Low'};
-  });
-  const sylls=words.reduce((a,w)=>a+countSylls(w),0);
-  const fk=206.835-(1.015*(total/(lastSentences.length||1)))-(84.6*(sylls/(total||1)));
-  const readLabel=fk>=80?'Very Easy':fk>=70?'Easy':fk>=60?'Fairly Easy':fk>=50?'Standard':fk>=40?'Fairly Difficult':fk>=30?'Difficult':'Very Difficult';
-  renderAI({activeScore:lastScore+'%',readability:readLabel,wordCount:total,passiveFlags,fillerWords,cliches:clicheFlags,keywords:topKW},text);
+  out.innerHTML='<div class="loading-wrap"><div class="spinner"></div><p>Analysing your copy…</p></div>';
+  const sys=`You are an elite Direct-Response Copy Editor and SEO Analyst. Return ONLY a raw JSON object — no markdown fences, no commentary. Shape: {"activeScore":"82%","readability":"Standard","wordCount":123,"passiveFlags":[{"original":"phrase","suggestion":"fix"}],"fillerWords":[{"word":"just","count":3}],"cliches":[{"phrase":"game changer","suggestion":"describe actual impact"}],"keywords":[{"word":"conversion","density":"2.1%","status":"Optimal"}],"rewrite":"Full rewritten lean version."}`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:[{role:'user',content:text}]})});
+    const data=await res.json();
+    const raw=(data.content||[]).map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    renderAI(JSON.parse(raw),text);
+  }catch(e){ out.innerHTML='<p style="color:#ef4444;font-size:12px;padding:8px 0">⚠️ Failed to load AI report. Please try again.</p>'; }
 }
 
 function renderAI(r,original){
@@ -932,13 +890,14 @@ function renderAI(r,original){
   const fillers=r.fillerWords?.length?r.fillerWords.map(f=>`<li>"<strong>${f.word}</strong>" — ${f.count}×</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
   const cliches=r.cliches?.length?r.cliches.map(c=>`<li>"<strong>${c.phrase}</strong>" — ${c.suggestion}</li>`).join(''):'<li style="color:#aaa">None detected.</li>';
   const kw=r.keywords?.length?`<table class="ai-kw-table"><thead><tr><th>Keyword</th><th>Density</th><th>Status</th></tr></thead><tbody>${r.keywords.map(k=>`<tr><td style="text-transform:capitalize">${k.word}</td><td style="color:#6366f1;font-family:monospace">${k.density}</td><td>${k.status==='Optimal'?'🟢':k.status==='High'?'🔴':'🟡'} ${k.status}</td></tr>`).join('')}</tbody></table>`:'<p style="color:#aaa">No keywords extracted.</p>';
-
+  const ba=`<div class="ba-grid"><div class="ba-box ba-before"><div class="ba-label">Before</div><div class="ba-text">${esc(original)}</div></div><div class="ba-box ba-after"><div class="ba-label">After</div><div class="ba-text">${esc(r.rewrite||'')}</div></div></div>`;
   document.getElementById('aiOutput').innerHTML=`
     <div class="ai-section"><h4>Executive Summary</h4><p><strong>Active Score:</strong> ${r.activeScore} · <strong>Readability:</strong> ${r.readability} · <strong>Words:</strong> ${r.wordCount}</p></div>
     <div class="ai-section"><h4>🔴 Passive Voice Flags</h4>${passive}</div>
     <div class="ai-section"><h4>🟡 Filler Alerts</h4><ul>${fillers}</ul></div>
     <div class="ai-section"><h4>🟣 Cliché Flags</h4><ul>${cliches}</ul></div>
-    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>`;
+    <div class="ai-section"><h4>🔍 SEO Keyword Density</h4>${kw}</div>
+    <div class="ai-section"><h4>✨ Before vs After</h4>${ba}</div>`;
 }
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
@@ -953,52 +912,6 @@ function downloadPDF(){
   panel.classList.remove('open');
   html2pdf().set({margin:0.35,filename:`CopyAudit_${Date.now()}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}})
   .from(document.getElementById('reportContent')).save().then(()=>{if(wasOpen)panel.classList.add('open');});
-}
-
-
-// ── Brand / protected terms ──────────────────────────────────────────────────
-let brandTags=[];
-function brandTagKeydown(e){
-  if(e.key==='Enter'||e.key===','){e.preventDefault();brandTagAdd();}
-  if(e.key==='Backspace'&&e.target.value===''&&brandTags.length){brandTags.pop();renderBrandTags();analyse();persistSave();}
-}
-function brandTagAdd(){
-  const input=document.getElementById('brandTagInput');
-  const val=input.value.trim().toLowerCase().replace(/,/g,'');
-  if(!val||brandTags.includes(val)){input.value='';return;}
-  brandTags.push(val); input.value='';
-  renderBrandTags(); analyse(); persistSave();
-}
-function brandTagRemove(i){brandTags.splice(i,1);renderBrandTags();analyse();persistSave();}
-function renderBrandTags(){
-  const wrap=document.getElementById('brandTagWrap');
-  wrap.innerHTML=brandTags.map((t,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#f1f5f9;color:#334155;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap">${t}<span onclick="brandTagRemove(${i})" style="cursor:pointer;font-size:13px;line-height:1;color:#94a3b8;margin-left:1px">&times;</span></span>`).join('');
-}
-
-// ── Keyword tag system ────────────────────────────────────────────────────────
-let kwTags=[];
-function kwTagKeydown(e){
-  if(e.key==='Enter'||e.key===','){e.preventDefault();kwTagAdd();}
-  if(e.key==='Backspace'&&e.target.value===''&&kwTags.length){kwTags.pop();renderKwTags();analyse();persistSave();}
-}
-function kwTagAdd(){
-  const input=document.getElementById('kwTagInput');
-  const val=input.value.trim().toLowerCase().replace(/,/g,'');
-  if(!val||kwTags.includes(val)) return;
-  kwTags.push(val); input.value='';
-  renderKwTags(); analyse(); persistSave();
-}
-function kwTagRemove(i){kwTags.splice(i,1);renderKwTags();analyse();persistSave();}
-function renderKwTags(){
-  const wrap=document.getElementById('kwTagWrap');
-  wrap.innerHTML=kwTags.map((t,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;background:#ede9fe;color:#4f46e5;font-size:11px;font-weight:700;padding:3px 8px;border-radius:99px;white-space:nowrap">${t}<span onclick="kwTagRemove(${i})" style="cursor:pointer;font-size:13px;line-height:1;color:#6366f1;margin-left:1px">&times;</span></span>`).join('');
-}
-
-// ── Splash ────────────────────────────────────────────────────────────────────
-function dismissSplash(){
-  const s=document.getElementById('splash');
-  s.classList.add('hiding');
-  setTimeout(()=>{s.style.display='none';},320);
 }
 
 window.addEventListener('DOMContentLoaded', persistLoad);
