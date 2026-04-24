@@ -88,13 +88,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .ch{background:#f3e8ff;box-shadow:0 2px 0 #a855f7;color:#6b21a8;border-radius:2px;cursor:pointer;position:relative}
 .rh{background:#dbeafe;box-shadow:0 2px 0 #3b82f6;color:#1e40af;border-radius:2px;cursor:pointer;position:relative}
 .vh{background:#fce7f3;box-shadow:0 2px 0 #ec4899;color:#9d174d;border-radius:2px}
-/* ── Markdown syntax styling (Phase M.2) ── */
-.md-syntax{color:rgba(26,26,26,0.3);font-weight:normal}
+/* ── Markdown syntax styling (Phase M.2 v2) ── */
+/* CRITICAL: no font-size or line-height changes — overlay must stay character-aligned with textarea */
+.md-syntax{color:rgba(26,26,26,0.3);font-weight:normal;font-style:normal}
 .md-bold{font-weight:700}
 .md-italic{font-style:italic}
-.md-h1{font-weight:700;font-size:17px;color:#111}
-.md-h2{font-weight:700;font-size:16px;color:#111}
-.md-h3{font-weight:700;font-size:15px;color:#111}
+.md-h1{font-weight:700;color:#000}
+.md-h2{font-weight:700;color:#111}
+.md-h3{font-weight:700;color:#222}
 .md-li{display:inline}
 .md-ol{display:inline}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
@@ -875,68 +876,43 @@ function onEditorInput(){
 
 ta.addEventListener('input', onEditorInput);
 
-// ── Markdown syntax styling for overlay (Phase M.2) ──────────────────────────
+// ── Markdown syntax styling for overlay (Phase M.2 v2) ──────────────────────
 // Takes overlay HTML (with analyse() highlight spans baked in) and wraps
-// markdown syntax characters in styled spans so headings render bold, bullets
-// render cleanly, and raw #/##/###/-/**/* fade to 30% opacity.
+// markdown syntax characters in styled spans. Preserves character-level
+// alignment with textarea — NO size/line-height changes, only weight/colour.
 function applyMarkdownStyling(html){
   if(!html) return html;
-
-  // Split on newlines so we can process line-anchored patterns (#, ##, ###, -, 1.).
-  // Rejoin with the same newlines to preserve overlay alignment with textarea.
   const lines = html.split('\n');
   const out = lines.map(line => {
-    // Match leading whitespace (if any) then the syntax marker.
-    // We only match at the very start of a line — inline #, -, digits are untouched.
-
     let m;
 
-    // ### heading
     m = line.match(/^(### )(.*)$/);
-    if(m){
-      return '<span class="md-h3"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
-    }
+    if(m) return '<span class="md-h3"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
 
-    // ## heading
     m = line.match(/^(## )(.*)$/);
-    if(m){
-      return '<span class="md-h2"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
-    }
+    if(m) return '<span class="md-h2"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
 
-    // # heading
     m = line.match(/^(# )(.*)$/);
-    if(m){
-      return '<span class="md-h1"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
-    }
+    if(m) return '<span class="md-h1"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
 
-    // Numbered list: digits followed by ". "
     m = line.match(/^(\d+\. )(.*)$/);
-    if(m){
-      return '<span class="md-ol"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
-    }
+    if(m) return '<span class="md-ol"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
 
-    // Bullet list: "- "
     m = line.match(/^(- )(.*)$/);
-    if(m){
-      return '<span class="md-li"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
-    }
+    if(m) return '<span class="md-li"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
 
-    // Plain line: just run inline processing
     return applyInlineMarkdown(line);
   });
-
   return out.join('\n');
 }
 
 function applyInlineMarkdown(s){
   if(!s) return s;
-  // Bold FIRST: **...** — match non-greedy, no newlines inside.
-  // Must not be empty, must not contain another ** inside (non-greedy handles this).
+  // Bold first: **...** non-greedy, no newlines
   let result = s.replace(/\*\*([^\n]+?)\*\*/g, function(_, inner){
     return '<span class="md-syntax">**</span><span class="md-bold">' + inner + '</span><span class="md-syntax">**</span>';
   });
-  // Italic NEXT: *...* where neither side is * (avoids catching ** which we already processed).
-  // The previous step replaced ** with span tags, so remaining * are either genuinely unpaired or italic pairs.
+  // Italic: *...* where neighbours are not * (avoids catching ** which is now replaced)
   result = result.replace(/(^|[^*>])\*([^*\n]+?)\*(?!\*)/g, function(_, pre, inner){
     return pre + '<span class="md-syntax">*</span><span class="md-italic">' + inner + '</span><span class="md-syntax">*</span>';
   });
