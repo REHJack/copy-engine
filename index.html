@@ -814,7 +814,7 @@ const ov  = document.getElementById('editor-overlay');
 
 const FILLERS = ['just','really','very','basically','actually','literally','simply','totally','perhaps','maybe','quite','slightly','rather','fairly','highly','extremely'];
 const STOP = new Set(['the','and','for','this','that','with','from','your','their','have','been','will','they','what','when','were','which','about','into','more','some','than','then','them','these','those','also','each','much','such','both','even','most','over','after','before','through','between','should','would','could','shall','does','doing','there','here','where','while','within','without','other','another','every','because','since','though','although','however','therefore','thus','hence','indeed','still','again','never','always','often','must','need','make','take','come','goes','like','many','well','back','only','same','good','high','long','great','small','large','next','last','first']);
-const PASSIVE_RE = /\b(am|is|are|was|were|be|been|being)\s+(shown|taken|known|given|seen|found|kept|told|held|brought|written|set|left|made|built|delivered|processed|organized|organised|published|[a-z]{4,}ed)\b/gi;
+const PASSIVE_RE = /\b(am|is|are|was|were|be|been|being)\s+(?!(?:relaxed|experienced|delighted|interested|painted|closed|tired|excited|pleased|bored|confused|worried|concerned|prepared|qualified|satisfied)\b)(shown|taken|known|given|seen|found|kept|told|held|brought|written|set|left|made|built|delivered|processed|organized|organised|published|thrown|caught|won|sung|eaten|broken|sunk|chosen|done|forgiven|drunk|swum|ridden|driven|spoken|stolen|torn|worn|flown|[a-z]{4,}ed)\b/gi;
 const PASSIVE_FIXES = {'is generated':'generates','was generated':'generated','are built':'build','was built':'built','is delivered':'delivers','was delivered':'delivered','is processed':'processes','was processed':'processed','is written':'writes','was written':'wrote','is made':'makes','was made':'made','is found':'finds','was found':'found','is known':'knows','was known':'knew','is seen':'sees','was seen':'saw','is given':'gives','was given':'gave','is shown':'shows','was shown':'showed','is taken':'takes','was taken':'took','is held':'holds','was held':'held','is told':'tells','was told':'told'};
 const CLICHES = {'game changer':'Describe the actual impact','game-changer':'Describe the actual impact','move the needle':'Specify what metric improves','synergy':'Try "collaboration" or be specific','think outside the box':'Describe the actual idea','low hanging fruit':'Try "quick wins"','low-hanging fruit':'Try "quick wins"','at the end of the day':'State your point directly','best in class':'Cite actual proof','best-in-class':'Cite actual proof','cutting edge':'Name the actual technology','cutting-edge':'Name the actual technology','world class':'Cite a stat or specific claim','world-class':'Cite a stat or specific claim','next level':'Describe the actual improvement','next-level':'Describe the actual improvement','robust':'Try "reliable" or "powerful"','leverage':'Try "use" or "apply"','scalable':'Describe what specifically grows','innovative':'Describe what makes it new','seamless':'Describe how it actually works','revolutionary':'Describe the actual change','disruptive':'Describe what it replaces','paradigm shift':'Describe the specific change','value add':'Describe the specific value','value-add':'Describe the specific value','circle back':'Try "follow up"','deep dive':'Try "detailed review"','bandwidth':'Try "capacity" or "time"'};
 const CTA_PHRASES = ['buy now','get started','sign up','subscribe','download','learn more','try free','start free','book a demo','get a demo','request a demo','contact us','get in touch','claim your','start today','join now','order now','shop now','get access','unlock','discover','find out','see how','watch now','read more','apply now','register now','schedule','book now','get your','claim now','try it','speak to us','get a quote','request a quote','start your','begin your'];
@@ -892,22 +892,46 @@ function splitSentencesWithSeps(text){
   // Each part: { text, sep } where text+sep exactly reconstructs the original.
   // CRITICAL: text+sep must be lossless — no trimming — so overlay stays
   // character-for-character identical to the textarea for correct cursor mapping.
-  const parts=[]; let buf='';
-  for(let i=0;i<text.length;i++){
-    const ch=text[i];
-    if('.!?'.includes(ch)&&i<text.length-1&&text[i+1]===' '){
-      // Sentence end: punctuation + space separator
-      buf+=ch;
-      parts.push({text:buf, sep:' '}); buf=''; i++;
-    } else if(ch==='\n'){
-      // Line break separator — buf may be empty (blank line) or have content
-      parts.push({text:buf, sep:'\n'}); buf='';
-    } else {
-      buf+=ch;
+  if(text==='') return [{text:'',sep:''}];
+  const ABBREVS=['mr','mrs','ms','dr','prof','sr','jr','st','mt','etc','ie','eg','vs','e.g','i.e','ph.d','u.s','u.k','inc','ltd','co','corp','no'];
+  const TRIGGERS=new Set(['.','!','?','\u2026']);
+  function isAbbrev(buf){
+    const trimmed=buf.trim().toLowerCase();
+    for(const abbr of ABBREVS){
+      if(trimmed.endsWith(abbr)){
+        const pos=trimmed.length-abbr.length;
+        if(pos===0||!/[a-zA-Z0-9]/.test(trimmed[pos-1])) return true;
+      }
     }
+    return false;
   }
-  // Remaining buffer with no trailing separator
-  parts.push({text:buf, sep:''});
+  const parts=[]; let buf=''; let i=0;
+  while(i<text.length){
+    const ch=text[i];
+    if(ch==='\n'){parts.push({text:buf,sep:'\n'});buf='';i++;continue;}
+    if(TRIGGERS.has(ch)){
+      if(ch==='.'){
+        const prev=buf.length>0?buf[buf.length-1]:'';
+        const next=i+1<text.length?text[i+1]:'';
+        if(/[a-zA-Z0-9]/.test(prev)&&/[a-zA-Z0-9]/.test(next)){buf+=ch;i++;continue;}
+      }
+      let triggerRun='';
+      while(i<text.length&&TRIGGERS.has(text[i])){triggerRun+=text[i];i++;}
+      const afterTrigger=i<text.length?text[i]:'';
+      const shouldSplit=afterTrigger!==''&&(/\s/.test(afterTrigger)||/[A-Z]/.test(afterTrigger));
+      if(shouldSplit&&!isAbbrev(buf)){
+        buf+=triggerRun;
+        let sep='';
+        while(i<text.length&&/\s/.test(text[i])){sep+=text[i];i++;}
+        parts.push({text:buf,sep});buf='';
+      } else {
+        buf+=triggerRun;
+      }
+      continue;
+    }
+    buf+=ch;i++;
+  }
+  parts.push({text:buf,sep:''});
   return parts;
 }
 
@@ -1253,6 +1277,21 @@ function kwDensityAdvice(pct, ct, count, wordCount){
   return `Increase usage — target ${ct.floor}–${ct.ideal}% for ${ct.label} (${Math.ceil(ct.floor/100*wordCount)}–${Math.ceil(ct.ideal/100*wordCount)} mentions at this word count).`;
 }
 
+// Keyword matching — supports special chars (c++, b&q, .net) and simple plural on last token
+function buildKeywordRegex(keyword, opts){
+  const g = opts && opts.global;
+  const kw = String(keyword||'').trim().toLowerCase();
+  if(!kw) return null;
+  const tokens = kw.split(/(\s+)/); // preserve spaces
+  const escaped = tokens.map(t => /^\s+$/.test(t) ? t : t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));
+  // Append plural suffix to the last non-space token only
+  for(let i=escaped.length-1; i>=0; i--){
+    if(!/^\s+$/.test(escaped[i])){ escaped[i] = escaped[i] + '(?:s|es)?'; break; }
+  }
+  const body = escaped.join('');
+  return new RegExp('(?<![a-z0-9])' + body + '(?![a-z0-9])', g ? 'gi' : 'i');
+}
+
 function updateKW(words, text){
   const total=words.length;
   const ct=getContentType();
@@ -1277,7 +1316,7 @@ function updateKW(words, text){
 
   // — Primary keyword block —
   if(tkw && total>0){
-    const re=new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
+    const re=buildKeywordRegex(tkw,{global:true});
     const matches=text.match(re)||[];
     const count=matches.length, pct=count/total*100, ps=pct.toFixed(2)+'%';
     const cls=kwDensityClass(pct,ct);
@@ -1298,7 +1337,7 @@ function updateKW(words, text){
 
     // Placement check — is keyword in first 100 words?
     const first100=text.trim().split(/\s+/).slice(0,100).join(' ');
-    const inFirst=(new RegExp(`\\b${tkw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'i')).test(first100);
+    const inFirst=buildKeywordRegex(tkw).test(first100);
     placementEl.style.display='flex';
     if(inFirst){
       placementEl.className='seo-placement found';
@@ -1333,7 +1372,7 @@ function updateKW(words, text){
       depthScore=0;
     } else {
       const secFound=secFilled.filter(k=>{
-        const r=new RegExp(`\\b${k.trim().toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'i');
+        const r=buildKeywordRegex(k);
         return r.test(text);
       }).length;
       depthScore=Math.round((secFound/Math.max(secFilled.length,1))*100);
@@ -1358,7 +1397,7 @@ function updateKW(words, text){
   if(secFilled.length>0 && total>0){
     secResultEl.innerHTML=secFilled.map(kw=>{
       const k=kw.trim().toLowerCase();
-      const r=new RegExp(`\\b${k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`,'gi');
+      const r=buildKeywordRegex(k,{global:true});
       const cnt=(text.match(r)||[]).length, p=cnt/total*100;
       let cls,badge;
       if(cnt===0){ cls='s-none'; badge='Not found'; }
