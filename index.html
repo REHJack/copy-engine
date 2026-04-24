@@ -1065,8 +1065,7 @@ function analyse(){
   document.getElementById('sWords').innerText  =lastWords.length;
   document.getElementById('sChars').innerText  =text.length;
 
-  const deduct=((pCount*5)+(fCount*2)+(cCount*3)+(repeatCount*2))/(lastWords.length||1)*100;
-  lastScore=Math.max(0,100-Math.round(deduct));
+  lastScore=scoreText(text);
   updateGauge(lastScore);
 
   const sylls=lastWords.reduce((a,w)=>a+countSylls(w),0);
@@ -1472,12 +1471,42 @@ function runDiff(){
   sum.innerHTML=`<span class="diff-chip diff-chip-add">+${added} added</span><span class="diff-chip diff-chip-rem">${removed} removed</span><span class="diff-chip diff-chip-score">Score: ${oldScore}% → ${lastScore}% (${sign}${diff}pts)</span>`;
 }
 
-function calcScore(text){
-  const words=text.trim().split(/\s+/).filter(w=>w.length>0); if(!words.length) return 0;
+function scoreText(text){
+  const words=text.trim().split(/\s+/).filter(w=>w.length>0);
+  if(!words.length) return 0;
+  const sentences=splitSentencesWithSeps(text).filter(p=>p.text.trim().length>0).map(p=>p.text);
+  let passive=0;
   const pr=new RegExp(PASSIVE_RE.source,'gi');
-  let p=(text.match(pr)||[]).length,f=0;
-  FILLERS.forEach(w=>{if(isBrandTerm(w)) return; f+=(text.match(new RegExp(`\\b${w}\\b`,'gi'))||[]).length;});
-  return Math.max(0,100-Math.round(((p*5)+(f*2))/(words.length)*100));
+  sentences.forEach(s=>{
+    pr.lastIndex=0;
+    let m; while((m=pr.exec(s))!==null){ passive++; if(m.index===pr.lastIndex) pr.lastIndex++; }
+  });
+  let filler=0;
+  FILLERS.forEach(w=>{
+    if(isBrandTerm(w)) return;
+    filler+=(text.match(new RegExp(`\\b${w}\\b`,'gi'))||[]).length;
+  });
+  let cliche=0;
+  Object.keys(CLICHES).forEach(phrase=>{
+    if(isBrandTerm(phrase)) return;
+    const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi');
+    cliche+=(text.match(re)||[]).length;
+  });
+  const wsMap={};
+  sentences.forEach((s,si)=>{
+    s.toLowerCase().replace(/[^a-z\s]/g,'').split(/\s+/)
+      .filter(w=>w.length>4&&!STOP.has(w)&&!FILLERS.includes(w)&&!isBrandTerm(w))
+      .forEach(w=>{ if(!wsMap[w]) wsMap[w]=[]; wsMap[w].push(si); });
+  });
+  let repeat=0;
+  Object.values(wsMap).forEach(idxs=>{
+    for(let i=1;i<idxs.length;i++){ if(idxs[i]-idxs[i-1]<=2){ repeat++; break; } }
+  });
+  const deduct=((passive*5)+(filler*2)+(cliche*3)+(repeat*2))/words.length*100;
+  return Math.max(0,100-Math.round(deduct));
+}
+function calcScore(text){
+  return scoreText(text);
 }
 
 function fixAllFillers(){
