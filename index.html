@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.4</title>
+<title>Copy Engine v6.7</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -88,6 +88,15 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .ch{background:#f3e8ff;box-shadow:0 2px 0 #a855f7;color:#6b21a8;border-radius:2px;cursor:pointer;position:relative}
 .rh{background:#dbeafe;box-shadow:0 2px 0 #3b82f6;color:#1e40af;border-radius:2px;cursor:pointer;position:relative}
 .vh{background:#fce7f3;box-shadow:0 2px 0 #ec4899;color:#9d174d;border-radius:2px}
+/* ── Markdown syntax styling (Phase M.2) ── */
+.md-syntax{color:rgba(26,26,26,0.3);font-weight:normal}
+.md-bold{font-weight:700}
+.md-italic{font-style:italic}
+.md-h1{font-weight:700;font-size:17px;color:#111}
+.md-h2{font-weight:700;font-size:16px;color:#111}
+.md-h3{font-weight:700;font-size:15px;color:#111}
+.md-li{display:inline}
+.md-ol{display:inline}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
 
@@ -525,7 +534,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.4</span>
+          <span class="sp-brand-ver">v6.7</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -576,7 +585,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.4</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.7</span></div>
       <div class="brand-sub" id="reportDate"></div>
     </div>
     <div class="btn-row no-print">
@@ -866,15 +875,241 @@ function onEditorInput(){
 
 ta.addEventListener('input', onEditorInput);
 
-// Strip HTML on paste, insert plain text
+// ── Markdown syntax styling for overlay (Phase M.2) ──────────────────────────
+// Takes overlay HTML (with analyse() highlight spans baked in) and wraps
+// markdown syntax characters in styled spans so headings render bold, bullets
+// render cleanly, and raw #/##/###/-/**/* fade to 30% opacity.
+function applyMarkdownStyling(html){
+  if(!html) return html;
+
+  // Split on newlines so we can process line-anchored patterns (#, ##, ###, -, 1.).
+  // Rejoin with the same newlines to preserve overlay alignment with textarea.
+  const lines = html.split('\n');
+  const out = lines.map(line => {
+    // Match leading whitespace (if any) then the syntax marker.
+    // We only match at the very start of a line — inline #, -, digits are untouched.
+
+    let m;
+
+    // ### heading
+    m = line.match(/^(### )(.*)$/);
+    if(m){
+      return '<span class="md-h3"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
+    }
+
+    // ## heading
+    m = line.match(/^(## )(.*)$/);
+    if(m){
+      return '<span class="md-h2"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
+    }
+
+    // # heading
+    m = line.match(/^(# )(.*)$/);
+    if(m){
+      return '<span class="md-h1"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
+    }
+
+    // Numbered list: digits followed by ". "
+    m = line.match(/^(\d+\. )(.*)$/);
+    if(m){
+      return '<span class="md-ol"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
+    }
+
+    // Bullet list: "- "
+    m = line.match(/^(- )(.*)$/);
+    if(m){
+      return '<span class="md-li"><span class="md-syntax">' + m[1] + '</span>' + applyInlineMarkdown(m[2]) + '</span>';
+    }
+
+    // Plain line: just run inline processing
+    return applyInlineMarkdown(line);
+  });
+
+  return out.join('\n');
+}
+
+function applyInlineMarkdown(s){
+  if(!s) return s;
+  // Bold FIRST: **...** — match non-greedy, no newlines inside.
+  // Must not be empty, must not contain another ** inside (non-greedy handles this).
+  let result = s.replace(/\*\*([^\n]+?)\*\*/g, function(_, inner){
+    return '<span class="md-syntax">**</span><span class="md-bold">' + inner + '</span><span class="md-syntax">**</span>';
+  });
+  // Italic NEXT: *...* where neither side is * (avoids catching ** which we already processed).
+  // The previous step replaced ** with span tags, so remaining * are either genuinely unpaired or italic pairs.
+  result = result.replace(/(^|[^*>])\*([^*\n]+?)\*(?!\*)/g, function(_, pre, inner){
+    return pre + '<span class="md-syntax">*</span><span class="md-italic">' + inner + '</span><span class="md-syntax">*</span>';
+  });
+  return result;
+}
+
+function htmlToMarkdown(html){
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  tmp.querySelectorAll('style,script,meta,link,colgroup,col').forEach(n => n.remove());
+  let md = walk(tmp).trim();
+  md = md.replace(/[ \t]+\n/g, '\n');
+  md = md.replace(/\n[ \t]+/g, '\n');
+  md = md.replace(/\n{3,}/g, '\n\n');
+  md = md.replace(/[ \t]{2,}/g, ' ');
+  return md;
+}
+
+function normaliseText(s){
+  return s
+    .replace(/[\u00A0]/g, ' ')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\r\n/g, '\n');
+}
+
+function isBoldFromStyle(style){
+  if(!style) return false;
+  const m = style.match(/font-weight:\s*(\d+|bold)/i);
+  if(!m) return false;
+  if(m[1].toLowerCase() === 'bold') return true;
+  return parseInt(m[1], 10) >= 600;
+}
+
+function isNormalWeightFromStyle(style){
+  if(!style) return false;
+  const m = style.match(/font-weight:\s*(\d+|normal)/i);
+  if(!m) return false;
+  if(m[1].toLowerCase() === 'normal') return true;
+  const n = parseInt(m[1], 10);
+  return !isNaN(n) && n < 600;
+}
+
+function isItalicFromStyle(style){
+  return /font-style:\s*italic/i.test(style || '');
+}
+
+function inlineChildren(node){
+  let out = '';
+  node.childNodes.forEach(c => { out += walk(c); });
+  return out;
+}
+
+function collapseInline(s){
+  return s.replace(/[\t\n]+/g, ' ').replace(/[ ]{2,}/g, ' ').replace(/^ +| +$/g, '');
+}
+
+// Strip surrounding ** only if they wrap the ENTIRE heading text.
+// Mid-heading bold (e.g. "What is an **NIE** number?") is preserved.
+function stripFullHeadingBold(s){
+  if(s.length < 4) return s;
+  if(!s.startsWith('**') || !s.endsWith('**')) return s;
+  const inner = s.slice(2, -2);
+  // If there are any other ** pairs inside, the outer pair isn't a clean full-wrap; leave as-is.
+  if(inner.includes('**')) return s;
+  return inner;
+}
+
+function walk(node){
+  if(node.nodeType === Node.TEXT_NODE){
+    return normaliseText(node.textContent);
+  }
+  if(node.nodeType !== Node.ELEMENT_NODE) return '';
+  const tag = node.tagName.toLowerCase();
+  const style = node.getAttribute('style') || '';
+
+  switch(tag){
+    case 'br': return '\n';
+
+    case 'h1': return '\n\n# ' + stripFullHeadingBold(collapseInline(inlineChildren(node))) + '\n\n';
+    case 'h2': return '\n\n## ' + stripFullHeadingBold(collapseInline(inlineChildren(node))) + '\n\n';
+    case 'h3':
+    case 'h4':
+    case 'h5':
+    case 'h6': return '\n\n### ' + stripFullHeadingBold(collapseInline(inlineChildren(node))) + '\n\n';
+
+    case 'p': {
+      const text = collapseInline(inlineChildren(node));
+      if(!text) return '\n\n';
+      return '\n\n' + text + '\n\n';
+    }
+
+    case 'div': {
+      const text = inlineChildren(node);
+      if(!text.trim()) return '';
+      if(/\n/.test(text)) return text;
+      return '\n' + text + '\n';
+    }
+
+    case 'b':
+    case 'strong': {
+      if(isNormalWeightFromStyle(style)){
+        return inlineChildren(node);
+      }
+      const inner = collapseInline(inlineChildren(node));
+      return inner ? '**' + inner + '**' : '';
+    }
+
+    case 'em':
+    case 'i': {
+      const inner = collapseInline(inlineChildren(node));
+      return inner ? '*' + inner + '*' : '';
+    }
+
+    case 'a': {
+      const raw = inlineChildren(node);
+      const leading = /^\s/.test(raw) ? ' ' : '';
+      const trailing = /\s$/.test(raw) ? ' ' : '';
+      const label = collapseInline(raw).replace(/^\*+|\*+$/g, '').trim();
+      const href = node.getAttribute('href') || '';
+      if(!label) return leading + trailing;
+      if(!href || href === label) return leading + label + trailing;
+      return leading + '[' + label + '](' + href + ')' + trailing;
+    }
+
+    case 'ul': {
+      const items = Array.from(node.children).filter(c => c.tagName.toLowerCase() === 'li');
+      if(!items.length) return '';
+      return '\n\n' + items.map(li => '- ' + collapseInline(inlineChildren(li))).join('\n') + '\n\n';
+    }
+
+    case 'ol': {
+      const items = Array.from(node.children).filter(c => c.tagName.toLowerCase() === 'li');
+      if(!items.length) return '';
+      let i = 1;
+      return '\n\n' + items.map(li => (i++) + '. ' + collapseInline(inlineChildren(li))).join('\n') + '\n\n';
+    }
+
+    case 'li': return inlineChildren(node);
+
+    case 'span': {
+      const raw = inlineChildren(node);
+      if(!raw) return '';
+      const leading = /^\s/.test(raw) ? ' ' : '';
+      const trailing = /\s$/.test(raw) ? ' ' : '';
+      let inner = raw.trim();
+      if(!inner) return leading;
+      const bold = isBoldFromStyle(style);
+      const italic = isItalicFromStyle(style);
+      const normalWeight = isNormalWeightFromStyle(style);
+      if(italic) inner = '*' + inner + '*';
+      if(bold && !normalWeight) inner = '**' + inner + '**';
+      return leading + inner + trailing;
+    }
+
+    default: {
+      return inlineChildren(node);
+    }
+  }
+}
+
+// Convert rich paste (Google Docs, Word, etc.) to markdown; fall back to plain text otherwise
 ta.addEventListener('paste', e=>{
   e.preventDefault();
-  const text = (e.clipboardData||window.clipboardData).getData('text/plain');
+  const cd = e.clipboardData || window.clipboardData;
+  const html = cd && cd.getData ? cd.getData('text/html') : '';
+  const plain = cd && cd.getData ? cd.getData('text/plain') : '';
+  const insert = (html && html.trim().length > 0) ? htmlToMarkdown(html) : plain;
   const start = ta.selectionStart, end = ta.selectionEnd;
   const before = ta.value.slice(0, start);
   const after  = ta.value.slice(end);
-  ta.value = before + text + after;
-  ta.selectionStart = ta.selectionEnd = start + text.length;
+  ta.value = before + insert + after;
+  ta.selectionStart = ta.selectionEnd = start + insert.length;
   onEditorInput();
 });
 
@@ -1055,7 +1290,7 @@ function analyse(){
     return html + sep;
   });
 
-  ov.innerHTML = sentHTMLs.join('');
+  ov.innerHTML = applyMarkdownStyling(sentHTMLs.join(''));
   syncScroll();
 
   document.getElementById('sPassive').innerText=pCount;
@@ -2196,7 +2431,7 @@ function closeGuide(){
       <button class="guide-back-btn" onclick="closeGuide()">&#8592; Back to Copy Engine</button>
       <div class="guide-brand">
         <span class="guide-brand-name">Copy Engine</span>
-        <span class="guide-brand-ver">v6.4</span>
+        <span class="guide-brand-ver">v6.7</span>
       </div>
     </div>
 
