@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.8</title>
+<title>Copy Engine v6.9</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -91,11 +91,11 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 /* ── Markdown syntax styling (Phase M.2 v2) ── */
 /* CRITICAL: no font-size or line-height changes — overlay must stay character-aligned with textarea */
 .md-syntax{color:rgba(26,26,26,0.3);font-weight:normal;font-style:normal}
-.md-bold{font-weight:700}
+.md-bold{font-weight:400;text-shadow:0.55px 0 0 currentColor}
 .md-italic{font-style:italic}
-.md-h1{font-weight:700;color:#000}
-.md-h2{font-weight:700;color:#111}
-.md-h3{font-weight:700;color:#222}
+.md-h1{font-weight:400;color:#000;text-shadow:0.55px 0 0 currentColor}
+.md-h2{font-weight:400;color:#111;text-shadow:0.55px 0 0 currentColor}
+.md-h3{font-weight:400;color:#222;text-shadow:0.55px 0 0 currentColor}
 .md-li{display:inline}
 .md-ol{display:inline}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
@@ -535,7 +535,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.8</span>
+          <span class="sp-brand-ver">v6.9</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -586,7 +586,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.8</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.9</span></div>
       <div class="brand-sub" id="reportDate"></div>
     </div>
     <div class="btn-row no-print">
@@ -636,7 +636,8 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <div id="readingTime" style="font-size:10px;color:#bbb;font-weight:700">— min read</div>
-            <button class="btn btn-ghost btn-sm" onclick="copyContent()" title="Copy formatted content for pasting into Google Docs or Word">Copy Content</button>
+            <span style="font-size:10px;color:#888;font-weight:600">Copies with formatting →</span>
+            <button class="btn btn-primary btn-sm" onclick="copyContent()" title="Copy formatted content for pasting into Google Docs or Word">Copy Content</button>
           </div>
         </div>
       </div>
@@ -878,6 +879,61 @@ function onEditorInput(){
 }
 
 ta.addEventListener('input', onEditorInput);
+
+// ── Markdown stripping for analysis (Phase M.4) ─────────────────────────────
+// stripMarkdown — removes syntax for measurement purposes (word/char count,
+// readability). Length CHANGES. Position-agnostic.
+function stripMarkdown(text){
+  if(!text) return text;
+  let out = text;
+  // Headings: line-anchored # / ## / ### + space
+  out = out.replace(/^### /gm, '');
+  out = out.replace(/^## /gm, '');
+  out = out.replace(/^# /gm, '');
+  // List markers: bullet "- " and numbered "N. "
+  out = out.replace(/^- /gm, '');
+  out = out.replace(/^\d+\. /gm, '');
+  // Links: [label](url) -> label
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');
+  // Bold: **text** -> text
+  out = out.replace(/\*\*([^*\n]+)\*\*/g, '$1');
+  // Italic: *text* (not ** — handled above)
+  out = out.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, '$1$2');
+  return out;
+}
+
+// maskMarkdown — replaces syntax characters with spaces. Length PRESERVED.
+// Use for per-character pattern detection where positions matter.
+function maskMarkdown(text){
+  if(!text) return text;
+  let out = text;
+
+  // Heading prefixes: keep length by replacing chars with spaces
+  out = out.replace(/^(### )/gm, '    ');                     // 4 chars in, 4 out
+  out = out.replace(/^(## )/gm, '   ');                       // 3 chars in, 3 out
+  out = out.replace(/^(# )/gm, '  ');                         // 2 chars in, 2 out
+  out = out.replace(/^(- )/gm, '  ');                         // 2 chars in, 2 out
+  out = out.replace(/^(\d+\. )/gm, function(m){ return ' '.repeat(m.length); });
+
+  // Links: [label](url) -> spaces + label + spaces, total length preserved
+  out = out.replace(/\[([^\]]+)\]\(([^)]+)\)/g, function(match, label, url){
+    // [ + label + ] + ( + url + ) = 1 + label.length + 1 + 1 + url.length + 1
+    // We keep label, replace [ ] ( url ) with spaces
+    return ' ' + label + ' '.repeat(2 + url.length + 1);
+  });
+
+  // Bold: **text** -> two spaces + text + two spaces (length preserved)
+  out = out.replace(/\*\*([^*\n]+)\*\*/g, function(match, inner){
+    return '  ' + inner + '  ';
+  });
+
+  // Italic: *text* -> space + text + space (length preserved)
+  out = out.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, function(match, pre, inner){
+    return pre + ' ' + inner + ' ';
+  });
+
+  return out;
+}
 
 // ── Markdown → HTML converter for Copy Content (Phase M.3) ──────────────────
 // Round-trip companion to htmlToMarkdown (M.1). Produces clean semantic HTML
@@ -1281,8 +1337,9 @@ document.addEventListener('click',e=>{
 function analyse(){
   const text = ta.value;
   if(!text.trim()){ resetUI(); return; }
+  const cleanText = stripMarkdown(text);
 
-  lastWords     = text.trim().split(/\s+/).filter(w=>w.length>0);
+  lastWords     = cleanText.trim().split(/\s+/).filter(w=>w.length>0);
   const sentParts = splitSentencesWithSeps(text);
   lastSentences = sentParts.filter(p=>p.text.trim().length>0).map(p=>p.text);
 
@@ -1314,6 +1371,7 @@ function analyse(){
   let sentIdx = 0;
   const sentHTMLs = sentParts.map((part) => {
     const sent = part.text;
+    const maskedSent = maskMarkdown(sent);
     const sep  = part.sep;
 
     if(!sent.trim()){
@@ -1327,24 +1385,24 @@ function analyse(){
     if(modes.filler) FILLERS.forEach(w=>{
       if(isBrandTerm(w)) return;
       const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){ fCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'fh',tip:null}); }
+      while((m=re.exec(maskedSent))!==null){ fCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'fh',tip:null}); }
     });
 
     if(modes.cliche) Object.entries(CLICHES).forEach(([phrase,tip])=>{
       if(isBrandTerm(phrase)) return;
       const re=new RegExp(`\\b${phrase.replace(/[-]/g,'[\\s-]')}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null){ cCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ch',tip}); }
+      while((m=re.exec(maskedSent))!==null){ cCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ch',tip}); }
     });
 
     if(modes.repeat) repeatSet.forEach(w=>{
       if(isBrandTerm(w)) return;
       const re=new RegExp(`\\b${w}\\b`,'gi'); let m;
-      while((m=re.exec(sent))!==null) ann.push({start:m.index,end:m.index+m[0].length,cls:'rh',tip:'Repeated nearby — try a synonym'});
+      while((m=re.exec(maskedSent))!==null) ann.push({start:m.index,end:m.index+m[0].length,cls:'rh',tip:'Repeated nearby — try a synonym'});
     });
 
     if(modes.passive){
       const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
-      while((m=pr.exec(sent))!==null){ pCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ph',tip:getSug(m[0])}); }
+      while((m=pr.exec(maskedSent))!==null){ pCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ph',tip:getSug(m[0])}); }
     }
 
     ann.sort((a,b)=>a.start-b.start||b.end-a.end);
@@ -1363,7 +1421,7 @@ function analyse(){
     if(pos<sent.length) html+=esc(sent.slice(pos));
 
     if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh">${html}</span>`;
-    const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
+    const wc=maskedSent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
     if(modes.sentence&&wc>=30) html=`<span class="sh">${html}</span>`;
     return html + sep;
   });
@@ -1376,7 +1434,7 @@ function analyse(){
   document.getElementById('sCliche').innerText =cCount;
   document.getElementById('sRepeat').innerText =repeatCount;
   document.getElementById('sWords').innerText  =lastWords.length;
-  document.getElementById('sChars').innerText  =text.length;
+  document.getElementById('sChars').innerText  =cleanText.length;
 
   lastScore=scoreText(text);
   updateGauge(lastScore);
