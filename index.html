@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.9</title>
+<title>Copy Engine v6.11</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -124,6 +124,24 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 .g-num{font-size:26px;font-weight:900;fill:#111;text-anchor:middle;font-family:inherit}
 .g-lbl{font-size:10px;fill:#bbb;text-anchor:middle;font-family:inherit}
 .score-msg{font-size:11px;color:#888;text-align:center;margin-top:7px;line-height:1.5;min-height:32px}
+
+/* ── Status indicators (Phase 5.2 — colour-independent) ── */
+.score-status{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:2px;font-size:11px;font-weight:700}
+.score-status-icon{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px}
+.aud-chip{position:relative}
+.aud-chip-icon{display:inline-flex;align-items:center;justify-content:center;width:11px;height:11px;margin-right:3px;vertical-align:-1px}
+
+/* ── Score breakdown panel (Phase 5.4) ── */
+.score-breakdown-toggle{background:none;border:none;font-size:11px;color:#6366f1;cursor:pointer;padding:6px 10px;font-weight:600;margin-top:4px;font-family:inherit}
+.score-breakdown-toggle:hover{color:#4f46e5;text-decoration:underline}
+.score-breakdown-panel{display:none;font-size:11px;line-height:1.6;margin-top:8px;padding:10px 12px;background:#fafafa;border-radius:8px;border:1px solid #f0f0f0}
+.score-breakdown-panel.open{display:block}
+.score-breakdown-row{display:flex;justify-content:space-between;padding:2px 0}
+.score-breakdown-label{display:inline-flex;align-items:center;gap:6px;color:#555}
+.score-breakdown-dot{width:8px;height:8px;border-radius:2px;display:inline-block}
+.score-breakdown-value{font-weight:600;color:#111}
+.score-breakdown-final{padding-top:6px;margin-top:6px;border-top:1px solid #e5e5e5;font-weight:700}
+.score-breakdown-base{color:#888}
 
 .read-val{font-size:18px;font-weight:800;color:#111;margin-bottom:3px}
 .read-desc{font-size:11px;color:#aaa;line-height:1.55}
@@ -535,7 +553,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.9</span>
+          <span class="sp-brand-ver">v6.11</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -586,7 +604,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.9</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.11</span></div>
       <div class="brand-sub" id="reportDate"></div>
     </div>
     <div class="btn-row no-print">
@@ -678,8 +696,14 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
             <text class="g-num" id="gNum" x="75" y="82">—</text>
             <text class="g-lbl" x="75" y="95">score</text>
           </svg>
+          <div class="score-status" id="scoreStatus" style="display:none">
+            <span class="score-status-icon" id="scoreStatusIcon"></span>
+            <span id="scoreStatusLabel"></span>
+          </div>
           <div class="score-msg" id="scoreMsg">Paste copy to begin.</div>
         </div>
+        <button class="score-breakdown-toggle" id="scoreBreakdownToggle" onclick="toggleScoreBreakdown()" style="display:none">Show breakdown ▾</button>
+        <div class="score-breakdown-panel" id="scoreBreakdownPanel"></div>
       </div>
 
       <div class="card">
@@ -1445,7 +1469,39 @@ function analyse(){
   document.getElementById('sChars').innerText  =cleanText.length;
 
   lastScore=scoreText(text);
+  renderScoreBreakdown(text);
   updateGauge(lastScore);
+
+  // Status indicator (Phase 5.2 — colour-independent)
+  const sStatus = document.getElementById('scoreStatus');
+  const sIcon   = document.getElementById('scoreStatusIcon');
+  const sLabel  = document.getElementById('scoreStatusLabel');
+  if(text.trim()){
+    let label, iconSvg, color;
+    if(lastScore >= 80){
+      label = 'Strong';
+      color = '#16a34a';
+      iconSvg = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>';
+    } else if(lastScore >= 60){
+      label = 'Good';
+      color = '#65a30d';
+      iconSvg = '<svg width="14" height="14" viewBox="0 0 16 16" fill="' + color + '"><circle cx="8" cy="8" r="3"/></svg>';
+    } else if(lastScore >= 40){
+      label = 'Needs work';
+      color = '#d97706';
+      iconSvg = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4v4M8 11v.5"/></svg>';
+    } else {
+      label = 'Weak';
+      color = '#dc2626';
+      iconSvg = '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+    }
+    sIcon.innerHTML = iconSvg;
+    sLabel.innerText = label;
+    sLabel.style.color = color;
+    sStatus.style.display = 'flex';
+  } else {
+    sStatus.style.display = 'none';
+  }
 
   const sylls=lastWords.reduce((a,w)=>a+countSylls(w),0);
   lastFK=206.835-(1.015*(lastWords.length/(lastSentences.length||1)))-(84.6*(sylls/(lastWords.length||1)));
@@ -1479,7 +1535,18 @@ function updateAudience(){
   const col=total>=75?'#22c55e':total>=50?'#f59e0b':'#ef4444';
   const lbl=total>=75?'Strong Match':total>=50?'Partial Match':'Poor Match';
   const fkLabel=lastFK>=80?'Very Easy':lastFK>=70?'Easy':lastFK>=60?'Fairly Easy':lastFK>=50?'Standard':lastFK>=40?'Fairly Difficult':lastFK>=30?'Difficult':'Very Difficult';
-  el.innerHTML=`<div class="aud-score-row" style="margin-bottom:4px"><span class="aud-score-num" style="color:${col}">${total}%</span><span style="font-size:11px;font-weight:800;color:${col}">${lbl}</span></div><div class="aud-bar-track"><div class="aud-bar-fill" style="width:${total}%;background:${col}"></div></div><div class="aud-feedback">${prof.desc}</div><div class="aud-detail"><div class="aud-chip"><div class="aud-chip-val" style="color:${fkScore>=28?'#16a34a':fkScore>=15?'#d97706':'#dc2626'}">${fkLabel}</div><div class="aud-chip-lbl">Readability</div></div><div class="aud-chip"><div class="aud-chip-val" style="color:${avgLen<=prof.sentLen?'#16a34a':'#d97706'}">${Math.round(avgLen)}w ${avgLen<=prof.sentLen?'✓':'↑ long'}</div><div class="aud-chip-lbl">Avg Sentence</div></div></div>`;
+  const fkColor = fkScore>=28 ? '#16a34a' : fkScore>=15 ? '#d97706' : '#dc2626';
+  const fkIcon = fkScore>=28
+    ? '<svg class="aud-chip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+fkColor+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>'
+    : fkScore>=15
+      ? '<svg class="aud-chip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+fkColor+'" stroke-width="3" stroke-linecap="round"><path d="M8 4v4M8 11v.5"/></svg>'
+      : '<svg class="aud-chip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+fkColor+'" stroke-width="3" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>';
+  const slColor = avgLen<=prof.sentLen ? '#16a34a' : '#d97706';
+  const slIcon = avgLen<=prof.sentLen
+    ? '<svg class="aud-chip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+slColor+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 4.5"/></svg>'
+    : '<svg class="aud-chip-icon" width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="'+slColor+'" stroke-width="3" stroke-linecap="round"><path d="M8 4v4M8 11v.5"/></svg>';
+
+  el.innerHTML=`<div class="aud-score-row" style="margin-bottom:4px"><span class="aud-score-num" style="color:${col}">${total}%</span><span style="font-size:11px;font-weight:800;color:${col}">${lbl}</span></div><div class="aud-bar-track"><div class="aud-bar-fill" style="width:${total}%;background:${col}"></div></div><div class="aud-feedback">${prof.desc}</div><div class="aud-detail"><div class="aud-chip"><div class="aud-chip-val" style="color:${fkColor}">${fkIcon}${fkLabel}</div><div class="aud-chip-lbl">Readability</div></div><div class="aud-chip"><div class="aud-chip-val" style="color:${slColor}">${slIcon}${Math.round(avgLen)}w ${avgLen<=prof.sentLen?'✓':'↑ long'}</div><div class="aud-chip-lbl">Avg Sentence</div></div></div>`;
 }
 
 function updateRead(s){
@@ -2002,6 +2069,117 @@ function scoreText(text){
   const deduct=((passive*5)+(filler*2)+(cliche*3)+(repeat*2))/words.length*100;
   return Math.max(0,100-Math.round(deduct));
 }
+
+// ── Score breakdown for click-to-expand UI (Phase 5.4) ──────────────────────
+// Returns the same final score as scoreText, plus the component breakdown
+// (counts, weights, deductions) so the UI can show why a score is what it is.
+function scoreBreakdown(text){
+  const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+  const base = 100;
+  const components = {
+    passive: { count: 0, weight: 5, deduction: 0 },
+    filler:  { count: 0, weight: 2, deduction: 0 },
+    cliche:  { count: 0, weight: 3, deduction: 0 },
+    repeat:  { count: 0, weight: 2, deduction: 0 }
+  };
+  if(!words.length){
+    return { base, words: 0, components, final: 0 };
+  }
+
+  const sentences = splitSentencesWithSeps(text).filter(p => p.text.trim().length > 0).map(p => p.text);
+
+  // Passive
+  const pr = new RegExp(PASSIVE_RE.source, 'gi');
+  sentences.forEach(s => {
+    pr.lastIndex = 0;
+    let m; while((m = pr.exec(s)) !== null){ components.passive.count++; if(m.index === pr.lastIndex) pr.lastIndex++; }
+  });
+
+  // Filler
+  FILLERS.forEach(w => {
+    if(isBrandTerm(w)) return;
+    components.filler.count += (text.match(new RegExp(`\\b${w}\\b`, 'gi')) || []).length;
+  });
+
+  // Cliché
+  Object.keys(CLICHES).forEach(phrase => {
+    if(isBrandTerm(phrase)) return;
+    const re = new RegExp(`\\b${phrase.replace(/[-]/g, '[\\s-]')}\\b`, 'gi');
+    components.cliche.count += (text.match(re) || []).length;
+  });
+
+  // Repeat
+  const wsMap = {};
+  sentences.forEach((s, si) => {
+    s.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/)
+      .filter(w => w.length > 4 && !STOP.has(w) && !FILLERS.includes(w) && !isBrandTerm(w))
+      .forEach(w => { if(!wsMap[w]) wsMap[w] = []; wsMap[w].push(si); });
+  });
+  Object.values(wsMap).forEach(idxs => {
+    for(let i = 1; i < idxs.length; i++){ if(idxs[i] - idxs[i-1] <= 2){ components.repeat.count++; break; } }
+  });
+
+  // Per-component deductions: weighted count, normalised by word count, rounded
+  ['passive','filler','cliche','repeat'].forEach(k => {
+    const c = components[k];
+    c.deduction = Math.round((c.count * c.weight) / words.length * 100);
+  });
+
+  // Final score: same formula as scoreText (don't sum component deductions — rounding accumulates)
+  const totalDeduct = ((components.passive.count * 5) + (components.filler.count * 2) + (components.cliche.count * 3) + (components.repeat.count * 2)) / words.length * 100;
+  const final = Math.max(0, 100 - Math.round(totalDeduct));
+
+  return { base, words: words.length, components, final };
+}
+
+// ── Score breakdown UI (Phase 5.4) ──────────────────────────────────────────
+function renderScoreBreakdown(text){
+  const toggle = document.getElementById('scoreBreakdownToggle');
+  const panel  = document.getElementById('scoreBreakdownPanel');
+  if(!text.trim()){
+    toggle.style.display = 'none';
+    panel.classList.remove('open');
+    panel.innerHTML = '';
+    return;
+  }
+  toggle.style.display = 'inline-block';
+  const b = scoreBreakdown(text);
+  const colours = {
+    passive: '#ef4444',
+    filler:  '#eab308',
+    cliche:  '#a855f7',
+    repeat:  '#3b82f6'
+  };
+  const labels = {
+    passive: 'Passive',
+    filler:  'Fillers',
+    cliche:  'Clichés',
+    repeat:  'Repeats'
+  };
+  let rows = `<div class="score-breakdown-row"><span class="score-breakdown-label score-breakdown-base">Base</span><span class="score-breakdown-value score-breakdown-base">${b.base}</span></div>`;
+  ['passive','filler','cliche','repeat'].forEach(k => {
+    const c = b.components[k];
+    const ded = c.deduction > 0 ? `−${c.deduction}` : '0';
+    const dedStyle = c.deduction > 0 ? `color:${colours[k]}` : 'color:#888';
+    rows += `<div class="score-breakdown-row"><span class="score-breakdown-label"><span class="score-breakdown-dot" style="background:${colours[k]}"></span>${labels[k]} (${c.count})</span><span class="score-breakdown-value" style="${dedStyle}">${ded}</span></div>`;
+  });
+  rows += `<div class="score-breakdown-row score-breakdown-final"><span>Final</span><span>${b.final}</span></div>`;
+  panel.innerHTML = rows;
+}
+
+function toggleScoreBreakdown(){
+  const panel  = document.getElementById('scoreBreakdownPanel');
+  const toggle = document.getElementById('scoreBreakdownToggle');
+  const isOpen = panel.classList.contains('open');
+  if(isOpen){
+    panel.classList.remove('open');
+    toggle.innerText = 'Show breakdown ▾';
+  } else {
+    panel.classList.add('open');
+    toggle.innerText = 'Hide breakdown ▴';
+  }
+}
+
 function calcScore(text){
   return scoreText(text);
 }
@@ -2431,6 +2609,10 @@ function resetUI(){
   const fill=document.getElementById('gFill'); fill.style.strokeDashoffset='0'; fill.style.stroke='#e5e5e5';
   document.getElementById('gNum').innerText='—';
   document.getElementById('scoreMsg').innerText='Paste copy to begin.';
+  document.getElementById('scoreStatus').style.display = 'none';
+  document.getElementById('scoreBreakdownToggle').style.display = 'none';
+  document.getElementById('scoreBreakdownPanel').classList.remove('open');
+  document.getElementById('scoreBreakdownPanel').innerHTML = '';
   document.getElementById('readVal').innerText='—';
   document.getElementById('readDesc').innerText='Paste text to calculate.';
   document.getElementById('kwList').innerHTML='<p style="font-size:11px;color:#ccc;font-style:italic">No keywords yet.</p>';
