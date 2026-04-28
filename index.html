@@ -1305,9 +1305,17 @@ function splitSentencesWithSeps(text){
 }
 
 function countSylls(word){
-  word=word.toLowerCase(); if(word.length<=3) return 1;
-  word=word.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/,'').replace(/^y/,'');
-  const s=word.match(/[aeiouy]{1,2}/g); return s?s.length:1;
+  const cleaned = word.toLowerCase().replace(/[^a-z]/g,'');
+  if(cleaned.length === 0) return 0;
+  if(cleaned.length <= 3) return 1;
+  let w = cleaned;
+  w = w.replace(/[^laeiouy]es$/, m => m[0]);
+  w = w.replace(/([^td])ed$/, '$1');
+  w = w.replace(/([^l])e$/, '$1');
+  w = w.replace(/^y/, '');
+  if(w.length === 0) return 1;
+  const groups = w.match(/[aeiouy]{1,3}/g);
+  return groups ? groups.length : 1;
 }
 
 function getSug(m){
@@ -1485,14 +1493,41 @@ function updateRead(s){
   else{v.innerText='Very Difficult';d.innerText='Dense and complex. Likely to lose most readers.';}
 }
 
+// Pure tone classification (no DOM, testable). Returns 'aggressive' | 'formal' | 'conversational' | 'neutral'.
+function detectToneClass(words, AGG, FORM, CONV){
+  if(!words || words.length === 0) return 'neutral';
+  const lc = words.map(w => w.toLowerCase().replace(/[^a-z]/g,''));
+  const agg = lc.filter(w => AGG.includes(w)).length;
+  const frm = lc.filter(w => FORM.includes(w)).length;
+  const cnv = lc.filter(w => CONV.includes(w)).length;
+  const total = words.length;
+
+  // Short documents (<30 words): use absolute thresholds — relative rates aren't meaningful
+  if(total < 30){
+    if(agg >= 2) return 'aggressive';
+    if(frm >= 2) return 'formal';
+    if(cnv >= 4) return 'conversational';
+    return 'neutral';
+  }
+
+  // Longer documents: per-1000-words rates with tuned thresholds
+  const aggRate = (agg / total) * 1000;
+  const frmRate = (frm / total) * 1000;
+  const cnvRate = (cnv / total) * 1000;
+
+  if(aggRate >= 8) return 'aggressive';
+  if(frmRate >= 8) return 'formal';
+  if(cnvRate >= 16) return 'conversational';
+  return 'neutral';
+}
+
 function detectTone(words){
-  const lc=words.map(w=>w.toLowerCase().replace(/[^a-z]/g,''));
-  const agg=lc.filter(w=>TONE_AGG.includes(w)).length,frm=lc.filter(w=>TONE_FORM.includes(w)).length,cnv=lc.filter(w=>TONE_CONV.includes(w)).length;
+  const cls = detectToneClass(words, TONE_AGG, TONE_FORM, TONE_CONV);
   const badge=document.getElementById('toneBadge'),desc=document.getElementById('toneDesc');
   badge.className='tone-badge';
-  if(agg>=2){badge.classList.add('t-agg');badge.innerText='🔥 Aggressive';desc.innerText='High-energy. Great for urgency-driven ads.';}
-  else if(frm>=2){badge.classList.add('t-form');badge.innerText='📋 Formal';desc.innerText='Professional tone. Well-suited to B2B or whitepapers.';}
-  else if(cnv>=4){badge.classList.add('t-conv');badge.innerText='💬 Conversational';desc.innerText='Friendly and direct. Ideal for consumer-facing copy.';}
+  if(cls === 'aggressive'){badge.classList.add('t-agg');badge.innerText='🔥 Aggressive';desc.innerText='High-energy. Great for urgency-driven ads.';}
+  else if(cls === 'formal'){badge.classList.add('t-form');badge.innerText='📋 Formal';desc.innerText='Professional tone. Well-suited to B2B or whitepapers.';}
+  else if(cls === 'conversational'){badge.classList.add('t-conv');badge.innerText='💬 Conversational';desc.innerText='Friendly and direct. Ideal for consumer-facing copy.';}
   else{badge.classList.add('t-neut');badge.innerText='⚖️ Neutral';desc.innerText='Balanced tone. Consider sharpening for your audience.';}
 }
 
@@ -1507,8 +1542,99 @@ function updateVariety(sentences,issues){
   el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px"><span style="font-size:22px;font-weight:900;color:${col}">${score}%</span><span style="font-size:10px;color:#aaa">${ic} issue${ic!==1?'s':''}</span></div><div class="variety-track"><div class="variety-fill" style="width:${score}%;background:${col}"></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin:9px 0">${[['Short',sh],['Medium',md],['Long',lg]].map(([l,n])=>`<div style="text-align:center;background:#f8fafc;border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:900;color:#555">${n}</div><div style="font-size:9px;color:#bbb;font-weight:700;text-transform:uppercase;margin-top:2px">${l}</div></div>`).join('')}</div><p style="font-size:11px;color:#888;line-height:1.55">${fb}</p>`;
 }
 
+// Pure CTA detection — returns [{phrase, reason}] for legitimate CTAs in text.
+// reason ∈ {'sentence-initial', 'imperative-short', 'followed-by-cue'}.
+// Narrative/descriptive mentions of CTA phrases are NOT detected.
+function detectCTAPhrases(text, ctaList){
+  if(!text || !text.trim() || !ctaList || !ctaList.length) return [];
+
+  // Cue words/markers that indicate a CTA-like context immediately after a phrase
+  const CUE_WORDS = ['today','now','free','here','below'];
+
+  // Split into sentences using same separators as the rest of the analysis
+  const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+
+  const detections = [];
+  const seenPhrases = new Set();
+
+  for(const sentence of sentences){
+    const sLower = sentence.toLowerCase();
+    const sTrimmed = sentence.trim();
+    const words = sTrimmed.split(/\s+/);
+    const wordCount = words.length;
+
+    for(const phrase of ctaList){
+      const phraseLower = phrase.toLowerCase();
+      const idx = sLower.indexOf(phraseLower);
+      if(idx < 0) continue;
+
+      // RULE 1 — sentence-initial: phrase starts at position 0 (after optional whitespace)
+      // and original text capitalises the first letter.
+      const isSentenceInitial = (() => {
+        const beforePhrase = sentence.substring(0, idx);
+        if(beforePhrase.trim() !== '') return false;
+        const firstChar = sentence.substring(idx, idx + 1);
+        return firstChar === firstChar.toUpperCase() && firstChar !== firstChar.toLowerCase();
+      })();
+
+      if(isSentenceInitial){
+        if(!seenPhrases.has(phraseLower)){
+          detections.push({phrase: phraseLower, reason: 'sentence-initial'});
+          seenPhrases.add(phraseLower);
+        }
+        continue;
+      }
+
+      // Compute word index where phrase starts
+      const before = sentence.substring(0, idx).trim();
+      const wordIdx = before.length === 0 ? 0 : before.split(/\s+/).length;
+
+      // RULE 2 — imperative-short: sentence is short (<12 words), phrase starts within first 4 words,
+      // AND sentence opens with an imperative-shaped clause (no subject pronoun, no "[X] can/will/might" narrative pattern).
+      if(wordCount < 12 && wordIdx <= 4){
+        const firstWord = words[0].toLowerCase().replace(/[^a-z]/g,'');
+        const secondWord = words[1] ? words[1].toLowerCase().replace(/[^a-z]/g,'') : '';
+        const SUBJECT_OPENERS = ['i','you','we','they','he','she','it','our','your','my','their','his','her','its','users','customers','people','clients','readers','someone','everyone','anyone','many','most','some','few','all'];
+        const MODAL_VERBS = ['can','could','will','would','might','may','should','must','shall'];
+        const opensWithSubject = SUBJECT_OPENERS.includes(firstWord);
+        const opensWithSubjectModal = SUBJECT_OPENERS.includes(firstWord) && MODAL_VERBS.includes(secondWord);
+        // Also catch "[noun] + modal" pattern with relative clause: "Customers who download now..."
+        const hasRelativeClauseModal = words.length >= 4 && (words[1].toLowerCase() === 'who' || words[1].toLowerCase() === 'that');
+
+        if(!opensWithSubject && !opensWithSubjectModal && !hasRelativeClauseModal){
+          if(!seenPhrases.has(phraseLower)){
+            detections.push({phrase: phraseLower, reason: 'imperative-short'});
+            seenPhrases.add(phraseLower);
+          }
+          continue;
+        }
+        // Falls through to RULE 3 (followed-by-cue) — narrative-style sentences can still qualify if a cue word appears
+      }
+
+      // RULE 3 — followed-by-cue: phrase is immediately followed by a cue word or '!'
+      const after = sentence.substring(idx + phrase.length).trim();
+      const cueMatch = after.match(/^([a-z]+|!)/i);
+      if(cueMatch){
+        const cue = cueMatch[1].toLowerCase();
+        if(cue === '!' || CUE_WORDS.includes(cue)){
+          if(!seenPhrases.has(phraseLower)){
+            detections.push({phrase: phraseLower, reason: 'followed-by-cue'});
+            seenPhrases.add(phraseLower);
+          }
+          continue;
+        }
+      }
+
+      // No rule matched — this is a narrative use, skip.
+    }
+  }
+
+  return detections;
+}
+
 function detectCTA(text){
-  const lower=text.toLowerCase(),found=CTA_PHRASES.filter(p=>lower.includes(p));
+  const detections = detectCTAPhrases(text, CTA_PHRASES);
+  const found = detections.map(d => d.phrase);
   const el=document.getElementById('ctaBlock');
   if(found.length>0){
     const str=found.length>=3?'💪 Strong':found.length===2?'👍 Good':'⚠️ Weak';
@@ -1572,13 +1698,13 @@ function renderBrandTerms(){
 // Returns true if a word/phrase should be skipped because it matches a brand term
 function isBrandTerm(str){
   if(!brandTerms.length) return false;
-  const lc = str.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
+  // Normalise: lowercase, strip non-alphanum-or-space, collapse multi-space, trim
+  const lc = str.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
   return brandTerms.some(t => {
-    // Exact match
-    if(lc === t) return true;
-    // Multi-word brand term contained within a phrase (e.g. "deep dive" in cliche list)
-    if(t.includes(' ') && lc.includes(t)) return true;
-    return false;
+    const normT = t.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
+    // Whole-string match only (after normalisation). Multi-word brand terms
+    // no longer match when they're a substring of a longer phrase.
+    return lc === normT;
   });
 }
 
