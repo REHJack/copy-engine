@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.11</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<title>Copy Engine v6.16</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;color:#1a1a1a;min-height:100vh;font-size:14px}
@@ -553,7 +552,7 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.11</span>
+          <span class="sp-brand-ver">v6.16</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -604,21 +603,13 @@ body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f5f5f7;
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.11</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.16</span></div>
       <div class="brand-sub" id="reportDate"></div>
     </div>
     <div class="btn-row no-print">
       <button class="btn btn-ghost btn-sm" onclick="fixAllFillers()">⚡ Fix Fillers</button>
       <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ AI Audit</button>
       <button class="btn btn-ghost btn-sm" onclick="openCreateFolderModal()">📁 New Folder</button>
-      <button class="btn btn-teal btn-sm" onclick="downloadHTML()">
-        <svg width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/></svg>
-        HTML
-      </button>
-      <button class="btn btn-primary btn-sm" onclick="downloadPDF()">
-        <svg width="11" height="11" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
-        PDF
-      </button>
     </div>
   </div>
 
@@ -2185,10 +2176,24 @@ function calcScore(text){
 }
 
 function fixAllFillers(){
-  let t=ta.value; if(!t.trim()) return;
-  FILLERS.forEach(w=>{if(isBrandTerm(w)) return; t=t.replace(new RegExp(`\\s?\\b${w}\\b\\s?`,'gi'),' ');});
-  ta.value=t.replace(/ {2,}/g,' ').replace(/ ([.,!?;:])/g,'$1').trim();
+  const t=ta.value; if(!t.trim()) return;
+  let count=0;
+  FILLERS.forEach(w=>{
+    if(isBrandTerm(w)) return;
+    const matches=t.match(new RegExp(`\\b${w}\\b`,'gi'));
+    if(matches) count+=matches.length;
+  });
+  if(count===0){
+    showToast('No fillers found in current copy');
+    return;
+  }
+  const fillerWord = count === 1 ? 'filler word' : 'filler words';
+  if(!confirm(`Remove ${count} ${fillerWord} from your copy?\n\nThis cannot be undone.`)) return;
+  let cleaned=t;
+  FILLERS.forEach(w=>{if(isBrandTerm(w)) return; cleaned=cleaned.replace(new RegExp(`\\s?\\b${w}\\b\\s?`,'gi'),' ');});
+  ta.value=cleaned.replace(/ {2,}/g,' ').replace(/ ([.,!?;:])/g,'$1').trim();
   onEditorInput();
+  showToast(`✓ Removed ${count} ${fillerWord}`);
 }
 
 // ── Folders & History ────────────────────────────────────────────────────────
@@ -2842,17 +2847,6 @@ function renderAI(issues, text){
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 
-function downloadHTML(){
-  const blob=new Blob([document.documentElement.outerHTML],{type:'text/html;charset=utf-8'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`CopyEngine_${Date.now()}.html`; a.click(); URL.revokeObjectURL(a.href);
-  showToast('✓ HTML downloaded');
-}
-function downloadPDF(){
-  const panel=document.getElementById('aiPanel'),wasOpen=panel.classList.contains('open');
-  panel.classList.remove('open');
-  html2pdf().set({margin:0.35,filename:`CopyAudit_${Date.now()}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}})
-  .from(document.getElementById('reportContent')).save().then(()=>{if(wasOpen)panel.classList.add('open');});
-}
 
 window.addEventListener('DOMContentLoaded', persistLoad);
 
@@ -2875,7 +2869,7 @@ function closeGuide(){
       <button class="guide-back-btn" onclick="closeGuide()">&#8592; Back to Copy Engine</button>
       <div class="guide-brand">
         <span class="guide-brand-name">Copy Engine</span>
-        <span class="guide-brand-ver">v6.7</span>
+        <span class="guide-brand-ver">v6.16</span>
       </div>
     </div>
 
