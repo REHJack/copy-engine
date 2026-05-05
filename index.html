@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.18</title>
+<title>Copy Engine v6.20</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
@@ -240,6 +240,49 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .issue-why{font-size:11px;color:#888;line-height:1.6;margin-bottom:5px}
 .issue-fix{font-size:11px;color:#16a34a;background:#f0fdf4;border-radius:6px;padding:6px 9px;line-height:1.6;border-left:2px solid #86efac}
 .issue-fix strong{color:#15803d}
+/* Brand source badge on issue cards */
+.issue-brand-badge{display:inline-flex;align-items:center;gap:3px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:99px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;white-space:nowrap}
+/* Brand issue type tags */
+.tag-banned{background:#fef2f2;color:#991b1b}
+.tag-preferred{background:#ecfdf5;color:#065f46}
+.tag-avoid{background:#fefce8;color:#854d0e}
+/* Override (suppressed) section */
+.override-section{border:1.5px solid #f0f0f0;border-radius:10px;margin-top:4px;overflow:hidden}
+.override-section>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:9px 13px;cursor:pointer;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb;user-select:none;transition:background .12s}
+.override-section>summary::-webkit-details-marker{display:none}
+.override-section>summary:hover{background:#f8fafc}
+.override-section-caret{font-size:11px;color:#ccc;transition:transform .18s;flex-shrink:0}
+.override-section[open] .override-section-caret{transform:rotate(180deg)}
+.override-section-body{padding:0 10px 10px}
+.override-card{background:#fafafa;border:1.5px solid #f0f0f0;border-radius:9px;padding:10px 12px;margin-bottom:7px;transition:border-color .15s}
+.override-card:last-child{margin-bottom:0}
+.override-card:hover{border-color:#d0d0d0;cursor:default}
+.override-card-head{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+.override-type-tag{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:99px;background:#f5f5f5;color:#999}
+.override-badge{display:inline-flex;align-items:center;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:99px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;opacity:.75}
+.override-reason{font-size:11px;color:#666;line-height:1.55}
+.override-phrase{font-size:10px;color:#bbb;font-style:italic;margin-top:5px}
+/* Settings gear + dropdown */
+.settings-wrap{position:relative}
+.settings-btn{background:none;border:1.5px solid #e0e0e0;border-radius:7px;font-size:13px;color:#888;cursor:pointer;padding:4px 8px;line-height:1;transition:all .15s;font-family:inherit}
+.settings-btn:hover{border-color:#999;color:#555}
+.settings-dropdown{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1.5px solid #e5e5e5;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.1);min-width:196px;z-index:600;padding:6px}
+.settings-dd-item{display:block;width:100%;text-align:left;background:none;border:none;font-size:12px;font-weight:600;color:#333;padding:8px 12px;border-radius:7px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .12s}
+.settings-dd-item:hover{background:#f5f5f7;color:#111}
+.settings-dd-sep{height:1px;background:#f0f0f0;margin:4px 0}
+.settings-dd-note{font-size:10px;color:#bbb;padding:6px 12px 3px;line-height:1.4}
+/* Backup reminder */
+.backup-reminder{font-size:10px;color:#bbb;margin-top:14px;line-height:1.5;text-align:center}
+.backup-warn{color:#f59e0b;font-weight:600}
+/* Import confirm modal */
+.import-confirm-body{font-size:12px;color:#666;line-height:1.6;margin-bottom:4px}
+.import-confirm-body strong{color:#111}
+.import-confirm-warn{background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:8px 11px;margin-top:8px;font-size:11px;color:#92400e;line-height:1.5}
+/* Error modal */
+.import-error-msg{font-size:12px;color:#666;line-height:1.6;background:#fef2f2;border:1.5px solid #fecaca;border-radius:8px;padding:10px 12px;margin-top:2px}
+/* Import link in empty state */
+.cp-import-link{background:none;border:none;color:#6366f1;font-size:11px;font-weight:700;cursor:pointer;padding:0;font-family:inherit;text-decoration:underline;display:inline}
+.cp-import-link:hover{color:#4f46e5}
 
 /* Rewrite */
 .ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
@@ -310,31 +353,31 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .bt-hint{font-size:10px;color:#9ca3af;margin-top:8px;line-height:1.5}
 
 /* ── Folder Tabs Row ── */
-#folderTabsRow{scrollbar-width:none}
-#folderTabs::-webkit-scrollbar{display:none}
-.folder-tab{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;font-size:12px;font-weight:700;color:#aaa;cursor:pointer;border:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s;background:none;font-family:inherit;flex-shrink:0;margin-bottom:-1.5px}
-.folder-tab:hover{color:#555}
-.folder-tab.active{color:#111;border-bottom-color:#6366f1}
-.folder-tab-count{font-size:9px;font-weight:800;background:#f0f0f0;color:#888;padding:2px 6px;border-radius:99px;line-height:1}
-.folder-tab.active .folder-tab-count{background:#ede9fe;color:#6366f1}
+#clientTabsRow{scrollbar-width:none}
+#clientTabs::-webkit-scrollbar{display:none}
+.client-tab{display:inline-flex;align-items:center;gap:7px;padding:9px 14px;font-size:12px;font-weight:700;color:#aaa;cursor:pointer;border:none;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s;background:none;font-family:inherit;flex-shrink:0;margin-bottom:-1.5px}
+.client-tab:hover{color:#555}
+.client-tab.active{color:#111;border-bottom-color:#6366f1}
+.client-tab-count{font-size:9px;font-weight:800;background:#f0f0f0;color:#888;padding:2px 6px;border-radius:99px;line-height:1}
+.client-tab.active .client-tab-count{background:#ede9fe;color:#6366f1}
 
 /* ── Folder Tab Dropdown ── */
-.folder-dropdown{position:fixed;background:#fff;border:1.5px solid #e5e5e5;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:500;min-width:260px;max-width:320px;padding:8px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .15s,transform .15s}
-.folder-dropdown.open{opacity:1;transform:translateY(0);pointer-events:all}
-.folder-dropdown-header{display:flex;justify-content:space-between;align-items:center;padding:6px 8px 8px;border-bottom:1px solid #f0f0f0;margin-bottom:6px}
-.folder-dropdown-name{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb}
-.folder-dropdown-close{background:none;border:none;font-size:18px;color:#ccc;cursor:pointer;line-height:1;padding:0;font-family:inherit;transition:color .15s}
-.folder-dropdown-close:hover{color:#555}
-.folder-dropdown-entry{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
-.folder-dropdown-entry:hover{background:#f5f5ff}
-.folder-dropdown-entry.is-open{background:#f0eeff}
-.folder-dropdown-entry-left{flex:1;min-width:0}
-.folder-dropdown-entry-name{font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.folder-dropdown-entry-meta{font-size:10px;color:#bbb;margin-top:1px}
-.folder-dropdown-entry-score{font-size:12px;font-weight:800;color:#6366f1;flex-shrink:0}
-.folder-dropdown-entry-del{background:none;border:none;color:#e0e0e0;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s;font-family:inherit;flex-shrink:0}
-.folder-dropdown-entry-del:hover{color:#ef4444}
-.folder-dropdown-empty{font-size:11px;color:#ccc;font-style:italic;padding:10px 8px;text-align:center}
+.client-dropdown{position:fixed;background:#fff;border:1.5px solid #e5e5e5;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.14);z-index:500;min-width:260px;max-width:320px;padding:8px;opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .15s,transform .15s}
+.client-dropdown.open{opacity:1;transform:translateY(0);pointer-events:all}
+.client-dropdown-header{display:flex;justify-content:space-between;align-items:center;padding:6px 8px 8px;border-bottom:1px solid #f0f0f0;margin-bottom:6px}
+.client-dropdown-name{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb}
+.client-dropdown-close{background:none;border:none;font-size:18px;color:#ccc;cursor:pointer;line-height:1;padding:0;font-family:inherit;transition:color .15s}
+.client-dropdown-close:hover{color:#555}
+.client-dropdown-entry{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.client-dropdown-entry:hover{background:#f5f5ff}
+.client-dropdown-entry.is-open{background:#f0eeff}
+.client-dropdown-entry-left{flex:1;min-width:0}
+.client-dropdown-entry-name{font-size:12px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.client-dropdown-entry-meta{font-size:10px;color:#bbb;margin-top:1px}
+.client-dropdown-entry-score{font-size:12px;font-weight:800;color:#6366f1;flex-shrink:0}
+.client-dropdown-entry-del{background:none;border:none;color:#e0e0e0;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s;font-family:inherit;flex-shrink:0}
+.client-dropdown-entry-del:hover{color:#ef4444}
+.client-dropdown-empty{font-size:11px;color:#ccc;font-style:italic;padding:10px 8px;text-align:center}
 
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -353,11 +396,97 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .modal-btn-confirm:hover{background:#4f46e5}
 .modal-btn-danger{background:#ef4444;color:#fff;border-color:#ef4444}
 .modal-btn-danger:hover{background:#dc2626}
-.modal-folder-select{width:100%;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;background:#fff;outline:none;cursor:pointer;transition:border-color .2s;margin-bottom:14px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23999' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-.modal-folder-select:focus{border-color:#6366f1}
+.modal-client-select{width:100%;padding:9px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;background:#fff;outline:none;cursor:pointer;transition:border-color .2s;margin-bottom:14px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23999' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.modal-client-select:focus{border-color:#6366f1}
 .modal-meta{font-size:10px;color:#bbb;background:#f8fafc;border-radius:7px;padding:8px 11px;border:1.5px solid #f0f0f0;margin-bottom:14px;display:flex;gap:16px}
 .modal-meta span{display:flex;flex-direction:column;gap:2px}
 .modal-meta strong{font-size:12px;color:#111;font-weight:800}
+
+/* ── Client Picker Modal (sits above splash) ── */
+.modal-overlay-top{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:10000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay-top.open{opacity:1;pointer-events:all}
+.modal-overlay-top .modal-box{transform:scale(.96);transition:transform .2s}
+.modal-overlay-top.open .modal-box{transform:scale(1)}
+.cp-list{display:flex;flex-direction:column;gap:6px;max-height:320px;overflow-y:auto;margin-bottom:16px}
+.cp-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1.5px solid #e5e5e5;border-radius:10px;cursor:pointer;transition:all .15s;background:#fff}
+.cp-row:hover{border-color:#6366f1;background:#faf9ff}
+.cp-row-left{flex:1;min-width:0}
+.cp-row-name{font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.cp-row-context{font-size:11px;color:#6366f1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-row-time{font-size:10px;color:#bbb;white-space:nowrap;flex-shrink:0}
+.cp-row-arrow{color:#ccc;font-size:16px;flex-shrink:0}
+.cp-divider{border:none;border-top:1.5px solid #f0f0f0;margin:12px 0}
+.cp-add-btn{display:flex;align-items:center;gap:8px;padding:10px 13px;border-radius:10px;cursor:pointer;background:none;border:1.5px dashed #e0e0e0;color:#888;font-size:12px;font-weight:700;width:100%;font-family:inherit;transition:all .15s;margin-bottom:8px}
+.cp-add-btn:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
+.cp-skip{background:none;border:none;color:#aaa;font-size:11px;font-weight:600;cursor:pointer;width:100%;text-align:center;padding:6px;font-family:inherit;transition:color .15s}
+.cp-skip:hover{color:#555}
+.cp-empty{text-align:center;padding:28px 0 16px}
+.cp-empty-title{font-size:14px;font-weight:800;color:#333;margin-bottom:6px}
+.cp-empty-sub{font-size:12px;color:#aaa;line-height:1.55}
+
+/* ── Client context bar ── */
+.client-ctx-bar{display:none;align-items:center;gap:8px;margin-top:5px;font-size:11px;flex-wrap:wrap}
+.client-ctx-bar.visible{display:flex}
+.client-ctx-name{font-weight:700;color:#6366f1}
+.client-ctx-sep{color:#ddd}
+.client-ctx-detail{color:#aaa;font-weight:500}
+.client-ctx-quick{color:#f97316;font-weight:700}
+.client-ctx-switch{background:none;border:none;color:#6366f1;font-size:11px;font-weight:700;cursor:pointer;padding:0;font-family:inherit;text-decoration:underline;text-underline-offset:2px}
+.client-ctx-switch:hover{color:#4f46e5}
+
+/* ── Entry list modal ── */
+.el-header{margin-bottom:18px}
+.el-client-name{font-size:16px;font-weight:900;color:#111;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.el-edit-stub{background:none;border:none;padding:0;cursor:default;opacity:.25;font-size:14px;line-height:1}
+.el-client-ctx{font-size:11px;color:#999}
+.el-actions-top{margin-bottom:12px}
+.el-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto}
+.el-row{display:flex;align-items:center;gap:10px;padding:11px 13px;border:1.5px solid #e5e5e5;border-radius:10px;cursor:pointer;transition:all .15s;background:#fff}
+.el-row:hover{border-color:#6366f1;background:#faf9ff}
+.el-row-left{flex:1;min-width:0}
+.el-row-title{font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.el-row-meta{font-size:10px;color:#bbb}
+.el-row-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.el-score-pill{font-size:11px;font-weight:800;color:#fff;border-radius:99px;padding:2px 8px;white-space:nowrap}
+.el-score-pill.good{background:#10b981}
+.el-score-pill.mid{background:#6366f1}
+.el-score-pill.low{background:#ef4444}
+.el-score-none{font-size:10px;color:#ccc;font-style:italic;white-space:nowrap}
+.el-trash{background:none;border:none;color:#e0e0e0;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s;font-family:inherit;flex-shrink:0}
+.el-trash:hover{color:#ef4444}
+.el-empty{text-align:center;padding:24px 0 12px;color:#bbb;font-size:12px;line-height:1.7}
+
+/* ── Editor nav (back to entries / switch client) ── */
+.editor-nav{display:flex;align-items:center;gap:10px;padding-bottom:14px;font-size:11px}
+.editor-nav-btn{background:none;border:none;color:#6366f1;font-size:11px;font-weight:700;cursor:pointer;padding:0;font-family:inherit}
+.editor-nav-btn:hover{color:#4f46e5;text-decoration:underline}
+.editor-nav-sep{color:#ddd;font-size:10px}
+
+/* ── Add Client Modal form ── */
+.modal-box-wide{max-width:560px}
+.modal-box-scroll{max-height:calc(100vh - 80px);overflow-y:auto}
+.ac-field{margin-bottom:16px}
+.ac-label{display:block;font-size:11px;font-weight:700;color:#555;margin-bottom:5px;letter-spacing:.01em}
+.ac-hint{font-size:10px;color:#aaa;margin-top:4px;line-height:1.5}
+.ac-error{font-size:10px;color:#ef4444;margin-top:4px;font-weight:600;display:none}
+.ac-error.visible{display:block}
+.ac-textarea{width:100%;padding:10px 13px;border:1.5px solid #e5e5e5;border-radius:9px;font-size:13px;font-family:inherit;color:#111;outline:none;transition:border-color .2s;resize:vertical;min-height:72px;line-height:1.5;box-sizing:border-box}
+.ac-textarea:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.ac-chips-row{display:flex;flex-wrap:wrap;gap:5px;align-items:center;min-height:36px;padding:5px 8px;border:1.5px solid #e5e5e5;border-radius:9px;cursor:text;transition:border-color .2s;background:#fff}
+.ac-chips-row:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.ac-chip-input{border:none;outline:none;font-size:12px;font-family:inherit;color:#111;flex:1;min-width:80px;background:transparent;padding:2px 4px}
+.ac-file-zone{border:1.5px dashed #e0e0e0;border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;background:#fafafa}
+.ac-file-zone:hover{border-color:#6366f1;background:#f8f7ff}
+.ac-file-label{flex:1}
+.ac-file-title{font-size:12px;font-weight:700;color:#555}
+.ac-file-sub{font-size:10px;color:#aaa;margin-top:1px}
+.ac-file-btn{font-size:11px;font-weight:700;color:#6366f1;background:#ede9fe;border:none;border-radius:7px;padding:6px 10px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.ac-file-btn:hover{background:#ddd6fe}
+.ac-file-status{font-size:10px;margin-top:5px;line-height:1.4;display:none}
+.ac-file-status.parsing{color:#6366f1;display:block}
+.ac-file-status.done{color:#10b981;display:block}
+.ac-file-status.error{color:#ef4444;display:block}
+.ac-char-count{font-size:10px;color:#ccc;text-align:right;margin-top:3px}
 
 /* ── History Panel (replaces Saved Drafts) ── */
 .history-panel{background:#fff;border:1.5px solid #e5e5e5;border-radius:14px;padding:18px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
@@ -464,26 +593,114 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .guide-highlight-name{font-size:12px;font-weight:800;color:#111;margin-bottom:2px}
 .guide-highlight-desc{font-size:11px;color:#888;line-height:1.5}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script>
+  if(typeof pdfjsLib!=='undefined')
+    pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
 </head>
 <body>
 <!-- ── Folder Tab Dropdown ── -->
-<div class="folder-dropdown no-print" id="folderDropdown">
-  <div class="folder-dropdown-header">
-    <span class="folder-dropdown-name" id="folderDropdownName"></span>
-    <button class="folder-dropdown-close" onclick="closeFolderDropdown()">×</button>
+<div class="client-dropdown no-print" id="clientDropdown">
+  <div class="client-dropdown-header">
+    <span class="client-dropdown-name" id="clientDropdownName"></span>
+    <button class="client-dropdown-close" onclick="closeClientDropdown()">×</button>
   </div>
-  <div id="folderDropdownEntries"></div>
+  <div id="clientDropdownEntries"></div>
+</div>
+
+<!-- ── Entry List Modal (above splash) ── -->
+<div class="modal-overlay-top" id="modalEntryList">
+  <div class="modal-box modal-box-wide modal-box-scroll">
+    <div id="elContent"><!-- rendered by renderEntryList() --></div>
+    <div class="modal-footer" style="margin-top:16px;justify-content:space-between">
+      <button class="modal-btn modal-btn-cancel" onclick="goToPickerFromEntryList()">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Client Picker Modal (above splash) ── -->
+<div class="modal-overlay-top" id="modalClientPicker">
+  <div class="modal-box">
+    <div class="modal-title">Choose a client</div>
+    <div class="modal-sub" id="cpSubtext">Select a client to load their brand terms and saved entries.</div>
+    <div id="cpBody"></div>
+    <div class="backup-reminder"><span class="backup-reminder-text"></span></div>
+  </div>
+</div>
+
+<!-- ── Modal: Add Client (full form) ── -->
+<div class="modal-overlay-top" id="modalAddClient">
+  <div class="modal-box modal-box-wide modal-box-scroll">
+    <div class="modal-title">Add a new client</div>
+    <div class="modal-sub">Set up a new client workspace with optional brand context.</div>
+
+    <div class="ac-field">
+      <label class="ac-label" for="acName">Client name <span style="color:#ef4444">*</span></label>
+      <input class="modal-input" id="acName" type="text" placeholder="e.g. Acme Corp" maxlength="40" oninput="acOnNameInput()" style="margin-bottom:0">
+      <div class="ac-error" id="acNameError"></div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label" for="acDesc">Description <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <textarea class="ac-textarea" id="acDesc" maxlength="280" placeholder="Tone preferences, language rules, anything writers should know…" oninput="acOnDescInput()"></textarea>
+      <div class="ac-char-count"><span id="acDescCount">0</span>/280</div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label">Brand terms <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <div class="ac-chips-row" id="acChipsRow" onclick="document.getElementById('acTermInput').focus()">
+        <input class="ac-chip-input" id="acTermInput" type="text" placeholder="Type a term, press Enter" maxlength="60"
+          onkeydown="acOnTermKey(event)">
+      </div>
+      <div class="ac-hint">Company name, product names, etc. — excluded from repetition checks. Max 20 terms.</div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label">Persona document <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <label class="ac-file-zone" for="acPersonaInput">
+        <div class="ac-file-label">
+          <div class="ac-file-title">Upload buyer persona</div>
+          <div class="ac-file-sub">.pdf, .docx or .txt · max 10 MB</div>
+        </div>
+        <span class="ac-file-btn">Choose file</span>
+        <input id="acPersonaInput" type="file" accept=".pdf,.docx,.txt" style="display:none" onchange="acHandleFile('persona',this)">
+      </label>
+      <div class="ac-file-status" id="acPersonaStatus"></div>
+      <div class="ac-hint">Specific words and phrases will be extracted and used by the audit.</div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label">Tone of voice document <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <label class="ac-file-zone" for="acTovInput">
+        <div class="ac-file-label">
+          <div class="ac-file-title">Upload tone of voice guide</div>
+          <div class="ac-file-sub">.pdf, .docx or .txt · max 10 MB</div>
+        </div>
+        <span class="ac-file-btn">Choose file</span>
+        <input id="acTovInput" type="file" accept=".pdf,.docx,.txt" style="display:none" onchange="acHandleFile('tov',this)">
+      </label>
+      <div class="ac-file-status" id="acTovStatus"></div>
+      <div class="ac-hint">Banned words, preferred terms and length preferences will be extracted automatically.</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="modal-btn modal-btn-cancel" onclick="cancelAddClient()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" id="btnSaveClient" onclick="confirmAddClient()" disabled>Save client</button>
+    </div>
+  </div>
 </div>
 
 <!-- ── Modal: Create Folder ── -->
-<div class="modal-overlay" id="modalCreateFolder">
+<div class="modal-overlay" id="modalCreateClient">
   <div class="modal-box">
-    <div class="modal-title">New Client Folder</div>
-    <div class="modal-sub">Give this folder a client name. You can create up to 10 folders.</div>
-    <input class="modal-input" id="inputFolderName" type="text" placeholder="e.g. Acme Corp" maxlength="40" oninput="document.getElementById('btnCreateFolder').disabled=!this.value.trim()">
+    <div class="modal-title">New Client</div>
+    <div class="modal-sub">Give this client a name. You can create up to 10 clients.</div>
+    <input class="modal-input" id="inputClientName" type="text" placeholder="e.g. Acme Corp" maxlength="40" oninput="document.getElementById('btnCreateClient').disabled=!this.value.trim()">
     <div class="modal-footer">
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalCreateFolder')">Cancel</button>
-      <button class="modal-btn modal-btn-confirm" id="btnCreateFolder" onclick="confirmCreateFolder()" disabled>Create Folder</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalCreateClient')">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" id="btnCreateClient" onclick="confirmCreateClient()" disabled>Create Client</button>
     </div>
   </div>
 </div>
@@ -491,10 +708,10 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 <!-- ── Modal: Save Entry ── -->
 <div class="modal-overlay" id="modalSaveEntry">
   <div class="modal-box">
-    <div class="modal-title">Save to Folder</div>
+    <div class="modal-title">Save to Client</div>
     <div class="modal-sub">Name this entry and choose where to save it.</div>
     <input class="modal-input" id="inputEntryName" type="text" placeholder="e.g. Homepage Hero v2" maxlength="60" oninput="document.getElementById('btnSaveEntry').disabled=!this.value.trim()">
-    <select class="modal-folder-select" id="selectSaveFolder"></select>
+    <select class="modal-client-select" id="selectSaveClient"></select>
     <div class="modal-meta" id="saveMeta">
       <span><strong id="metaScore">—</strong>Active Score</span>
       <span><strong id="metaDate">—</strong>Date</span>
@@ -538,13 +755,36 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 </div>
 
 <!-- ── Modal: Delete Folder ── -->
-<div class="modal-overlay" id="modalDeleteFolder">
+<div class="modal-overlay" id="modalDeleteClient">
   <div class="modal-box">
-    <div class="modal-title">Delete Folder?</div>
-    <div class="modal-sub" id="deleteFolderMsg">This folder and all its saved entries will be permanently removed.</div>
+    <div class="modal-title">Delete Client?</div>
+    <div class="modal-sub" id="deleteClientMsg">This client and all its saved entries will be permanently removed.</div>
     <div class="modal-footer">
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalDeleteFolder')">Cancel</button>
-      <button class="modal-btn modal-btn-danger" onclick="confirmDeleteFolder()">Delete Folder</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalDeleteClient')">Cancel</button>
+      <button class="modal-btn modal-btn-danger" onclick="confirmDeleteClient()">Delete Client</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Import confirm ── -->
+<div class="modal-overlay" id="modalImportConfirm">
+  <div class="modal-box">
+    <div class="modal-title">Import backup?</div>
+    <div id="importConfirmBody" class="import-confirm-body"></div>
+    <div class="modal-footer" style="margin-top:16px">
+      <button class="modal-btn modal-btn-cancel" onclick="cancelImport()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" onclick="confirmImport()">Import</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal: Import error ── -->
+<div class="modal-overlay" id="modalImportError">
+  <div class="modal-box">
+    <div class="modal-title">Import failed</div>
+    <div id="importErrorMsg" class="import-error-msg"></div>
+    <div class="modal-footer" style="margin-top:16px">
+      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalImportError')">OK</button>
     </div>
   </div>
 </div>
@@ -555,7 +795,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.18</span>
+          <span class="sp-brand-ver">v6.20</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -570,7 +810,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
       </div>
       <div class="sp-cta-card">
         <span class="sp-cta-label">Ready to analyse your copy?</span>
-        <button class="sp-cta-btn" onclick="dismissSplash()">Start now <span class="sp-arrow">→</span></button>
+        <button class="sp-cta-btn" onclick="openClientPicker()">Start now <span class="sp-arrow">→</span></button>
       </div>
       <div class="sp-guide-card">
         <span class="sp-guide-label">New to the tool?</span>
@@ -606,19 +846,43 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.18</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.20</span></div>
       <div class="brand-sub" id="reportDate"></div>
+      <div class="client-ctx-bar" id="clientContextBar">
+        <span id="ctxContent"></span>
+        <span class="client-ctx-sep" id="ctxSep1" style="display:none">·</span>
+        <button class="client-ctx-switch" id="ctxBackBtn" onclick="goBackToEntries()" style="display:none">← Entries</button>
+        <button class="client-ctx-switch" onclick="openClientPicker()">Switch</button>
+      </div>
     </div>
     <div class="btn-row no-print">
+      <button class="btn btn-ghost btn-sm" onclick="saveDraftManual()">💾 Save draft</button>
       <button class="btn btn-ghost btn-sm" onclick="fixAllFillers()">⚡ Fix Fillers</button>
       <button class="btn btn-violet btn-sm" onclick="runAIAudit()">✦ AI Audit</button>
-      <button class="btn btn-ghost btn-sm" onclick="openCreateFolderModal()">📁 New Folder</button>
+      <button class="btn btn-ghost btn-sm" onclick="openCreateClientModal()">+ New Client</button>
+      <div class="settings-wrap" id="settingsWrap">
+        <button class="settings-btn" onclick="toggleSettingsDropdown()" title="Data &amp; settings">⚙</button>
+        <div class="settings-dropdown" id="settingsDropdown" style="display:none">
+          <button class="settings-dd-item" onclick="exportData()">⬇ Export data</button>
+          <button class="settings-dd-item" onclick="importPickFile()">⬆ Import backup</button>
+          <div class="settings-dd-sep"></div>
+          <div class="settings-dd-note backup-reminder-text"></div>
+        </div>
+      </div>
     </div>
   </div>
+  <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="handleImportFile(this)">
 
-  <!-- Folder tabs row — only shown when folders exist -->
-  <div id="folderTabsRow" class="no-print" style="display:none;margin-bottom:20px;margin-top:-16px;border-bottom:1.5px solid #e5e5e5;padding-bottom:0">
-    <div id="folderTabs" style="display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none"></div>
+  <!-- Editor nav — shown when a client is active in the editor -->
+  <div id="editorNav" class="editor-nav no-print" style="display:none">
+    <button class="editor-nav-btn" onclick="goBackToEntries()">← Entries</button>
+    <span class="editor-nav-sep">·</span>
+    <button class="editor-nav-btn" onclick="openClientPicker()">Switch client</button>
+  </div>
+
+  <!-- Folder tabs row — only shown when clients exist -->
+  <div id="clientTabsRow" class="no-print" style="display:none;margin-bottom:20px;margin-top:-16px;border-bottom:1.5px solid #e5e5e5;padding-bottom:0">
+    <div id="clientTabs" style="display:flex;align-items:center;gap:0;overflow-x:auto;scrollbar-width:none"></div>
   </div>
 
   <div class="main-grid">
@@ -797,8 +1061,8 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
         <div id="kwList"><p style="font-size:11px;color:#ccc;font-style:italic">No keywords yet.</p></div>
       </div>
 
-      <!-- ── Brand Terms card ── -->
-      <div class="card no-print">
+      <!-- ── Brand Terms card — shown only when a client is active ── -->
+      <div class="card no-print" id="brandTermsCard" style="display:none">
         <div class="card-title">Brand Terms</div>
         <p style="font-size:11px;color:#888;line-height:1.5;margin:0 0 10px">Add brand names or product terms that should never be flagged as filler, clichés, or repetition.</p>
         <div class="bt-input-row">
@@ -809,7 +1073,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
         <div class="bt-chips" id="btChips">
           <span class="bt-empty" id="btEmpty">No brand terms added.</span>
         </div>
-        <p class="bt-hint" id="btHint" style="display:none">⚠️ Session only — brand terms reset when you close the tab.</p>
+        <p class="bt-hint" id="btHint" style="display:none">Saved with this client — terms persist across sessions.</p>
       </div>
 
       <div class="history-panel no-print">
@@ -817,7 +1081,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
           <span class="history-panel-title">Project History</span>
           <button class="history-save-btn" onclick="openSaveModal()">💾 Save</button>
         </div>
-        <div id="historyList"><p class="history-empty">Create a folder to start saving.</p></div>
+        <div id="historyList"><p class="history-empty">Create a client to start saving.</p></div>
       </div>
 
       <div class="tip-card no-print">
@@ -839,6 +1103,733 @@ function dismissSplash(){
   const s=document.getElementById('splash');
   s.classList.add('hiding');
   setTimeout(()=>{ s.style.display='none'; },320);
+}
+
+function hideSplash(){
+  dismissSplash();
+}
+
+function relativeTime(ts){
+  if(!ts) return '';
+  const diff = Date.now() - ts;
+  const mins  = Math.floor(diff/60000);
+  const hours = Math.floor(diff/3600000);
+  const days  = Math.floor(diff/86400000);
+  if(mins < 1)  return 'just now';
+  if(mins < 60) return `${mins} min ago`;
+  if(hours < 24) return `${hours} hour${hours===1?'':'s'} ago`;
+  if(days === 1) return 'yesterday';
+  if(days < 7)  return `${days} days ago`;
+  return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+}
+
+function clientContextLabel(c){
+  const hasPersona = c.personaDoc && c.personaDoc.rawText;
+  const hasTov     = c.tovDoc && c.tovDoc.rawText;
+  const termCount  = Array.isArray(c.brandTerms) ? c.brandTerms.length : 0;
+  const parts = [];
+  if(hasPersona) parts.push('Persona');
+  if(hasTov)     parts.push('ToV');
+  if(termCount)  parts.push(`${termCount} brand term${termCount===1?'':'s'}`);
+  return parts.length ? parts.join(' · ') : 'No context set';
+}
+
+function openClientPicker(){
+  renderClientPickerModal();
+  renderBackupReminder();
+  document.getElementById('modalClientPicker').classList.add('open');
+}
+
+function renderClientPickerModal(){
+  const body = document.getElementById('cpBody');
+  const sorted = [...clients].sort((a,b)=>(b.lastUsedAt||0)-(a.lastUsedAt||0));
+
+  if(sorted.length === 0){
+    body.innerHTML = `
+      <div class="cp-empty">
+        <div class="cp-empty-title">No clients yet</div>
+        <div class="cp-empty-sub">Create your first client to save brand terms<br>and track entries across sessions.</div>
+      </div>
+      <button class="cp-add-btn" onclick="closeClientPickerAndCreate()">＋ Add new client</button>
+      <div style="text-align:center;margin-top:8px">
+        <button class="cp-import-link" onclick="importPickFile()">⬆ Import previous backup</button>
+      </div>
+      <hr class="cp-divider">
+      <button class="cp-skip" onclick="enterQuickCheckMode()">Just check this copy (no client)</button>`;
+    return;
+  }
+
+  const rows = sorted.map(c=>`
+    <div class="cp-row" onclick="selectClientAndEnter('${c.id}')">
+      <div class="cp-row-left">
+        <div class="cp-row-name">${esc(c.name)}</div>
+        <div class="cp-row-context">${esc(clientContextLabel(c))}</div>
+      </div>
+      <div class="cp-row-time">${relativeTime(c.lastUsedAt)}</div>
+      <div class="cp-row-arrow">›</div>
+    </div>`).join('');
+
+  body.innerHTML = `
+    <div class="cp-list">${rows}</div>
+    <button class="cp-add-btn" onclick="closeClientPickerAndCreate()">＋ Add new client</button>
+    <hr class="cp-divider">
+    <button class="cp-skip" onclick="enterQuickCheckMode()">Just check this copy (no client)</button>`;
+}
+
+function closeClientPickerAndCreate(){
+  document.getElementById('modalClientPicker').classList.remove('open');
+  openAddClientModal();
+}
+
+function selectClientAndEnter(clientId){
+  const c = clients.find(cl=>cl.id===clientId);
+  if(!c) return;
+  activeClientId = clientId;
+  c.lastUsedAt = Date.now();
+  clientsSave();
+  document.getElementById('modalClientPicker').classList.remove('open');
+  renderBrandTerms();
+  renderHistory();
+  updateClientContextBar();
+  openEntryList(clientId);
+}
+
+function enterQuickCheckMode(){
+  activeClientId = null;
+  document.getElementById('modalClientPicker').classList.remove('open');
+  hideSplash();
+  renderBrandTerms();
+  renderHistory();
+  updateClientContextBar();
+}
+
+function updateClientContextBar(){
+  const bar = document.getElementById('clientContextBar');
+  const content = document.getElementById('ctxContent');
+  if(!bar || !content) return;
+  if(activeClientId){
+    const c = clients.find(cl=>cl.id===activeClientId);
+    if(c){
+      const detail = clientContextLabel(c);
+      content.innerHTML = `<span class="client-ctx-name">${esc(c.name)}</span><span class="client-ctx-sep">·</span><span class="client-ctx-detail">${esc(detail)}</span>`;
+      bar.classList.add('visible');
+    }
+  } else {
+    content.innerHTML = `<span class="client-ctx-quick">Quick check mode</span>`;
+    bar.classList.add('visible');
+    // Hide back button in quick-check mode
+    const btn = document.getElementById('ctxBackBtn');
+    const sep = document.getElementById('ctxSep1');
+    if(btn) btn.style.display = 'none';
+    if(sep) sep.style.display = 'none';
+  }
+}
+
+// ── Entry list ────────────────────────────────────────────────────────────────
+
+function autoTitle(text){
+  const s = (text||'').trim().replace(/\s+/g,' ');
+  if(!s) return 'Untitled draft';
+  return s.length > 50 ? s.slice(0,50)+'…' : s;
+}
+
+function openEntryList(clientId){
+  const c = clients.find(cl=>cl.id===clientId);
+  if(!c) return;
+  activeClientId = clientId;
+  openEntryId = null;
+  renderEntryList();
+  document.getElementById('modalEntryList').classList.add('open');
+}
+
+function renderEntryList(){
+  const c = clients.find(cl=>cl.id===activeClientId);
+  if(!c) return;
+  const el = document.getElementById('elContent');
+
+  const sorted = [...c.saves].sort((a,b)=>{
+    return (b.lastModified||b.createdAt||0) - (a.lastModified||a.createdAt||0);
+  });
+
+  const header = `<div class="el-header">
+    <div class="el-client-name">${esc(c.name)}<button class="el-edit-stub" title="Coming soon" tabindex="-1">✎</button></div>
+    <div class="el-client-ctx">${esc(clientContextLabel(c))}</div>
+  </div>`;
+
+  const newBtn = `<div class="el-actions-top">
+    <button class="btn btn-violet btn-sm" onclick="openNewPiece()" style="width:100%">+ New piece</button>
+  </div>`;
+
+  if(!sorted.length){
+    el.innerHTML = header + newBtn + `<div class="el-empty">No saved drafts yet<br><span style="font-size:11px">Start a new piece to begin</span></div>`;
+    return;
+  }
+
+  const rows = sorted.map(s=>{
+    const title   = s.title || s.name || autoTitle(s.text||'');
+    const modTs   = s.lastModified || s.createdAt || 0;
+    const timeStr = modTs ? relativeTime(modTs) : (s.date||'');
+    const score   = s.lastAuditScore ?? (typeof s.score==='number' ? s.score : null);
+    const scorePill = score !== null
+      ? `<span class="el-score-pill ${score>=80?'good':score>=60?'mid':'low'}">${score}%</span>`
+      : `<span class="el-score-none">Not audited</span>`;
+    const safeTitle = esc(title).replace(/'/g,'&#39;');
+    return `<div class="el-row" onclick="loadEntryFromList('${c.id}','${s.id}')">
+      <div class="el-row-left">
+        <div class="el-row-title">${esc(title)}</div>
+        <div class="el-row-meta">${esc(timeStr)}</div>
+      </div>
+      <div class="el-row-right">
+        ${scorePill}
+        <button class="el-trash" title="Delete entry" onclick="event.stopPropagation();openDeleteEntryModal('${c.id}','${s.id}','${safeTitle}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = header + newBtn + `<div class="el-list">${rows}</div>`;
+}
+
+function goToPickerFromEntryList(){
+  document.getElementById('modalEntryList').classList.remove('open');
+  openClientPicker();
+}
+
+function openNewPiece(){
+  document.getElementById('modalEntryList').classList.remove('open');
+  openEntryId = null;
+  // Clear the editor
+  ta.value = '';
+  document.getElementById('targetKW').value = '';
+  const aiPanel = document.getElementById('aiPanel');
+  if(aiPanel) aiPanel.classList.remove('open');
+  onEditorInput();
+  hideSplash();
+  renderBrandTerms();
+  renderHistory();
+  updateClientContextBar();
+  updateEditorNav(true);
+  ta.focus();
+}
+
+function loadEntryFromList(clientId, entryId){
+  document.getElementById('modalEntryList').classList.remove('open');
+  hideSplash();
+  loadEntry(clientId, entryId);
+  updateEditorNav(true);
+}
+
+function goBackToEntries(){
+  if(!activeClientId) return;
+  // Auto-save before leaving
+  if(openEntryId) doAutoSave();
+  updateEditorNav(false);
+  openEntryList(activeClientId);
+}
+
+function updateEditorNav(visible){
+  const nav = document.getElementById('editorNav');
+  if(nav) nav.style.display = (visible && activeClientId) ? '' : 'none';
+  // Also toggle the "← Entries" button in the context bar
+  const btn  = document.getElementById('ctxBackBtn');
+  const sep  = document.getElementById('ctxSep1');
+  const show = visible && !!activeClientId;
+  if(btn) btn.style.display  = show ? '' : 'none';
+  if(sep) sep.style.display  = show ? '' : 'none';
+}
+
+// ── Entry persistence ─────────────────────────────────────────────────────────
+
+let autoSaveTimer = null;
+
+function scheduleAutoSave(){
+  if(!activeClientId || !openEntryId) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(doAutoSave, 500);
+}
+
+function doAutoSave(){
+  if(!activeClientId || !openEntryId) return;
+  const client = clients.find(c=>c.id===activeClientId);
+  if(!client) return;
+  const entry = client.saves.find(s=>s.id===openEntryId);
+  if(!entry) return;
+  const now = Date.now();
+  entry.text         = ta.value;
+  entry.lastModified = now;
+  entry.audience     = document.getElementById('audSelect').value;
+  entry.kw           = document.getElementById('targetKW').value;
+  entry.contentType  = document.getElementById('seoContentType').value;
+  entry.diffInput    = document.getElementById('diffInput').value;
+  entry.secKWs       = [...secKWs];
+  if(!entry._titleManual){
+    const t = autoTitle(ta.value);
+    entry.title = t;
+    entry.name  = t;
+  }
+  clientsSave();
+}
+
+function createCurrentEntry(issues, score){
+  if(!activeClientId) return;
+  const client = clients.find(c=>c.id===activeClientId);
+  if(!client) return;
+  if(client.saves.length >= MAX_SAVES){
+    showToast(`⚠️ Client full (${MAX_SAVES} saves max) — delete an entry to save more`);
+    return;
+  }
+  const now = Date.now();
+  const t   = autoTitle(ta.value);
+  const entry = {
+    id:               genId(),
+    name:             t,
+    title:            t,
+    _titleManual:     false,
+    text:             ta.value,
+    score:            score ?? 0,
+    lastAuditScore:   score ?? null,
+    lastAuditResults:   issues ? [...issues] : null,
+    lastAuditOverrides: auditOverrides.length ? [...auditOverrides] : null,
+    audience:         document.getElementById('audSelect').value,
+    kw:               document.getElementById('targetKW').value,
+    contentType:      document.getElementById('seoContentType').value,
+    diffInput:        document.getElementById('diffInput').value,
+    secKWs:           [...secKWs],
+    date:             new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+    time:             new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}),
+    createdAt:        now,
+    lastModified:     now,
+  };
+  client.saves.unshift(entry);
+  openEntryId = entry.id;
+  clientsSave();
+  renderClientNav();
+  renderHistory();
+  showToast('✓ Draft saved');
+}
+
+function saveDraftManual(){
+  if(!activeClientId){ showToast('⚠️ Open a client to save'); return; }
+  if(!ta.value.trim()){ showToast('⚠️ Nothing to save — editor is empty'); return; }
+  if(!openEntryId){
+    createCurrentEntry(null, null);
+  } else {
+    doAutoSave();
+    showToast('✓ Draft saved');
+  }
+}
+
+// ── Add Client Modal ──────────────────────────────────────────────────────────
+let acBrandTerms  = [];
+let acPersonaDoc  = { fileName:null, rawText:null, uploadedAt:null };
+let acTovDoc      = { fileName:null, rawText:null, uploadedAt:null };
+let acPersonaRules = null;
+let acTovRules     = null;
+
+function openAddClientModal(){
+  acBrandTerms = [];
+  acPersonaDoc = { fileName:null, rawText:null, uploadedAt:null };
+  acTovDoc     = { fileName:null, rawText:null, uploadedAt:null };
+
+  document.getElementById('acName').value      = '';
+  document.getElementById('acDesc').value      = '';
+  document.getElementById('acDescCount').textContent = '0';
+  document.getElementById('acTermInput').value = '';
+  document.getElementById('acPersonaInput').value = '';
+  document.getElementById('acTovInput').value  = '';
+  acPersonaRules = null;
+  acTovRules     = null;
+  acSetStatus('persona', null);
+  acSetStatus('tov',     null);
+  acSetError('acNameError', '');
+  document.getElementById('btnSaveClient').disabled = true;
+  renderAcChips();
+  document.getElementById('modalAddClient').classList.add('open');
+  setTimeout(()=>document.getElementById('acName').focus(), 60);
+}
+
+function cancelAddClient(){
+  document.getElementById('modalAddClient').classList.remove('open');
+  openClientPicker();
+}
+
+function acOnNameInput(){
+  const val = document.getElementById('acName').value.trim();
+  document.getElementById('btnSaveClient').disabled = !val;
+  acSetError('acNameError', '');
+}
+
+function acOnDescInput(){
+  document.getElementById('acDescCount').textContent =
+    document.getElementById('acDesc').value.length;
+}
+
+function acOnTermKey(e){
+  if(e.key === 'Enter' || e.key === ','){
+    e.preventDefault();
+    const input = document.getElementById('acTermInput');
+    const val = input.value.trim().replace(/,+$/, '');
+    if(!val) return;
+    if(acBrandTerms.length >= 20){ showToast('⚠️ Max 20 brand terms'); return; }
+    const norm = val.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
+    if(acBrandTerms.some(t=>t.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim()===norm)) return;
+    acBrandTerms.push(val);
+    input.value = '';
+    renderAcChips();
+  } else if(e.key === 'Backspace' && !e.target.value && acBrandTerms.length){
+    acBrandTerms.pop();
+    renderAcChips();
+  }
+}
+
+function acRemoveTerm(i){
+  acBrandTerms.splice(i, 1);
+  renderAcChips();
+}
+
+function renderAcChips(){
+  const row   = document.getElementById('acChipsRow');
+  const input = document.getElementById('acTermInput');
+  Array.from(row.querySelectorAll('.bt-chip')).forEach(el=>el.remove());
+  acBrandTerms.forEach((term, i)=>{
+    const chip = document.createElement('span');
+    chip.className = 'bt-chip';
+    chip.innerHTML = `${esc(term)}<button class="bt-chip-x" onclick="acRemoveTerm(${i})" title="Remove">×</button>`;
+    row.insertBefore(chip, input);
+  });
+}
+
+function acSetError(id, msg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.toggle('visible', !!msg);
+}
+
+function acSetStatus(type, state, msg=''){
+  const el = document.getElementById(type==='persona' ? 'acPersonaStatus' : 'acTovStatus');
+  if(!el) return;
+  el.className = 'ac-file-status' + (state ? ' '+state : '');
+  if(!state){ el.textContent=''; return; }
+  if(state==='parsing') el.textContent = '⏳ Reading file…';
+  else if(state==='done')  el.innerHTML = '✓ ' + esc(msg).replace(/\n/g,'<br>');
+  else if(state==='error') el.textContent = '⚠ ' + msg;
+}
+
+async function acHandleFile(type, input){
+  const file = input.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['pdf','docx','txt'].includes(ext)){
+    acSetStatus(type, 'error', 'Unsupported file type — use .pdf, .docx or .txt');
+    input.value = ''; return;
+  }
+  if(file.size > 10*1024*1024){
+    acSetStatus(type, 'error', 'File too large — max 10 MB');
+    input.value = ''; return;
+  }
+  acSetStatus(type, 'parsing');
+  let rawText = null;
+  let parseError = null;
+  try { rawText = await acParseFile(file, ext); }
+  catch(e){ parseError = e.message || 'Could not read file'; }
+
+  const doc = { fileName:file.name, rawText:rawText||null, uploadedAt:Date.now() };
+  if(type==='persona') acPersonaDoc = doc;
+  else acTovDoc = doc;
+
+  if(!rawText){
+    const hint = ext==='pdf'
+      ? "Couldn't read this PDF — try saving it as plain text and uploading again"
+      : ext==='docx'
+        ? "Couldn't read this docx — try saving as .txt and uploading again"
+        : (parseError || "Couldn't read this file");
+    acSetStatus(type, 'error', hint + '. Client will be saved without this document.');
+  } else {
+    // Run rule extraction synchronously
+    let rules;
+    if(type === 'tov'){
+      acTovRules = extractTovRules(rawText);
+      rules = acTovRules;
+    } else {
+      acPersonaRules = extractPersonaRules(rawText);
+      rules = acPersonaRules;
+    }
+    const summary = buildExtractionSummary(type, rules);
+    acSetStatus(type, 'done', `${file.name}\n${summary}`);
+  }
+}
+
+async function acParseFile(file, ext){
+  if(ext==='txt'){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload  = e => resolve(e.target.result);
+      reader.onerror = () => reject(new Error('FileReader error'));
+      reader.readAsText(file);
+    });
+  }
+  if(ext==='pdf'){
+    if(typeof pdfjsLib==='undefined') throw new Error('PDF library unavailable — reload and try again');
+    const ab  = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+    let text = '';
+    for(let i=1; i<=pdf.numPages; i++){
+      const page    = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      text += content.items.map(it=>it.str).join(' ') + '\n';
+    }
+    return text.trim() || null;
+  }
+  if(ext==='docx'){
+    if(typeof mammoth==='undefined') throw new Error('Docx library unavailable — reload and try again');
+    const ab     = await file.arrayBuffer();
+    const result = await mammoth.extractRawText({arrayBuffer:ab});
+    return result.value.trim() || null;
+  }
+  throw new Error('Unsupported format');
+}
+
+// ── Rule extraction helpers ───────────────────────────────────────────────────
+
+function normalizeExtracted(s){
+  if(!s || typeof s !== 'string') return '';
+  return s
+    .replace(/^[\s•\-\*·:\"\'«»]+/, '')
+    .replace(/[\s.,;:\"\'»«]+$/, '')
+    .toLowerCase()
+    .trim();
+}
+
+function extractListItems(chunk, cap){
+  const items = [];
+  // Bullet / dash lines
+  const bulletRe = /^[ \t]*[•\-\*·>]+[ \t]+(.{2,80})/gm;
+  let m;
+  while((m = bulletRe.exec(chunk)) !== null && items.length < cap){
+    const n = normalizeExtracted(m[1]);
+    if(n && n.length <= 60 && n.length >= 2) items.push(n);
+  }
+  if(items.length) return [...new Set(items)].slice(0, cap);
+
+  // Numbered list: "1. X" or "1) X"
+  const numRe = /^\s*\d+[\.\)]\s+(.{2,80})/gm;
+  while((m = numRe.exec(chunk)) !== null && items.length < cap){
+    const n = normalizeExtracted(m[1]);
+    if(n && n.length <= 60 && n.length >= 2) items.push(n);
+  }
+  if(items.length) return [...new Set(items)].slice(0, cap);
+
+  // Comma/semicolon separated — scan first 8 lines only
+  for(const line of chunk.split('\n').slice(0, 8)){
+    const parts = line.split(/[,;]/);
+    if(parts.length >= 2){
+      for(const p of parts){
+        const n = normalizeExtracted(p);
+        if(n && n.length >= 2 && n.length <= 50 && n.split(' ').length <= 6)
+          items.push(n);
+      }
+      if(items.length) break;
+    }
+  }
+  return [...new Set(items)].slice(0, cap);
+}
+
+function extractSectionItems(text, labelRe, cap){
+  const results = [];
+  // Anchor on the label, grab up to 600 chars of the section that follows
+  const fullRe = new RegExp(
+    labelRe.source + '[^\\n]{0,80}\\n([\\s\\S]{0,600})',
+    'gi'
+  );
+  let m;
+  while((m = fullRe.exec(text)) !== null){
+    // Stop at the next blank-line-separated block
+    const chunk = m[1].split(/\n[ \t]*\n/)[0];
+    for(const item of extractListItems(chunk, cap - results.length)){
+      if(item && !results.includes(item) && results.length < cap)
+        results.push(item);
+    }
+    if(results.length >= cap) break;
+  }
+  return results;
+}
+
+function extractTovRules(text){
+  // ── bannedWords ──────────────────────────────────────────────────────────
+  const bannedLabelRe = /(?:banned\s+words?|avoid(?:\s+these\s+words?)?|don'?t\s+use|do\s+not\s+use|never\s+use|words?\s+to\s+avoid|forbidden\s+words?|avoid\s+using|not\s+to\s+use)/i;
+  const bannedWords = extractSectionItems(text, bannedLabelRe, 50);
+
+  // ── preferredTerms ───────────────────────────────────────────────────────
+  const preferredTerms = [];
+  const prefPatterns = [
+    /\buse\s+["']?([^"'\n,;]{1,40}?)["']?\s+(?:instead\s+of|not|rather\s+than)\s+["']?([^"'\n,;.]{1,40}?)["']?[.,;\n)]/gi,
+    /\bsay\s+["']?([^"'\n,;]{1,40}?)["']?\s+not\s+["']?([^"'\n,;.]{1,40}?)["']?[.,;\n)]/gi,
+    /["']([^"']{1,40})["']\s+\(not\s+["']?([^"')]{1,40})["']?\)/gi,
+    /\bprefer\s+["']?([^"'\n,;]{1,40}?)["']?\s+over\s+["']?([^"'\n,;.]{1,40}?)["']?[.,;\n)]/gi,
+    /\b([^.\n,;]{1,30}?)\s+rather\s+than\s+([^.\n,;]{1,30}?)(?=[.,;\n])/gi,
+  ];
+  for(const re of prefPatterns){
+    let m;
+    while((m = re.exec(text)) !== null && preferredTerms.length < 30){
+      const use   = normalizeExtracted(m[1]);
+      const avoid = normalizeExtracted(m[2]);
+      if(use && avoid && use.length >= 1 && avoid.length >= 1 && use !== avoid){
+        if(!preferredTerms.some(p => p.use === use && p.avoid === avoid))
+          preferredTerms.push({ use, avoid });
+      }
+    }
+  }
+
+  // ── lengthPreference ─────────────────────────────────────────────────────
+  const lc = text.toLowerCase();
+  const shortScore = (lc.match(/\bshort\s+sentences?\b/g)||[]).length
+    + (lc.match(/\bconcise\b/g)||[]).length
+    + (lc.match(/\bbrief\b/g)||[]).length
+    + (lc.match(/\bpunchy\b/g)||[]).length
+    + (lc.match(/\btight(?:\s+copy)?\b/g)||[]).length
+    + (lc.match(/\bkeep\s+it\s+short\b/g)||[]).length;
+  const longScore = (lc.match(/\blong(?:er)?\s+sentences?\b/g)||[]).length
+    + (lc.match(/\bdetailed\b/g)||[]).length
+    + (lc.match(/\bthorough\b/g)||[]).length
+    + (lc.match(/\bin-depth\b/g)||[]).length
+    + (lc.match(/\bconsidered\s+sentences?\b/g)||[]).length
+    + (lc.match(/\bexpansive\b/g)||[]).length;
+  const variedScore = (lc.match(/\bmix\s+of\s+(?:sentence\s+)?lengths?\b/g)||[]).length
+    + (lc.match(/\bvaried\s+(?:sentence\s+)?lengths?\b/g)||[]).length
+    + (lc.match(/\bsentence\s+(?:length\s+)?rhythm\b/g)||[]).length
+    + (lc.match(/\bvariety\s+of\s+(?:sentence\s+)?lengths?\b/g)||[]).length;
+
+  let lengthPreference = null;
+  const maxLen = Math.max(shortScore, longScore, variedScore);
+  if(maxLen > 0){
+    if(shortScore > 0 && longScore > 0)      lengthPreference = 'varied'; // conflict
+    else if(shortScore === maxLen)            lengthPreference = 'short';
+    else if(longScore === maxLen)             lengthPreference = 'long';
+    else                                      lengthPreference = 'varied';
+  }
+
+  // ── personPreference ─────────────────────────────────────────────────────
+  const firstScore = (lc.match(/\buse\s+(?:we|us|our)\b/g)||[]).length
+    + (lc.match(/\bwrite\s+in\s+(?:the\s+)?first\s+person\b/g)||[]).length
+    + (lc.match(/\bspeak\s+as\s+(?:we|us)\b/g)||[]).length
+    + (lc.match(/\bsay\s+"?we\b/g)||[]).length;
+  const secondScore = (lc.match(/\buse\s+(?:you|your)\b/g)||[]).length
+    + (lc.match(/\bwrite\s+in\s+(?:the\s+)?second\s+person\b/g)||[]).length
+    + (lc.match(/\baddress\s+(?:the\s+)?(?:reader|customer|audience)\b/g)||[]).length;
+  const thirdScore = (lc.match(/\bwrite\s+in\s+(?:the\s+)?third\s+person\b/g)||[]).length
+    + (lc.match(/\brefer\s+to\s+(?:the\s+)?(?:customer|reader|user|client)\b/g)||[]).length
+    + (lc.match(/\b(?:the\s+)?customer\s+(?:is|wants|needs)\b/g)||[]).length;
+
+  let personPreference = null;
+  const maxPerson = Math.max(firstScore, secondScore, thirdScore);
+  if(maxPerson > 0){
+    if(firstScore > 0 && secondScore > 0 && Math.abs(firstScore - secondScore) <= 1)
+      personPreference = 'varied';
+    else if(firstScore === maxPerson)  personPreference = 'first';
+    else if(secondScore === maxPerson) personPreference = 'second';
+    else                               personPreference = 'third';
+  }
+
+  return { bannedWords, preferredTerms, lengthPreference, personPreference };
+}
+
+function extractPersonaRules(text){
+  // ── audienceKeywords: heading lines + frequency fallback ─────────────────
+  const audienceKeywords = [];
+  // Lines that look like headings: short, no trailing period, mixed/upper case
+  const headingRe = /^[ \t]*([A-Z][A-Za-z\s\-&]{2,50})[ \t]*$/gm;
+  let m;
+  while((m = headingRe.exec(text)) !== null && audienceKeywords.length < 20){
+    const kw = normalizeExtracted(m[1]);
+    if(kw && kw.length >= 3 && kw.split(' ').length <= 6 && !audienceKeywords.includes(kw))
+      audienceKeywords.push(kw);
+  }
+  // Frequency fallback when few headings found
+  if(audienceKeywords.length < 5){
+    const STOP_EXT = new Set([...STOP,
+      'that','with','this','from','have','they','were','been','will','their',
+      'what','when','which','about','into','more','some','than','then','them',
+      'these','those','also','each','much','such','both','even','most','over',
+      'uses','used','using','want','need','make','take','come','help','like',
+      'just','very','much','many','well','back','only','same','good','high',
+      'long','great','small','large','next','last','first']);
+    const words = (text.toLowerCase().match(/\b[a-z]{4,}\b/g) || []);
+    const freq = {};
+    words.forEach(w => { if(!STOP_EXT.has(w)) freq[w] = (freq[w]||0) + 1; });
+    Object.entries(freq)
+      .sort((a,b) => b[1]-a[1])
+      .slice(0, 20 - audienceKeywords.length)
+      .forEach(([w]) => { if(!audienceKeywords.includes(w)) audienceKeywords.push(w); });
+  }
+
+  // ── preferredLanguage ────────────────────────────────────────────────────
+  const prefLangRe = /(?:language\s+(?:they\s+use|that\s+resonates|that\s+works)|vocabulary|words?\s+they\s+(?:use|say|respond\s+to)|they\s+say|preferred\s+(?:language|terms?|words?)|language\s+to\s+use|resonates?\s+with\s+them)/i;
+  const preferredLanguage = extractSectionItems(text, prefLangRe, 30);
+
+  // ── avoidLanguage ────────────────────────────────────────────────────────
+  const avoidLangRe = /(?:language\s+to\s+avoid|don'?t\s+say|won'?t\s+connect|turns?\s+(?:them\s+)?off|put(?:s)?\s+(?:them\s+)?off|avoid\s+(?:saying|using|these?\s+words?)|jargon\s+to\s+avoid|language\s+that\s+(?:doesn'?t\s+work|alienates))/i;
+  const avoidLanguage = extractSectionItems(text, avoidLangRe, 30);
+
+  return { audienceKeywords, preferredLanguage, avoidLanguage };
+}
+
+function buildExtractionSummary(type, rules){
+  if(type === 'tov'){
+    const { bannedWords, preferredTerms, lengthPreference, personPreference } = rules;
+    const hasAny = bannedWords.length || preferredTerms.length || lengthPreference || personPreference;
+    if(!hasAny) return 'No structured rules found — document used for general context only';
+    const parts = [];
+    if(bannedWords.length)    parts.push(`${bannedWords.length} banned word${bannedWords.length===1?'':'s'}`);
+    if(preferredTerms.length) parts.push(`${preferredTerms.length} preferred term${preferredTerms.length===1?'':'s'}`);
+    if(lengthPreference)      parts.push(`length: ${lengthPreference}`);
+    if(personPreference)      parts.push(`person: ${personPreference}`);
+    return 'Extracted — ' + parts.join(' · ');
+  } else {
+    const { audienceKeywords, preferredLanguage, avoidLanguage } = rules;
+    const hasAny = audienceKeywords.length || preferredLanguage.length || avoidLanguage.length;
+    if(!hasAny) return 'No structured rules found — document used for general context only';
+    const parts = [];
+    if(audienceKeywords.length)  parts.push(`${audienceKeywords.length} audience keyword${audienceKeywords.length===1?'':'s'}`);
+    if(preferredLanguage.length) parts.push(`${preferredLanguage.length} preferred term${preferredLanguage.length===1?'':'s'}`);
+    if(avoidLanguage.length)     parts.push(`${avoidLanguage.length} avoid term${avoidLanguage.length===1?'':'s'}`);
+    return 'Extracted — ' + parts.join(' · ');
+  }
+}
+
+async function confirmAddClient(){
+  const name = document.getElementById('acName').value.trim();
+  if(!name){ acSetError('acNameError','Client name is required'); return; }
+  if(clients.some(c=>c.name.toLowerCase()===name.toLowerCase())){
+    acSetError('acNameError','A client with this name already exists'); return;
+  }
+  if(clients.length >= MAX_CLIENTS){
+    acSetError('acNameError',`Maximum of ${MAX_CLIENTS} clients reached`); return;
+  }
+  const btn = document.getElementById('btnSaveClient');
+  btn.disabled = true;
+  const now = Date.now();
+  const client = {
+    id:           genId(),
+    name,
+    description:  document.getElementById('acDesc').value.trim(),
+    brandTerms:   [...acBrandTerms],
+    personaDoc:   {...acPersonaDoc},
+    tovDoc:       {...acTovDoc},
+    personaRules: acPersonaRules || { audienceKeywords:[], preferredLanguage:[], avoidLanguage:[] },
+    tovRules:     acTovRules     || { bannedWords:[], preferredTerms:[], lengthPreference:null, personPreference:null },
+    saves:        [],
+    createdAt:    now,
+    lastUsedAt:   now,
+  };
+  clients.push(client);
+  activeClientId = client.id;
+  clientsSave();
+  document.getElementById('modalAddClient').classList.remove('open');
+  renderClientNav();
+  renderBrandTerms();
+  updateClientContextBar();
+  showToast(`✓ Client created: ${name}`);
+  openEntryList(client.id);
 }
 
 const ta  = document.getElementById('editor-textarea');
@@ -863,7 +1854,7 @@ const AUDIENCES = {
 };
 
 const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true};
-let analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],auditIssues=[];
+let analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],auditIssues=[],auditOverrides=[];
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
@@ -894,6 +1885,8 @@ function onEditorInput(){
   // Analysis fires on next tick — imperceptible delay, doesn't block keystrokes
   clearTimeout(analyseTimer);
   analyseTimer = setTimeout(()=>{ analyse(); persistSave(); }, 0);
+  // Auto-save to the open entry (500 ms debounce, no-op if no entry materialised)
+  scheduleAutoSave();
 }
 
 ta.addEventListener('input', onEditorInput);
@@ -1710,44 +2703,64 @@ function detectCTA(text){
 // Secondary keyword state
 let secKWs = []; // array of strings
 
-// ── Brand Terms (session-only — never persisted) ────────────────────────────
-let brandTerms = []; // array of lowercase strings
+// ── Brand Terms (per-client — persisted with client data) ───────────────────
+// Brand terms moved from a global session array to per-client storage in v6.20.
+// Returns the active client's brandTerms, or [] when no client is active.
+function getBrandTerms(){
+  if(!activeClientId) return [];
+  const c = clients.find(cl=>cl.id===activeClientId);
+  return (c && Array.isArray(c.brandTerms)) ? c.brandTerms : [];
+}
 
 function addBrandTerm(){
   const inp = document.getElementById('btInput');
   const val = inp.value.trim();
   if(!val) return;
+  if(!activeClientId){ showToast('⚠️ Select a client to add brand terms'); return; }
+  const c = clients.find(cl=>cl.id===activeClientId);
+  if(!c) return;
   const lc = val.toLowerCase();
-  if(brandTerms.includes(lc)){ showToast('⚠️ Already in brand terms'); inp.value=''; return; }
-  if(brandTerms.length >= 20){ showToast('⚠️ Maximum 20 brand terms'); return; }
-  brandTerms.push(lc);
+  if(c.brandTerms.includes(lc)){ showToast('⚠️ Already in brand terms'); inp.value=''; return; }
+  if(c.brandTerms.length >= 20){ showToast('⚠️ Maximum 20 brand terms'); return; }
+  c.brandTerms.push(lc);
   inp.value = '';
+  clientsSave();
   renderBrandTerms();
   analyse();
 }
 
 function removeBrandTerm(i){
-  brandTerms.splice(i, 1);
+  if(!activeClientId) return;
+  const c = clients.find(cl=>cl.id===activeClientId);
+  if(!c) return;
+  c.brandTerms.splice(i, 1);
+  clientsSave();
   renderBrandTerms();
   analyse();
 }
 
 function renderBrandTerms(){
-  const chips  = document.getElementById('btChips');
-  const empty  = document.getElementById('btEmpty');
-  const hint   = document.getElementById('btHint');
+  const card  = document.getElementById('brandTermsCard');
+  const chips = document.getElementById('btChips');
+  const empty = document.getElementById('btEmpty');
+  const hint  = document.getElementById('btHint');
   if(!chips) return;
+
+  // Show the card only when a client is active
+  if(card) card.style.display = activeClientId ? '' : 'none';
+
+  const terms = getBrandTerms();
 
   // Remove existing chips (but keep the empty span in DOM)
   Array.from(chips.querySelectorAll('.bt-chip')).forEach(el => el.remove());
 
-  if(brandTerms.length === 0){
+  if(terms.length === 0){
     empty.style.display = '';
     hint.style.display  = 'none';
   } else {
     empty.style.display = 'none';
     hint.style.display  = '';
-    brandTerms.forEach((term, i) => {
+    terms.forEach((term, i) => {
       const chip = document.createElement('span');
       chip.className = 'bt-chip';
       chip.innerHTML = `${esc(term)}<button class="bt-chip-x" onclick="removeBrandTerm(${i})" title="Remove">×</button>`;
@@ -1758,10 +2771,11 @@ function renderBrandTerms(){
 
 // Returns true if a word/phrase should be skipped because it matches a brand term
 function isBrandTerm(str){
-  if(!brandTerms.length) return false;
+  const terms = getBrandTerms();
+  if(!terms.length) return false;
   // Normalise: lowercase, strip non-alphanum-or-space, collapse multi-space, trim
   const lc = str.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
-  return brandTerms.some(t => {
+  return terms.some(t => {
     const normT = t.toLowerCase().replace(/[^a-z0-9\s]/g,'').replace(/\s+/g,' ').trim();
     // Whole-string match only (after normalisation). Multi-word brand terms
     // no longer match when they're a substring of a longer phrase.
@@ -2199,30 +3213,89 @@ function fixAllFillers(){
   showToast(`✓ Removed ${count} ${fillerWord}`);
 }
 
-// ── Folders & History ────────────────────────────────────────────────────────
-const FOLDERS_KEY = 'ce_folders_v1';
-const SESSION_KEY = 'copyengine_v63';
-const MAX_FOLDERS = 10;
+// ── Clients & History ────────────────────────────────────────────────────────
+const CLIENTS_KEY    = 'ce_clients_v1';
+const OLD_FOLDERS_KEY = 'ce_folders_v1'; // legacy key — used only during one-time migration
+const MIGRATION_FLAG  = 'ce_migration_v1';
+const SESSION_KEY    = 'copyengine_v63';
+const LAST_EXPORT_KEY = 'ce_last_export_v1';
+const APP_VERSION    = 'v6.20';
+const MAX_CLIENTS = 10;
 const MAX_SAVES   = 5;
 
 // Runtime state
-let folders = [];        // [{id, name, saves:[{id,name,date,time,score,text,audience,kw,secKWs,diffInput,contentType,brandTerms}]}]
-let activeFolderId = null;
+let clients = [];        // [{id, name, saves:[{id,name,date,time,score,text,audience,kw,secKWs,diffInput,contentType,brandTerms}]}]
+let activeClientId = null;
 let openEntryId    = null; // currently loaded entry id (for overwrite)
 let pendingDeleteEntryId   = null;
-let pendingDeleteFolderId  = null;
+let pendingDeleteClientId  = null;
+let pendingImportData      = null;
 
-function foldersLoad(){
-  try{
-    const raw = localStorage.getItem(FOLDERS_KEY);
-    if(raw) folders = JSON.parse(raw);
-  }catch(e){ folders=[]; }
-  renderFolderNav();
-  renderHistory();
+// ── One-time migration: ce_folders_v1 → ce_clients_v1 ───────────────────────
+// Runs exactly once per browser (MIGRATION_FLAG guards re-runs).
+// Brand terms were global/session-only in v6.18 and never written to localStorage,
+// so there are no persisted global terms to migrate. Entry-level brandTerms snapshots
+// exist inside each save object but are not hoisted to client level — they were
+// point-in-time session snapshots, not a curated per-client list. Each migrated
+// client starts with an empty brandTerms array; the user re-adds terms as needed.
+function runMigration(){
+  if(localStorage.getItem(MIGRATION_FLAG)) return;
+  const raw = localStorage.getItem(OLD_FOLDERS_KEY);
+  if(raw){
+    try{
+      const oldFolders = JSON.parse(raw);
+      if(Array.isArray(oldFolders) && oldFolders.length && !localStorage.getItem(CLIENTS_KEY)){
+        const now = Date.now();
+        const migrated = oldFolders.map(f => ({
+          id:          f.id || genId(),
+          name:        f.name || 'Unnamed Client',
+          description: '',
+          brandTerms:  [],
+          personaDoc:  { fileName: null, rawText: null, uploadedAt: null },
+          tovDoc:      { fileName: null, rawText: null, uploadedAt: null },
+          personaRules:{},
+          tovRules:    {},
+          saves:       Array.isArray(f.saves) ? f.saves : [],
+          createdAt:   now,
+          lastUsedAt:  now,
+        }));
+        localStorage.setItem(CLIENTS_KEY, JSON.stringify(migrated));
+      }
+      localStorage.removeItem(OLD_FOLDERS_KEY);
+    }catch(e){}
+  }
+  localStorage.setItem(MIGRATION_FLAG, '1');
 }
 
-function foldersSave(){
-  try{ localStorage.setItem(FOLDERS_KEY, JSON.stringify(folders)); }catch(e){}
+function clientsLoad(){
+  runMigration();
+  try{
+    const raw = localStorage.getItem(CLIENTS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      // Normalise each client object to guarantee new schema fields exist
+      clients = parsed.map(c => ({
+        id:          c.id,
+        name:        c.name || '',
+        description: c.description || '',
+        brandTerms:  Array.isArray(c.brandTerms) ? c.brandTerms : [],
+        personaDoc:  c.personaDoc  || { fileName: null, rawText: null, uploadedAt: null },
+        tovDoc:      c.tovDoc      || { fileName: null, rawText: null, uploadedAt: null },
+        personaRules:c.personaRules|| {},
+        tovRules:    c.tovRules    || {},
+        saves:       Array.isArray(c.saves) ? c.saves : [],
+        createdAt:   c.createdAt   || Date.now(),
+        lastUsedAt:  c.lastUsedAt  || Date.now(),
+      }));
+    }
+  }catch(e){ clients=[]; }
+  renderClientNav();
+  renderHistory();
+  renderBrandTerms();
+}
+
+function clientsSave(){
+  try{ localStorage.setItem(CLIENTS_KEY, JSON.stringify(clients)); }catch(e){}
 }
 
 function genId(){
@@ -2230,68 +3303,74 @@ function genId(){
 }
 
 // ── Folder Nav ────────────────────────────────────────────────────────────────
-function renderFolderNav(){
-  const tabs = document.getElementById('folderTabs');
-  const row  = document.getElementById('folderTabsRow');
-  if(!folders.length){
+function renderClientNav(){
+  const tabs = document.getElementById('clientTabs');
+  const row  = document.getElementById('clientTabsRow');
+  if(!clients.length){
     row.style.display = 'none';
     tabs.innerHTML = '';
     return;
   }
   row.style.display = 'block';
-  tabs.innerHTML = folders.map((f,i)=>{
-    const isActive = f.id === activeFolderId;
-    return `<button class="folder-tab${isActive?' active':''}" id="ftab-${f.id}" onclick="onFolderTabClick('${f.id}',this)">
-      ${esc(f.name)}<span class="folder-tab-count">${f.saves.length}/${MAX_SAVES}</span>
+  tabs.innerHTML = clients.map((f,i)=>{
+    const isActive = f.id === activeClientId;
+    return `<button class="client-tab${isActive?' active':''}" id="ftab-${f.id}" onclick="onClientTabClick('${f.id}',this)">
+      ${esc(f.name)}<span class="client-tab-count">${f.saves.length}/${MAX_SAVES}</span>
     </button>`;
   }).join('');
 }
 
-function setActiveFolder(id){
-  activeFolderId = id;
-  renderFolderNav();
+function setActiveClient(id){
+  activeClientId = id;
+  const c = clients.find(cl=>cl.id===id);
+  if(c) c.lastUsedAt = Date.now();
+  renderClientNav();
   renderHistory();
+  renderBrandTerms();
 }
 
 // ── Folder Tab Dropdown ───────────────────────────────────────────────────────
-let dropdownFolderId = null;
+let dropdownClientId = null;
 
-function onFolderTabClick(folderId, btnEl){
-  const dd = document.getElementById('folderDropdown');
+function onClientTabClick(folderId, btnEl){
+  const dd = document.getElementById('clientDropdown');
   // Toggle: if already open for this folder, close it
-  if(dd.classList.contains('open') && dropdownFolderId === folderId){
-    closeFolderDropdown(); return;
+  if(dd.classList.contains('open') && dropdownClientId === folderId){
+    closeClientDropdown(); return;
   }
-  // Set as active folder
-  activeFolderId = folderId;
-  dropdownFolderId = folderId;
-  renderFolderNav();
+  // Set as active client, stamp lastUsedAt
+  activeClientId = folderId;
+  dropdownClientId = folderId;
+  const _ct = clients.find(cl=>cl.id===folderId);
+  if(_ct) { _ct.lastUsedAt = Date.now(); clientsSave(); }
+  renderClientNav();
   renderHistory();
-  openFolderDropdown(folderId, btnEl);
+  renderBrandTerms();
+  openClientDropdown(folderId, btnEl);
 }
 
-function openFolderDropdown(folderId, anchorEl){
-  const folder = folders.find(f=>f.id===folderId);
+function openClientDropdown(folderId, anchorEl){
+  const folder = clients.find(f=>f.id===folderId);
   if(!folder) return;
-  const dd = document.getElementById('folderDropdown');
+  const dd = document.getElementById('clientDropdown');
 
   // Header name
-  document.getElementById('folderDropdownName').textContent = folder.name;
+  document.getElementById('clientDropdownName').textContent = folder.name;
 
   // Entries
-  const entriesEl = document.getElementById('folderDropdownEntries');
+  const entriesEl = document.getElementById('clientDropdownEntries');
   if(!folder.saves.length){
-    entriesEl.innerHTML = '<div class="folder-dropdown-empty">No saves yet — hit 💾 Save to add one.</div>';
+    entriesEl.innerHTML = '<div class="client-dropdown-empty">No saves yet — hit 💾 Save to add one.</div>';
   } else {
     entriesEl.innerHTML = folder.saves.map(s=>{
       const isOpen = s.id === openEntryId;
-      return `<div class="folder-dropdown-entry${isOpen?' is-open':''}" onclick="loadEntryFromDropdown('${folder.id}','${s.id}')">
-        <div class="folder-dropdown-entry-left">
-          <div class="folder-dropdown-entry-name">${esc(s.name)}</div>
-          <div class="folder-dropdown-entry-meta">${s.date} · ${s.time}</div>
+      return `<div class="client-dropdown-entry${isOpen?' is-open':''}" onclick="loadEntryFromDropdown('${folder.id}','${s.id}')">
+        <div class="client-dropdown-entry-left">
+          <div class="client-dropdown-entry-name">${esc(s.name)}</div>
+          <div class="client-dropdown-entry-meta">${s.date} · ${s.time}</div>
         </div>
-        <span class="folder-dropdown-entry-score">${s.score}%</span>
-        <button class="folder-dropdown-entry-del" title="Delete entry"
+        <span class="client-dropdown-entry-score">${s.score}%</span>
+        <button class="client-dropdown-entry-del" title="Delete entry"
           onclick="event.stopPropagation();openDeleteEntryModal('${folder.id}','${s.id}','${esc(s.name)}')">×</button>
       </div>`;
     }).join('');
@@ -2310,40 +3389,40 @@ function openFolderDropdown(folderId, anchorEl){
   }
 }
 
-function closeFolderDropdown(){
-  document.getElementById('folderDropdown').classList.remove('open');
-  dropdownFolderId = null;
+function closeClientDropdown(){
+  document.getElementById('clientDropdown').classList.remove('open');
+  dropdownClientId = null;
 }
 
 function loadEntryFromDropdown(folderId, entryId){
-  closeFolderDropdown();
+  closeClientDropdown();
   loadEntry(folderId, entryId);
 }
 
 // Close dropdown when clicking outside
 document.addEventListener('click', e=>{
-  const dd = document.getElementById('folderDropdown');
+  const dd = document.getElementById('clientDropdown');
   if(!dd.classList.contains('open')) return;
   if(dd.contains(e.target)) return;
-  if(e.target.closest('.folder-tab')) return; // tab clicks handled by onFolderTabClick
-  closeFolderDropdown();
+  if(e.target.closest('.client-tab')) return; // tab clicks handled by onClientTabClick
+  closeClientDropdown();
 });
 
 // ── History Panel ─────────────────────────────────────────────────────────────
 function renderHistory(){
   const el = document.getElementById('historyList');
-  if(!folders.length){
-    el.innerHTML = '<p class="history-empty">Create a folder to start saving.</p>';
+  if(!clients.length){
+    el.innerHTML = '<p class="history-empty">Create a client to start saving.</p>';
     return;
   }
-  const folder = folders.find(f=>f.id===activeFolderId);
+  const folder = clients.find(f=>f.id===activeClientId);
   if(!folder){
-    el.innerHTML = '<p class="history-empty">Select a folder above.</p>';
+    el.innerHTML = '<p class="history-empty">Select a client above.</p>';
     return;
   }
   if(!folder.saves.length){
     el.innerHTML = `<p class="history-empty">No saves yet.<br>Hit 💾 Save to add one.</p>
-      <button onclick="openDeleteFolderModal('${folder.id}')" style="margin-top:8px;background:none;border:none;font-size:10px;color:#e0e0e0;cursor:pointer;font-family:inherit;font-weight:700;width:100%;text-align:center;padding:4px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#e0e0e0'">Delete folder</button>`;
+      <button onclick="openDeleteClientModal('${folder.id}')" style="margin-top:8px;background:none;border:none;font-size:10px;color:#e0e0e0;cursor:pointer;font-family:inherit;font-weight:700;width:100%;text-align:center;padding:4px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#e0e0e0'">Delete client</button>`;
     return;
   }
   el.innerHTML = folder.saves.map(s=>{
@@ -2359,12 +3438,12 @@ function renderHistory(){
       </div>
     </div>`;
   }).join('') +
-  `<button onclick="openDeleteFolderModal('${folder.id}')" style="margin-top:6px;background:none;border:none;font-size:10px;color:#e0e0e0;cursor:pointer;font-family:inherit;font-weight:700;width:100%;text-align:center;padding:4px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#e0e0e0'">Delete folder</button>`;
+  `<button onclick="openDeleteClientModal('${folder.id}')" style="margin-top:6px;background:none;border:none;font-size:10px;color:#e0e0e0;cursor:pointer;font-family:inherit;font-weight:700;width:100%;text-align:center;padding:4px" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#e0e0e0'">Delete client</button>`;
 }
 
 // ── Load an entry into the editor ─────────────────────────────────────────────
 function loadEntry(folderId, entryId){
-  const folder = folders.find(f=>f.id===folderId);
+  const folder = clients.find(f=>f.id===folderId);
   if(!folder) return;
   const entry = folder.saves.find(s=>s.id===entryId);
   if(!entry) return;
@@ -2375,27 +3454,42 @@ function loadEntry(folderId, entryId){
   if(entry.contentType) document.getElementById('seoContentType').value = entry.contentType;
   if(entry.diffInput) document.getElementById('diffInput').value = entry.diffInput;
   if(entry.secKWs && Array.isArray(entry.secKWs)){ secKWs = entry.secKWs; renderSecKWInputs(); }
-  // Brand Terms: restore if present (session-only; they were captured at save time)
-  if(entry.brandTerms && Array.isArray(entry.brandTerms) && typeof renderBrandTerms === 'function'){
-    brandTerms = entry.brandTerms; renderBrandTerms();
-  }
+  // Brand terms now live on the client object — no restoration from entry needed.
 
   openEntryId = entryId;
-  activeFolderId = folderId;
+  activeClientId = folderId;
+  const _ec = clients.find(cl=>cl.id===folderId);
+  if(_ec) { _ec.lastUsedAt = Date.now(); clientsSave(); }
   onEditorInput();
-  renderFolderNav();
+  renderClientNav();
   renderHistory();
+  renderBrandTerms();
+  updateClientContextBar();
+  // Restore last audit results if available
+  if(entry.lastAuditResults && entry.lastAuditResults.length){
+    auditIssues    = entry.lastAuditResults;
+    auditOverrides = Array.isArray(entry.lastAuditOverrides) ? entry.lastAuditOverrides : [];
+    const _panel = document.getElementById('aiPanel');
+    if(_panel) _panel.classList.add('open');
+    renderAI(auditIssues, ta.value, auditOverrides);
+  } else {
+    auditIssues    = [];
+    auditOverrides = [];
+    const _panel = document.getElementById('aiPanel');
+    if(_panel) _panel.classList.remove('open');
+  }
   showToast('↩ Entry loaded');
 }
 
 // ── Save modal ────────────────────────────────────────────────────────────────
 function openSaveModal(){
   if(!ta.value.trim()){ showToast('⚠️ Nothing to save — editor is empty'); return; }
-  if(!folders.length){ showToast('⚠️ Create a folder first'); return; }
+  if(!activeClientId){ showToast('⚠️ Open a client to save entries'); return; }
+  if(!clients.length){ showToast('⚠️ Create a client first'); return; }
 
   // If an entry is currently open, offer overwrite shortcut
   if(openEntryId){
-    const folder = folders.find(f=>f.saves.some(s=>s.id===openEntryId));
+    const folder = clients.find(f=>f.saves.some(s=>s.id===openEntryId));
     if(folder){
       const entry = folder.saves.find(s=>s.id===openEntryId);
       const now = new Date();
@@ -2411,10 +3505,10 @@ function openSaveModal(){
 }
 
 function openSaveNewModal(){
-  // Populate folder select
-  const sel = document.getElementById('selectSaveFolder');
-  sel.innerHTML = folders.map(f=>`<option value="${f.id}">${esc(f.name)} (${f.saves.length}/${MAX_SAVES})</option>`).join('');
-  if(activeFolderId) sel.value = activeFolderId;
+  // Populate client select
+  const sel = document.getElementById('selectSaveClient');
+  sel.innerHTML = clients.map(f=>`<option value="${f.id}">${esc(f.name)} (${f.saves.length}/${MAX_SAVES})</option>`).join('');
+  if(activeClientId) sel.value = activeClientId;
 
   // Pre-populate meta
   const now = new Date();
@@ -2429,13 +3523,13 @@ function openSaveNewModal(){
 
 function confirmSaveEntry(){
   const name   = document.getElementById('inputEntryName').value.trim();
-  const fid    = document.getElementById('selectSaveFolder').value;
+  const fid    = document.getElementById('selectSaveClient').value;
   if(!name||!fid) return;
 
-  const folder = folders.find(f=>f.id===fid);
-  if(!folder){ showToast('⚠️ Folder not found'); return; }
+  const folder = clients.find(f=>f.id===fid);
+  if(!folder){ showToast('⚠️ Client not found'); return; }
   if(folder.saves.length>=MAX_SAVES){
-    showToast(`⚠️ Folder is full (${MAX_SAVES} saves max)`);
+    showToast(`⚠️ Client is full (${MAX_SAVES} saves max)`);
     closeModal('modalSaveEntry'); return;
   }
 
@@ -2452,21 +3546,20 @@ function confirmSaveEntry(){
     contentType:document.getElementById('seoContentType').value,
     diffInput:  document.getElementById('diffInput').value,
     secKWs:     [...secKWs],
-    brandTerms: typeof brandTerms!=='undefined'?[...brandTerms]:[],
   };
 
   folder.saves.unshift(entry);
   openEntryId = entry.id;
-  activeFolderId = fid;
-  foldersSave();
+  activeClientId = fid;
+  clientsSave();
   closeModal('modalSaveEntry');
-  renderFolderNav();
+  renderClientNav();
   renderHistory();
   showToast('✓ Saved to '+folder.name);
 }
 
 function confirmOverwriteEntry(){
-  const folder = folders.find(f=>f.saves.some(s=>s.id===openEntryId));
+  const folder = clients.find(f=>f.saves.some(s=>s.id===openEntryId));
   if(!folder) return;
   const idx = folder.saves.findIndex(s=>s.id===openEntryId);
   if(idx===-1) return;
@@ -2484,36 +3577,51 @@ function confirmOverwriteEntry(){
     contentType:document.getElementById('seoContentType').value,
     diffInput:  document.getElementById('diffInput').value,
     secKWs:     [...secKWs],
-    brandTerms: typeof brandTerms!=='undefined'?[...brandTerms]:[],
   };
 
-  foldersSave();
+  clientsSave();
   closeModal('modalOverwriteEntry');
-  renderFolderNav();
+  renderClientNav();
   renderHistory();
   showToast('✓ Entry updated');
 }
 
 // ── Create Folder modal ───────────────────────────────────────────────────────
-function openCreateFolderModal(){
-  if(folders.length>=MAX_FOLDERS){ showToast(`⚠️ Maximum ${MAX_FOLDERS} folders reached`); return; }
-  document.getElementById('inputFolderName').value='';
-  document.getElementById('btnCreateFolder').disabled=true;
-  openModal('modalCreateFolder');
-  setTimeout(()=>document.getElementById('inputFolderName').focus(),100);
+function openCreateClientModal(){
+  if(clients.length>=MAX_CLIENTS){ showToast(`⚠️ Maximum ${MAX_CLIENTS} clients reached`); return; }
+  document.getElementById('inputClientName').value='';
+  document.getElementById('btnCreateClient').disabled=true;
+  openModal('modalCreateClient');
+  setTimeout(()=>document.getElementById('inputClientName').focus(),100);
 }
 
-function confirmCreateFolder(){
-  const name = document.getElementById('inputFolderName').value.trim();
+function confirmCreateClient(){
+  const name = document.getElementById('inputClientName').value.trim();
   if(!name) return;
-  const folder = { id:genId(), name, saves:[] };
-  folders.push(folder);
-  activeFolderId = folder.id;
-  foldersSave();
-  closeModal('modalCreateFolder');
-  renderFolderNav();
+  const now = Date.now();
+  const client = {
+    id:          genId(),
+    name,
+    description: '',
+    brandTerms:  [],
+    personaDoc:  { fileName: null, rawText: null, uploadedAt: null },
+    tovDoc:      { fileName: null, rawText: null, uploadedAt: null },
+    personaRules:{},
+    tovRules:    {},
+    saves:       [],
+    createdAt:   now,
+    lastUsedAt:  now,
+  };
+  clients.push(client);
+  activeClientId = client.id;
+  clientsSave();
+  closeModal('modalCreateClient');
+  hideSplash();
+  renderClientNav();
   renderHistory();
-  showToast('✓ Folder created: '+name);
+  renderBrandTerms();
+  updateClientContextBar();
+  showToast('✓ Client created: '+name);
 }
 
 // ── Delete modals ─────────────────────────────────────────────────────────────
@@ -2526,40 +3634,41 @@ function openDeleteEntryModal(folderId, entryId, entryName){
 function confirmDeleteEntry(){
   if(!pendingDeleteEntryId) return;
   const {folderId, entryId} = pendingDeleteEntryId;
-  const folder = folders.find(f=>f.id===folderId);
+  const folder = clients.find(f=>f.id===folderId);
   if(folder){ folder.saves = folder.saves.filter(s=>s.id!==entryId); }
   if(openEntryId===entryId) openEntryId=null;
-  foldersSave();
+  clientsSave();
   closeModal('modalDeleteEntry');
-  renderFolderNav();
+  renderClientNav();
   renderHistory();
   // Refresh dropdown if it's open for this folder
-  if(dropdownFolderId===folderId){
+  if(dropdownClientId===folderId){
     const anchorEl = document.getElementById('ftab-'+folderId);
-    if(anchorEl) openFolderDropdown(folderId, anchorEl);
+    if(anchorEl) openClientDropdown(folderId, anchorEl);
   }
   showToast('✓ Entry deleted');
   pendingDeleteEntryId=null;
 }
 
-function openDeleteFolderModal(folderId){
-  pendingDeleteFolderId = folderId;
-  const folder = folders.find(f=>f.id===folderId);
-  document.getElementById('deleteFolderMsg').textContent = folder
+function openDeleteClientModal(folderId){
+  pendingDeleteClientId = folderId;
+  const folder = clients.find(f=>f.id===folderId);
+  document.getElementById('deleteClientMsg').textContent = folder
     ? `"${folder.name}" and all ${folder.saves.length} saved ${folder.saves.length===1?'entry':'entries'} will be permanently removed.`
-    : 'This folder will be permanently removed.';
-  openModal('modalDeleteFolder');
+    : 'This client and all its saved entries will be permanently removed.';
+  openModal('modalDeleteClient');
 }
 
-function confirmDeleteFolder(){
-  folders = folders.filter(f=>f.id!==pendingDeleteFolderId);
-  if(activeFolderId===pendingDeleteFolderId) activeFolderId = folders.length?folders[0].id:null;
-  foldersSave();
-  closeModal('modalDeleteFolder');
-  renderFolderNav();
+function confirmDeleteClient(){
+  clients = clients.filter(f=>f.id!==pendingDeleteClientId);
+  if(activeClientId===pendingDeleteClientId) activeClientId = clients.length?clients[0].id:null;
+  clientsSave();
+  closeModal('modalDeleteClient');
+  renderClientNav();
   renderHistory();
-  showToast('✓ Folder deleted');
-  pendingDeleteFolderId=null;
+  renderBrandTerms();
+  showToast('✓ Client deleted');
+  pendingDeleteClientId=null;
 }
 
 // ── Modal helpers ─────────────────────────────────────────────────────────────
@@ -2573,11 +3682,25 @@ function closeModal(id){
 document.addEventListener('click',e=>{
   if(e.target.classList.contains('modal-overlay')) e.target.classList.remove('open');
 });
-// Enter key in folder/entry name inputs
+// Keyboard handlers for modals
 document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    const addModal = document.getElementById('modalAddClient');
+    if(addModal && addModal.classList.contains('open')){
+      cancelAddClient(); return;
+    }
+    const entryList = document.getElementById('modalEntryList');
+    if(entryList && entryList.classList.contains('open')){
+      goToPickerFromEntryList(); return;
+    }
+    const picker = document.getElementById('modalClientPicker');
+    if(picker && picker.classList.contains('open')){
+      picker.classList.remove('open'); return;
+    }
+  }
   if(e.key!=='Enter') return;
-  if(document.getElementById('modalCreateFolder').classList.contains('open')){
-    if(!document.getElementById('btnCreateFolder').disabled) confirmCreateFolder();
+  if(document.getElementById('modalCreateClient').classList.contains('open')){
+    if(!document.getElementById('btnCreateClient').disabled) confirmCreateClient();
   } else if(document.getElementById('modalSaveEntry').classList.contains('open')){
     if(!document.getElementById('btnSaveEntry').disabled) confirmSaveEntry();
   }
@@ -2608,7 +3731,8 @@ function persistLoad(){
     if(data.diffInput)  document.getElementById('diffInput').value=data.diffInput;
     if(data.editorText){ onEditorInput(); showToast('↩ Progress restored'); }
   }catch(e){}
-  foldersLoad();
+  clientsLoad();
+  renderBackupReminder();
 }
 
 function resetUI(){
@@ -2644,6 +3768,18 @@ function runAIAudit(){
   setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),50);
 
   const issues=[];
+  const overrides=[];
+
+  // ── Resolve active client brand rules (empty in quick-check mode) ──────────
+  const _client       = activeClientId ? clients.find(c=>c.id===activeClientId) : null;
+  const _tovRules     = (_client && _client.tovRules)     || {};
+  const _personaRules = (_client && _client.personaRules) || {};
+  const _bannedWords    = Array.isArray(_tovRules.bannedWords)    ? _tovRules.bannedWords.filter(Boolean)                          : [];
+  const _preferredTerms = Array.isArray(_tovRules.preferredTerms) ? _tovRules.preferredTerms.filter(t=>t&&t.use&&t.avoid)          : [];
+  const _avoidLang      = Array.isArray(_personaRules.avoidLanguage) ? _personaRules.avoidLanguage.filter(Boolean)                 : [];
+  const _lengthPref  = _tovRules.lengthPreference || null;
+  // Stricter thresholds when client prefers shorter sentences; 'long' suppresses entirely
+  const _longThreshold = _lengthPref==='short' ? 25 : _lengthPref==='medium' ? 28 : 30;
 
   // ── Passive voice ──
   const pr=new RegExp(PASSIVE_RE.source,'gi'); let m;
@@ -2702,22 +3838,27 @@ function runAIAudit(){
   // ── Long sentences ──
   lastSentences.forEach(sent=>{
     const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(wc>=30){
-      // searchPhrase = first 40 chars of the real sentence (no ellipsis) — guaranteed to exist in text
+    if(wc>=_longThreshold){
       const searchPhrase=sent.slice(0,40);
       const charIdx=text.indexOf(searchPhrase);
       const midPoint=Math.floor(sent.length/2);
       const splitPoint=sent.indexOf(' ',midPoint);
       const half1=sent.slice(0,splitPoint).trim();
       const half2=sent.slice(splitPoint+1).trim();
-      issues.push({
-        type:'long_sentence',
-        phrase:sent.length>70?sent.slice(0,70)+'…':sent, // display only
+      const issueObj={
+        type:'long_sentence', source:'generic', overrideReason:null,
+        phrase:sent.length>70?sent.slice(0,70)+'…':sent,
         searchPhrase,
         charIdx:charIdx>-1?charIdx:0,
         why:`At ${wc} words, this sentence asks readers to hold too much in working memory. In marketing copy, long sentences bury the point and invite skimming.`,
         fix:`Split it into two: "${half1}." then "${half2[0].toUpperCase()+half2.slice(1)}"`
-      });
+      };
+      if(_lengthPref==='long'){
+        issueObj.overrideReason="This sentence is long but your client's tone of voice favours longer, considered sentences.";
+        overrides.push(issueObj);
+      } else {
+        issues.push(issueObj);
+      }
     }
   });
 
@@ -2746,16 +3887,85 @@ function runAIAudit(){
     }
   });
 
-  // Deduplicate by phrase+type, sort by impact, cap at 12
+  // ── Brand: banned words ──────────────────────────────────────────────────────
+  _bannedWords.forEach(word=>{
+    const escaped=word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp(`\\b${escaped}\\b`,'gi'); let bm;
+    while((bm=re.exec(text))!==null){
+      issues.push({
+        type:'banned', source:'brand', overrideReason:null,
+        phrase:bm[0], searchPhrase:bm[0], charIdx:bm.index,
+        why:`"${word}" is in your client's banned words list and shouldn't appear in their copy.`,
+        fix:`Replace with a different word that fits the client's voice.`
+      });
+    }
+  });
+
+  // ── Brand: preferred terms ───────────────────────────────────────────────────
+  _preferredTerms.forEach(({use,avoid})=>{
+    const escaped=avoid.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp(`\\b${escaped}\\b`,'gi'); let pm;
+    while((pm=re.exec(text))!==null){
+      issues.push({
+        type:'preferred', source:'brand', overrideReason:null,
+        phrase:pm[0], searchPhrase:pm[0], charIdx:pm.index,
+        why:`Your client prefers "${use}" over "${avoid}".`,
+        fix:`Replace "${avoid}" with "${use}".`
+      });
+    }
+  });
+
+  // ── Brand: audience avoid language ───────────────────────────────────────────
+  _avoidLang.forEach(term=>{
+    const escaped=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const re=new RegExp(`\\b${escaped}\\b`,'gi'); let am;
+    while((am=re.exec(text))!==null){
+      issues.push({
+        type:'avoid', source:'brand', overrideReason:null,
+        phrase:am[0], searchPhrase:am[0], charIdx:am.index,
+        why:`"${term}" may not resonate with your client's audience and is in their avoid language list.`,
+        fix:`Replace with language that connects better with the target audience.`
+      });
+    }
+  });
+
+  // ── Deduplicate, normalise source fields, sort, cap active issues at 12 ─────
   const seen=new Set();
-  const typeOrder={passive:0,cliche:1,long_sentence:2,filler:3,repetition:4};
+  const typeOrder={passive:0,banned:1,preferred:1,cliche:2,avoid:2,long_sentence:3,filler:4,repetition:5};
   const deduped=issues
+    .map(i=>({source:'generic',overrideReason:null,...i})) // normalise missing source/overrideReason
     .filter(i=>{ const k=i.type+'|'+i.phrase.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; })
-    .sort((a,b)=>(typeOrder[a.type]??5)-(typeOrder[b.type]??5))
+    .sort((a,b)=>{
+      // Brand issues surface before generic issues of same priority
+      const tA=(typeOrder[a.type]??5)*2+(a.source==='brand'?0:1);
+      const tB=(typeOrder[b.type]??5)*2+(b.source==='brand'?0:1);
+      return tA-tB;
+    })
     .slice(0,12);
 
   auditIssues=deduped;
-  renderAI(deduped, text);
+  auditOverrides=overrides;
+  renderAI(deduped, text, overrides);
+  // Persist audit results to the current entry (create one if needed)
+  if(activeClientId){
+    if(!openEntryId){
+      createCurrentEntry(auditIssues, lastScore);
+    } else {
+      const _c=clients.find(c=>c.id===activeClientId);
+      if(_c){
+        const _e=_c.saves.find(s=>s.id===openEntryId);
+        if(_e){
+          _e.lastAuditScore=lastScore;
+          _e.lastAuditResults=[...auditIssues];
+          _e.lastAuditOverrides=[...auditOverrides];
+          _e.score=lastScore;
+          _e.lastModified=Date.now();
+          clientsSave();
+          renderHistory();
+        }
+      }
+    }
+  }
 }
 
 // Scroll the editor to a detected issue by its index in auditIssues
@@ -2832,17 +4042,31 @@ function locateIssue(i){
   showToast('↑ Jumped to issue');
 }
 
-function renderAI(issues, text){
+function renderAI(issues, text, overrides=[]){
   const out=document.getElementById('aiOutput');
   const typeMap={
-    passive:  {tag:'tag-passive', label:'Passive Voice',  icon:'🔴'},
-    filler:   {tag:'tag-filler',  label:'Filler Word',    icon:'🟡'},
-    cliche:   {tag:'tag-cliche',  label:'Cliché',         icon:'🟣'},
-    long_sentence:{tag:'tag-long',label:'Long Sentence',  icon:'🟠'},
-    repetition:{tag:'tag-repeat', label:'Repetition',     icon:'🔵'},
+    passive:      {tag:'tag-passive',   label:'Passive Voice',  icon:'🔴'},
+    filler:       {tag:'tag-filler',    label:'Filler Word',    icon:'🟡'},
+    cliche:       {tag:'tag-cliche',    label:'Cliché',         icon:'🟣'},
+    long_sentence:{tag:'tag-long',      label:'Long Sentence',  icon:'🟠'},
+    repetition:   {tag:'tag-repeat',    label:'Repetition',     icon:'🔵'},
+    banned:       {tag:'tag-banned',    label:'Banned Word',    icon:'🚫'},
+    preferred:    {tag:'tag-preferred', label:'Preferred Term', icon:'🔄'},
+    avoid:        {tag:'tag-avoid',     label:'Avoid Language', icon:'⚠️'},
+  };
+  // Tooltip shown on hover over override cards — explains the generic rule that was suppressed
+  const genericRuleHint={
+    long_sentence:'Generic rule: sentences over 25–30 words are flagged for readability',
+    passive:      'Generic rule: passive constructions are flagged to encourage active voice',
+    filler:       'Generic rule: filler words are flagged as they weaken copy clarity',
+    cliche:       'Generic rule: clichés are flagged as they reduce copy distinctiveness',
+    repetition:   'Generic rule: words repeated within 2 sentences are flagged',
+    banned:       'Generic rule: words in the client\'s banned list are flagged',
+    preferred:    'Generic rule: a preferred term substitution is available',
+    avoid:        'Generic rule: language marked to avoid for this audience is flagged',
   };
 
-  // Summary
+  // ── Summary chips ────────────────────────────────────────────────────────────
   const fkLabel=lastFK>=80?'Very Easy':lastFK>=70?'Easy':lastFK>=60?'Fairly Easy':lastFK>=50?'Standard':lastFK>=40?'Fairly Difficult':lastFK>=30?'Difficult':'Very Difficult';
   const scoreCol=lastScore>85?'#22c55e':lastScore>65?'#6366f1':'#ef4444';
   const chips=`<div class="ai-summary-grid">
@@ -2851,14 +4075,17 @@ function renderAI(issues, text){
     <div class="ai-sum-chip"><div class="ai-sum-val">${lastWords.length}</div><div class="ai-sum-lbl">Words</div></div>
   </div>`;
 
-  // Issue cards
+  // ── Active issue cards ───────────────────────────────────────────────────────
   const issueHTML=issues.length
     ?issues.map((issue,i)=>{
       const t=typeMap[issue.type]||{tag:'tag-passive',label:'Issue',icon:'⚠️'};
       const displayPhrase=issue.phrase.length>80?issue.phrase.slice(0,80)+'…':issue.phrase;
+      const brandBadge=issue.source==='brand'
+        ?`<span class="issue-brand-badge">Brand rule</span>`
+        :'';
       return `<div class="issue-card">
         <div class="issue-card-head">
-          <span class="issue-tag ${t.tag}">${t.icon} ${t.label}</span>
+          <span style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0"><span class="issue-tag ${t.tag}">${t.icon} ${t.label}</span>${brandBadge}</span>
           <button class="issue-locate" onclick="locateIssue(${i})">Show me →</button>
         </div>
         <div class="issue-phrase">${esc(displayPhrase)}</div>
@@ -2868,6 +4095,30 @@ function renderAI(issues, text){
     }).join('')
     :'<p class="ai-none">No issues found — your copy is clean.</p>';
 
+  // ── Overridden-by-brand-context section (hidden when empty) ──────────────────
+  const overrideSection=overrides.length?`
+    <details class="override-section">
+      <summary>
+        <span>Overridden by brand context (${overrides.length})</span>
+        <span class="override-section-caret">▾</span>
+      </summary>
+      <div class="override-section-body">
+        ${overrides.map(ov=>{
+          const t=typeMap[ov.type]||{tag:'tag-passive',label:'Issue',icon:'⚠️'};
+          const displayPhrase=(ov.phrase||'').length>80?ov.phrase.slice(0,80)+'…':(ov.phrase||'');
+          const hint=genericRuleHint[ov.type]||'Generic rule: this issue was suppressed by brand context';
+          return `<div class="override-card" title="${esc(hint)}">
+            <div class="override-card-head">
+              <span class="override-type-tag">${t.icon} ${t.label}</span>
+              <span class="override-badge">Overridden</span>
+            </div>
+            <div class="override-reason">${esc(ov.overrideReason||'Suppressed by brand context.')}</div>
+            ${displayPhrase?`<div class="override-phrase">"${esc(displayPhrase)}"</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </details>`:'';
+
   out.innerHTML=`
     <div class="ai-section">
       <div class="ai-section-title">Summary</div>
@@ -2876,8 +4127,178 @@ function renderAI(issues, text){
     <div class="ai-section">
       <div class="ai-section-title">Issues — ${issues.length} found</div>
       ${issueHTML}
-    </div>`;
+    </div>
+    ${overrideSection}`;
 }
+
+// ── Export / Import ──────────────────────────────────────────────────────────
+
+function exportData(){
+  closeSettingsDropdown();
+  const payload = {
+    version:    '1.0',
+    exportedAt: new Date().toISOString(),
+    appVersion: APP_VERSION,
+    clients:    JSON.parse(JSON.stringify(clients)), // deep copy
+  };
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'copy-engine-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); document.body.removeChild(a); }, 100);
+  localStorage.setItem(LAST_EXPORT_KEY, new Date().toISOString());
+  showToast('✓ Backup downloaded');
+  renderBackupReminder();
+}
+
+function importPickFile(){
+  closeSettingsDropdown();
+  const fi = document.getElementById('importFileInput');
+  fi.value = '';       // allow re-selecting same file
+  fi.click();
+}
+
+function handleImportFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    let data;
+    try{ data = JSON.parse(e.target.result); }
+    catch(err){
+      showImportError('This doesn\'t look like a Copy Engine backup file.\n\nThe file is not valid JSON.');
+      return;
+    }
+    if(!data || typeof data !== 'object' || !Array.isArray(data.clients)){
+      showImportError('This doesn\'t look like a Copy Engine backup file.\n\nExpected a "clients" array at the top level but didn\'t find one.');
+      return;
+    }
+    if(!data.version){
+      showImportError('This doesn\'t look like a Copy Engine backup file.\n\nMissing version field.');
+      return;
+    }
+    if(data.version !== '1.0'){
+      showImportError(`This backup uses format version "${esc(String(data.version))}", which isn\'t supported.\n\nOnly version "1.0" is compatible with this version of Copy Engine.`);
+      return;
+    }
+    // All good — show confirm modal
+    pendingImportData = data;
+    const totalEntries = data.clients.reduce((s,c)=> s + (Array.isArray(c.saves)?c.saves.length:0), 0);
+    const willReplace  = data.clients.filter(ic =>
+      clients.some(ec => ec.name.trim().toLowerCase() === (ic.name||'').trim().toLowerCase())
+    );
+    const replaceNames = willReplace.map(ic=>`"${esc(ic.name)}"`).join(', ');
+    const replaceNote  = willReplace.length
+      ? `<div class="import-confirm-warn">⚠ ${willReplace.length} existing client${willReplace.length!==1?'s':''} will be replaced: ${replaceNames}</div>`
+      : '';
+    document.getElementById('importConfirmBody').innerHTML = `
+      <p>Importing <strong>${data.clients.length} client${data.clients.length!==1?'s':''}</strong>
+         with <strong>${totalEntries} entr${totalEntries!==1?'ies':'y'}</strong>.</p>
+      <p style="margin-top:6px">Clients with the same name as an existing client will be <strong>replaced entirely</strong>.
+         New clients will be added. Continue?</p>
+      ${replaceNote}`;
+    openModal('modalImportConfirm');
+  };
+  reader.onerror = function(){
+    showImportError('Could not read the file. Please try again.');
+  };
+  reader.readAsText(file);
+}
+
+function showImportError(msg){
+  document.getElementById('importErrorMsg').textContent = msg;
+  openModal('modalImportError');
+}
+
+function confirmImport(){
+  if(!pendingImportData) return;
+  const data = pendingImportData;
+  pendingImportData = null;
+  closeModal('modalImportConfirm');
+
+  let added = 0, replaced = 0;
+  const totalEntries = data.clients.reduce((s,c)=> s + (Array.isArray(c.saves)?c.saves.length:0), 0);
+
+  data.clients.forEach(ic => {
+    const normalised = {
+      id:          ic.id || genId(),
+      name:        ic.name || 'Imported Client',
+      description: ic.description || '',
+      brandTerms:  Array.isArray(ic.brandTerms)  ? ic.brandTerms  : [],
+      personaDoc:  ic.personaDoc  || {fileName:null,rawText:null,uploadedAt:null},
+      tovDoc:      ic.tovDoc      || {fileName:null,rawText:null,uploadedAt:null},
+      personaRules:ic.personaRules || {},
+      tovRules:    ic.tovRules    || {},
+      saves:       Array.isArray(ic.saves) ? ic.saves : [],
+      createdAt:   ic.createdAt   || Date.now(),
+      lastUsedAt:  ic.lastUsedAt  || Date.now(),
+    };
+    const existIdx = clients.findIndex(ec =>
+      ec.name.trim().toLowerCase() === normalised.name.trim().toLowerCase()
+    );
+    if(existIdx >= 0){
+      // If the replaced client was active, repoint to the new id
+      if(activeClientId === clients[existIdx].id) activeClientId = normalised.id;
+      clients[existIdx] = normalised;
+      replaced++;
+    } else {
+      clients.push(normalised);
+      added++;
+    }
+  });
+
+  clientsSave();
+  renderClientNav();
+  renderBrandTerms();
+  renderHistory();
+  updateClientContextBar();
+  renderClientPickerModal();
+  renderBackupReminder();
+
+  const n = added + replaced;
+  showToast(`✓ Imported ${n} client${n!==1?'s':''} · ${totalEntries} entr${totalEntries!==1?'ies':'y'} · ${replaced} replaced`);
+}
+
+function cancelImport(){
+  pendingImportData = null;
+  closeModal('modalImportConfirm');
+}
+
+function renderBackupReminder(){
+  const ts  = localStorage.getItem(LAST_EXPORT_KEY);
+  let html;
+  if(!ts){
+    html = '<span class="backup-warn">No backup yet</span> — export your data to protect against cache clearing.';
+  } else {
+    const diff = Date.now() - new Date(ts).getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    if(days === 0)      html = 'Last backup: today ✓';
+    else if(days === 1) html = 'Last backup: yesterday';
+    else                html = `Last backup: ${days} days ago`;
+  }
+  document.querySelectorAll('.backup-reminder-text').forEach(el => el.innerHTML = html);
+}
+
+// Settings dropdown
+let _settingsOpen = false;
+function toggleSettingsDropdown(){
+  _settingsOpen = !_settingsOpen;
+  const dd = document.getElementById('settingsDropdown');
+  if(dd) dd.style.display = _settingsOpen ? 'block' : 'none';
+  if(_settingsOpen) renderBackupReminder(); // refresh before showing
+}
+function closeSettingsDropdown(){
+  _settingsOpen = false;
+  const dd = document.getElementById('settingsDropdown');
+  if(dd) dd.style.display = 'none';
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest('#settingsWrap')) closeSettingsDropdown();
+});
 
 function showToast(msg){ const t=document.getElementById('toast'); t.innerText=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 
@@ -2903,7 +4324,7 @@ function closeGuide(){
       <button class="guide-back-btn" onclick="closeGuide()">&#8592; Back to Copy Engine</button>
       <div class="guide-brand">
         <span class="guide-brand-name">Copy Engine</span>
-        <span class="guide-brand-ver">v6.18</span>
+        <span class="guide-brand-ver">v6.20</span>
       </div>
     </div>
 
@@ -2931,7 +4352,7 @@ function closeGuide(){
         <a class="guide-toc-item" onclick="document.getElementById('g-cta').scrollIntoView({behavior:'smooth'})">CTA Detection</a>
         <a class="guide-toc-item" onclick="document.getElementById('g-diff').scrollIntoView({behavior:'smooth'})">Version Diff</a>
         <a class="guide-toc-item" onclick="document.getElementById('g-audit').scrollIntoView({behavior:'smooth'})">Copy Audit</a>
-        <a class="guide-toc-item" onclick="document.getElementById('g-drafts').scrollIntoView({behavior:'smooth'})">Saved Drafts and Folders</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-drafts').scrollIntoView({behavior:'smooth'})">Saved Drafts and Clients</a>
         <a class="guide-toc-item" onclick="document.getElementById('g-export').scrollIntoView({behavior:'smooth'})">Export: PDF and HTML</a>
       </div>
     </div>
@@ -3162,9 +4583,10 @@ function closeGuide(){
       <div class="guide-section-title">Brand Terms</div>
       <hr class="guide-section-divider">
       <div class="guide-body">
-        <p>A session-based list of words and phrases that should never be flagged as filler words, clich&eacute;s, or repetition. Add any brand names, product names, or proprietary terms and the tool will ignore them when scanning for issues.</p>
+        <p>A per-client list of words and phrases that should never be flagged as filler words, clich&eacute;s, or repetition. Add any brand names, product names, or proprietary terms and the tool will ignore them when scanning for issues.</p>
+        <p>Brand Terms are saved with the client and persist across sessions. Select a client using the tabs at the top to see and edit its brand terms. When no client is active the Brand Terms panel is hidden.</p>
       </div>
-      <div class="guide-warn"><strong>Important:</strong> Brand Terms are not saved between sessions, because the tool is used across multiple clients and projects. You will need to re-add them each time you open the tool.</div>
+      <div class="guide-tip"><strong>Tip:</strong> Each client has its own brand terms list — up to 20 terms per client. Terms are automatically excluded from filler, clich&eacute;, and repetition checks.</div>
     </div>
 
     <div class="guide-section" id="g-cta">
@@ -3198,14 +4620,14 @@ function closeGuide(){
     </div>
 
     <div class="guide-section" id="g-drafts">
-      <div class="guide-section-title">Saved Drafts and Folders</div>
+      <div class="guide-section-title">Saved Drafts and Clients</div>
       <hr class="guide-section-divider">
       <div class="guide-body">
-        <p>A history system for saving, organising, and retrieving previous versions of your copy. Create folders to organise work by client or project, then save entries into them. Each saved entry records the copy, score, date, and time. Click any entry to reload it into the editor.</p>
+        <p>A history system for saving, organising, and retrieving previous versions of your copy. Create clients to organise work by client or project, then save entries into them. Each saved entry records the copy, score, date, and time. Click any entry to reload it into the editor.</p>
       </div>
       <div class="guide-sub-heading">How to use it</div>
       <div class="guide-body">
-        <p>Click New Folder in the top bar to create a folder. Use the Save button to save the current copy into a folder. Switch between folders using the tabs that appear below the top bar.</p>
+        <p>Click <strong>+ New Client</strong> in the top bar to create a client. Use the Save button to save the current copy into a client. Switch between clients using the tabs that appear below the top bar. Brand terms are saved per client and persist across sessions.</p>
       </div>
       <div class="guide-warn"><strong>Important:</strong> Drafts are saved in your browser's local storage. They are specific to the browser and device you are using. Clearing your browser data will permanently remove all saved drafts.</div>
     </div>
