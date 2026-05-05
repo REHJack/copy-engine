@@ -4352,8 +4352,10 @@ function closeGuide(){
         <a class="guide-toc-item" onclick="document.getElementById('g-cta').scrollIntoView({behavior:'smooth'})">CTA Detection</a>
         <a class="guide-toc-item" onclick="document.getElementById('g-diff').scrollIntoView({behavior:'smooth'})">Version Diff</a>
         <a class="guide-toc-item" onclick="document.getElementById('g-audit').scrollIntoView({behavior:'smooth'})">Copy Audit</a>
-        <a class="guide-toc-item" onclick="document.getElementById('g-drafts').scrollIntoView({behavior:'smooth'})">Saved Drafts and Clients</a>
-        <a class="guide-toc-item" onclick="document.getElementById('g-export').scrollIntoView({behavior:'smooth'})">Export: PDF and HTML</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-clients').scrollIntoView({behavior:'smooth'})">Clients and Brand Context</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-docs').scrollIntoView({behavior:'smooth'})">Persona and Tone of Voice Documents</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-drafts').scrollIntoView({behavior:'smooth'})">Saved Drafts</a>
+        <a class="guide-toc-item" onclick="document.getElementById('g-backup').scrollIntoView({behavior:'smooth'})">Backup and Restore</a>
       </div>
     </div>
 
@@ -4584,9 +4586,9 @@ function closeGuide(){
       <hr class="guide-section-divider">
       <div class="guide-body">
         <p>A per-client list of words and phrases that should never be flagged as filler words, clich&eacute;s, or repetition. Add any brand names, product names, or proprietary terms and the tool will ignore them when scanning for issues.</p>
-        <p>Brand Terms are saved with the client and persist across sessions. Select a client using the tabs at the top to see and edit its brand terms. When no client is active the Brand Terms panel is hidden.</p>
+        <p>Brand terms are saved with the client and persist across sessions. You can add them during the Add new client flow, or at any time from the Brand Terms panel in the editor. When no client is active, the Brand Terms panel is hidden.</p>
       </div>
-      <div class="guide-tip"><strong>Tip:</strong> Each client has its own brand terms list — up to 20 terms per client. Terms are automatically excluded from filler, clich&eacute;, and repetition checks.</div>
+      <div class="guide-tip"><strong>Tip:</strong> Each client has its own brand terms list - up to 20 terms per client. Terms are automatically excluded from filler, clich&eacute;, and repetition checks.</div>
     </div>
 
     <div class="guide-section" id="g-cta">
@@ -4617,32 +4619,105 @@ function closeGuide(){
         <p>Click the Audit button in the top bar to open the panel. It slides out below the editor and can be closed at any time.</p>
       </div>
       <div class="guide-tip"><strong>Note:</strong> The Copy Audit runs entirely in your browser. No internet connection is required and no data is sent anywhere.</div>
+      <div class="guide-sub-heading">Brand context and overrides</div>
+      <div class="guide-body">
+        <p>When a client is active, the audit also checks the copy against that client's brand rules. This includes banned words (flagged if they appear in the copy), preferred terms (flagged if the non-preferred alternative is used), and avoid language from the persona document. Issue cards for brand-specific rules are marked with a teal "Brand rule" badge so you can see at a glance which checks come from generic rules and which come from the client's context.</p>
+        <p>The sentence length threshold is also adjusted based on the client's length preference from their tone of voice document - shorter thresholds for clients who prefer concise copy, longer ones for clients who favour considered, detailed writing.</p>
+        <p>When a generic rule would normally flag something but the client's tone of voice actively favours it - for example, a client who prefers long sentences - the issue is moved into a separate "Overridden by brand context" section rather than listed as a problem to fix. This section is collapsed by default and does not affect the score. Hovering over any override card shows the original generic rule that was suppressed, so the behaviour is fully transparent.</p>
+      </div>
+    </div>
+
+    <div class="guide-section" id="g-clients">
+      <div class="guide-section-title">Clients and Brand Context</div>
+      <hr class="guide-section-divider">
+      <div class="guide-body">
+        <p>Clicking Start now opens the client picker. From there you have three options.</p>
+      </div>
+      <div class="guide-sub-heading">The three paths from the picker</div>
+      <div class="guide-body">
+        <p><strong>Open an existing client</strong> - load a previously created client workspace with its saved entries, brand terms, and extracted document rules.</p>
+        <p><strong>Add a new client</strong> - create a new workspace. You can give it a name, a description, brand terms, and optionally upload a buyer persona and tone of voice document.</p>
+        <p><strong>Just check this copy</strong> - enter the editor with no client active. The tool will still highlight passive voice, fillers, clich&eacute;s, long sentences, and repetition, but none of the brand-specific checks will run and nothing will be saved.</p>
+      </div>
+      <div class="guide-sub-heading">What clients store</div>
+      <div class="guide-body">
+        <p>Clients are workspaces for individual brands or projects. Each client stores a description, a list of brand terms, a buyer persona document, a tone of voice document, and all saved entries. Everything is kept in your browser and persists across sessions.</p>
+      </div>
+      <div class="guide-tip"><strong>Tip:</strong> If you only ever work on one or two brands, set them up as clients once and you will never have to set up brand terms again.</div>
+    </div>
+
+    <div class="guide-section" id="g-docs">
+      <div class="guide-section-title">Persona and Tone of Voice Documents</div>
+      <hr class="guide-section-divider">
+      <div class="guide-sub-heading">What you can upload</div>
+      <div class="guide-body">
+        <p>.pdf, .docx, or .txt files up to 10 MB each. One buyer persona document and one tone of voice document per client. All parsing happens in the browser - no data is uploaded anywhere.</p>
+      </div>
+      <div class="guide-sub-heading">What gets extracted from a tone of voice document</div>
+      <div class="guide-body">
+        <p>The tool scans for predictable patterns and extracts the following where they can be found:</p>
+      </div>
+      <table class="guide-table">
+        <thead><tr><th>What is extracted</th><th>How it is detected</th></tr></thead>
+        <tbody>
+          <tr><td>Banned words</td><td>Sections labelled "banned", "avoid", "don't use", or "never"</td></tr>
+          <tr><td>Preferred terms</td><td>Patterns such as "use X instead of Y" or "say X not Y"</td></tr>
+          <tr><td>Sentence length preference</td><td>Keyword scoring across the document - detected as short, medium, long, or varied</td></tr>
+          <tr><td>Person preference</td><td>First, second, or third person, based on pronoun patterns</td></tr>
+        </tbody>
+      </table>
+      <div class="guide-sub-heading">What gets extracted from a persona document</div>
+      <div class="guide-body">
+        <p>The tool scans for predictable patterns and extracts the following where they can be found:</p>
+      </div>
+      <table class="guide-table">
+        <thead><tr><th>What is extracted</th><th>How it is detected</th></tr></thead>
+        <tbody>
+          <tr><td>Audience keywords</td><td>Noun phrases from headings and high-frequency content words</td></tr>
+          <tr><td>Preferred language</td><td>Terms the audience responds to, from sections anchored by those labels</td></tr>
+          <tr><td>Avoid language</td><td>Terms the audience finds off-putting, from sections anchored by those labels</td></tr>
+        </tbody>
+      </table>
+      <div class="guide-callout">Document extraction is heuristic. It works best when documents have clear sections and structured language. If your tone of voice document is prose-heavy with no obvious patterns, less will be extracted - but the document text is still saved with the client and associated with future entries.</div>
+      <div class="guide-warn"><strong>Note:</strong> Extraction is not perfect. Always check what was extracted by running an audit on a test piece of copy and reviewing the results.</div>
     </div>
 
     <div class="guide-section" id="g-drafts">
-      <div class="guide-section-title">Saved Drafts and Clients</div>
+      <div class="guide-section-title">Saved Drafts</div>
       <hr class="guide-section-divider">
       <div class="guide-body">
-        <p>A history system for saving, organising, and retrieving previous versions of your copy. Create clients to organise work by client or project, then save entries into them. Each saved entry records the copy, score, date, and time. Click any entry to reload it into the editor.</p>
+        <p>A history of your saved copy entries, organised by client. When you open a client from the picker, the entry list shows all saved drafts for that client, sorted by most recently modified. Click any entry to load it back into the editor.</p>
       </div>
-      <div class="guide-sub-heading">How to use it</div>
+      <div class="guide-sub-heading">Auto-save</div>
       <div class="guide-body">
-        <p>Click <strong>+ New Client</strong> in the top bar to create a client. Use the Save button to save the current copy into a client. Switch between clients using the tabs that appear below the top bar. Brand terms are saved per client and persist across sessions.</p>
+        <p>Once an entry has been created - either by running an audit or by clicking Save draft in the top bar - it is updated automatically as you type, with a short delay. Entries are not created on the first keystroke; they only materialise when you explicitly save or run an audit for the first time.</p>
       </div>
-      <div class="guide-warn"><strong>Important:</strong> Drafts are saved in your browser's local storage. They are specific to the browser and device you are using. Clearing your browser data will permanently remove all saved drafts.</div>
+      <div class="guide-sub-heading">Deleting entries</div>
+      <div class="guide-body">
+        <p>Use the trash icon on any entry in the entry list to remove it. Deletion is permanent.</p>
+      </div>
+      <div class="guide-warn"><strong>Important:</strong> Drafts are saved in your browser's local storage. They are specific to the browser and device you are using. Clearing your browser data will permanently remove all saved drafts. Use Export data regularly to keep a backup.</div>
     </div>
 
-    <div class="guide-section" id="g-export">
-      <div class="guide-section-title">Export: PDF and HTML</div>
+    <div class="guide-section" id="g-backup">
+      <div class="guide-section-title">Backup and Restore</div>
       <hr class="guide-section-divider">
-      <div class="guide-sub-heading">PDF Export</div>
       <div class="guide-body">
-        <p>Produces a formatted copy audit document including the editor content, scores, and sidebar analysis. Useful for sharing with clients or keeping as a record of a piece at a particular point in time.</p>
+        <p>All data is saved in your browser's local storage. This includes clients, entries, brand terms, and the raw text from any uploaded documents. If you clear your browser data, or switch to a different browser or device, everything will be lost unless you have exported a backup.</p>
       </div>
-      <div class="guide-sub-heading">HTML Export</div>
+      <div class="guide-sub-heading">Exporting your data</div>
       <div class="guide-body">
-        <p>Downloads a standalone copy of the entire tool, including your current copy and settings. The file can be opened in any browser without an internet connection, making it useful for archiving or sharing a working snapshot of the tool.</p>
+        <p>Click the settings gear icon in the top bar, then choose Export data. This downloads a single JSON file containing all clients, their entries, brand terms, and extracted rules. The filename includes today's date so you can keep versioned backups.</p>
       </div>
+      <div class="guide-sub-heading">Restoring from a backup</div>
+      <div class="guide-body">
+        <p>Click the settings gear icon, then choose Import backup, and select your JSON file. The tool validates the file before making any changes and shows you a summary of what will be imported.</p>
+      </div>
+      <div class="guide-sub-heading">Merge behaviour on import</div>
+      <div class="guide-body">
+        <p>Clients with the same name as an existing client replace the existing client entirely, including all its entries. Clients with a new name are added alongside your existing clients. Nothing is partially imported - it is all or nothing per file.</p>
+      </div>
+      <div class="guide-warn"><strong>Recommendation:</strong> Export your data weekly. Clearing your browser cache will permanently remove everything that has not been backed up.</div>
     </div>
 
     <div style="text-align:center;padding-top:16px">
