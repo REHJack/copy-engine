@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.20</title>
+<title>Copy Engine v6.21</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
@@ -378,7 +378,26 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .client-dropdown-entry-del{background:none;border:none;color:#e0e0e0;font-size:16px;cursor:pointer;padding:0 2px;line-height:1;transition:color .15s;font-family:inherit;flex-shrink:0}
 .client-dropdown-entry-del:hover{color:#ef4444}
 .client-dropdown-empty{font-size:11px;color:#ccc;font-style:italic;padding:10px 8px;text-align:center}
-
+.client-dropdown-footer{border-top:1px solid #f0f0f0;margin-top:6px;padding-top:6px}
+.client-dropdown-action{display:flex;align-items:center;gap:6px;width:100%;background:none;border:none;font-size:11px;font-weight:700;color:#555;cursor:pointer;padding:6px 10px;border-radius:7px;font-family:inherit;text-align:left;transition:background .12s,color .12s}
+.client-dropdown-action:hover{background:#f5f5f7;color:#111}
+.client-dropdown-action-danger{color:#ef4444}
+.client-dropdown-action-danger:hover{background:#fff5f5;color:#dc2626}
+/* Edit-client doc sections */
+.ec-doc-existing{border:1.5px solid #e5e5e5;border-radius:9px;padding:10px 12px;background:#fafafa}
+.ec-doc-name{font-size:12px;font-weight:700;color:#111;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ec-doc-meta{font-size:10px;color:#bbb;line-height:1.4}
+.ec-doc-actions{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.ec-doc-btn{background:none;border:1.5px solid #e0e0e0;border-radius:7px;font-size:11px;font-weight:700;color:#555;cursor:pointer;padding:4px 11px;font-family:inherit;transition:all .15s;flex-shrink:0}
+.ec-doc-btn:hover{border-color:#6366f1;color:#6366f1}
+.ec-doc-remove{color:#bbb;border-color:#ebebeb}
+.ec-doc-remove:hover{border-color:#ef4444;color:#ef4444}
+.ec-doc-confirm-strip{background:#fff8f0;border:1.5px solid #fed7aa;border-radius:9px;padding:10px 12px}
+.ec-doc-confirm-msg{font-size:11px;color:#92400e;line-height:1.5;margin-bottom:8px}
+.ec-doc-confirm-btns{display:flex;gap:8px}
+/* Entry-list edit button (now live) */
+.el-edit-stub{background:none;border:none;padding:0;cursor:pointer;opacity:.4;font-size:14px;line-height:1;transition:opacity .15s;font-family:inherit}
+.el-edit-stub:hover{opacity:1}
 
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:1000;display:flex;align-items:center;justify-content:center;padding:24px;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.open{opacity:1;pointer-events:all}
@@ -608,6 +627,10 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
     <button class="client-dropdown-close" onclick="closeClientDropdown()">×</button>
   </div>
   <div id="clientDropdownEntries"></div>
+  <div class="client-dropdown-footer">
+    <button class="client-dropdown-action" onclick="openEditClientFromDropdown()">✎ Edit client</button>
+    <button class="client-dropdown-action client-dropdown-action-danger" onclick="deleteClientFromDropdown()">✕ Delete client</button>
+  </div>
 </div>
 
 <!-- ── Entry List Modal (above splash) ── -->
@@ -692,15 +715,48 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
   </div>
 </div>
 
-<!-- ── Modal: Create Folder ── -->
-<div class="modal-overlay" id="modalCreateClient">
-  <div class="modal-box">
-    <div class="modal-title">New Client</div>
-    <div class="modal-sub">Give this client a name. You can create up to 10 clients.</div>
-    <input class="modal-input" id="inputClientName" type="text" placeholder="e.g. Acme Corp" maxlength="40" oninput="document.getElementById('btnCreateClient').disabled=!this.value.trim()">
+<!-- ── Modal: Edit Client ── -->
+<div class="modal-overlay-top" id="modalEditClient">
+  <div class="modal-box modal-box-wide modal-box-scroll">
+    <div class="modal-title">Edit client</div>
+    <div class="modal-sub">Update this client's details, brand terms, or uploaded documents.</div>
+
+    <div class="ac-field">
+      <label class="ac-label" for="ecName">Client name <span style="color:#ef4444">*</span></label>
+      <input class="modal-input" id="ecName" type="text" placeholder="e.g. Acme Corp" maxlength="40" oninput="ecOnNameInput()" style="margin-bottom:0">
+      <div class="ac-error" id="ecNameError"></div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label" for="ecDesc">Description <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <textarea class="ac-textarea" id="ecDesc" maxlength="280" placeholder="Tone preferences, language rules, anything writers should know…" oninput="ecOnDescInput()"></textarea>
+      <div class="ac-char-count"><span id="ecDescCount">0</span>/280</div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label">Brand terms <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <div class="ac-chips-row" id="ecChipsRow" onclick="document.getElementById('ecTermInput').focus()">
+        <input class="ac-chip-input" id="ecTermInput" type="text" placeholder="Type a term, press Enter" maxlength="60"
+          onkeydown="ecOnTermKey(event)">
+      </div>
+      <div class="ac-hint">Company name, product names, etc. Max 20 terms.</div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label">Persona document <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <div id="ecPersonaDocSection"></div>
+      <div class="ac-hint">Audience keywords, preferred language, and avoid language will be extracted.</div>
+    </div>
+
+    <div class="ac-field">
+      <label class="ac-label">Tone of voice document <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <div id="ecTovDocSection"></div>
+      <div class="ac-hint">Banned words, preferred terms, and length preferences will be extracted automatically.</div>
+    </div>
+
     <div class="modal-footer">
-      <button class="modal-btn modal-btn-cancel" onclick="closeModal('modalCreateClient')">Cancel</button>
-      <button class="modal-btn modal-btn-confirm" id="btnCreateClient" onclick="confirmCreateClient()" disabled>Create Client</button>
+      <button class="modal-btn modal-btn-cancel" onclick="cancelEditClient()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" id="btnSaveEditClient" onclick="confirmEditClient()">Save changes</button>
     </div>
   </div>
 </div>
@@ -795,7 +851,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.20</span>
+          <span class="sp-brand-ver">v6.21</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -846,7 +902,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.20</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.21</span></div>
       <div class="brand-sub" id="reportDate"></div>
       <div class="client-ctx-bar" id="clientContextBar">
         <span id="ctxContent"></span>
@@ -1252,7 +1308,7 @@ function renderEntryList(){
   });
 
   const header = `<div class="el-header">
-    <div class="el-client-name">${esc(c.name)}<button class="el-edit-stub" title="Coming soon" tabindex="-1">✎</button></div>
+    <div class="el-client-name">${esc(c.name)}<button class="el-edit-stub" title="Edit client" onclick="closeModal('modalEntryList');openEditClientModal('${c.id}')">✎</button></div>
     <div class="el-client-ctx">${esc(clientContextLabel(c))}</div>
   </div>`;
 
@@ -1425,6 +1481,14 @@ let acTovDoc      = { fileName:null, rawText:null, uploadedAt:null };
 let acPersonaRules = null;
 let acTovRules     = null;
 
+// ── Edit-client staged state (parallel to ac* set) ─────────────────────────
+let ecClientId     = null;
+let ecBrandTerms   = [];
+let ecPersonaDoc   = { fileName:null, rawText:null, uploadedAt:null };
+let ecTovDoc       = { fileName:null, rawText:null, uploadedAt:null };
+let ecPersonaRules = null;
+let ecTovRules     = null;
+
 function openAddClientModal(){
   acBrandTerms = [];
   acPersonaDoc = { fileName:null, rawText:null, uploadedAt:null };
@@ -1449,7 +1513,12 @@ function openAddClientModal(){
 
 function cancelAddClient(){
   document.getElementById('modalAddClient').classList.remove('open');
-  openClientPicker();
+  // If the splash is hidden the user is already in the editor — just close.
+  // If the splash is still showing they came via the picker, so return them there.
+  const splash = document.getElementById('splash');
+  if(splash && splash.style.display !== 'none'){
+    openClientPicker();
+  }
 }
 
 function acOnNameInput(){
@@ -1830,6 +1899,285 @@ async function confirmAddClient(){
   updateClientContextBar();
   showToast(`✓ Client created: ${name}`);
   openEntryList(client.id);
+}
+
+// ── Dropdown helpers (capture id before closeClientDropdown nulls it) ────────
+function openEditClientFromDropdown(){
+  const id = dropdownClientId;
+  closeClientDropdown();
+  openEditClientModal(id);
+}
+function deleteClientFromDropdown(){
+  const id = dropdownClientId;
+  closeClientDropdown();
+  openDeleteClientModal(id);
+}
+
+// ── Edit Client Modal ─────────────────────────────────────────────────────────
+
+function openEditClientModal(clientId){
+  const client = clients.find(c => c.id === clientId);
+  if(!client) return;
+
+  ecClientId     = clientId;
+  ecBrandTerms   = [...(client.brandTerms || [])];
+  ecPersonaDoc   = client.personaDoc  ? {...client.personaDoc}  : { fileName:null, rawText:null, uploadedAt:null };
+  ecTovDoc       = client.tovDoc      ? {...client.tovDoc}      : { fileName:null, rawText:null, uploadedAt:null };
+  ecPersonaRules = client.personaRules ? {...client.personaRules} : null;
+  ecTovRules     = client.tovRules     ? {...client.tovRules}     : null;
+
+  document.getElementById('ecName').value        = client.name;
+  document.getElementById('ecDesc').value        = client.description || '';
+  document.getElementById('ecDescCount').textContent = (client.description || '').length;
+  document.getElementById('ecTermInput').value   = '';
+  document.getElementById('btnSaveEditClient').disabled = false;
+  ecSetError('ecNameError', '');
+
+  renderEcChips();
+  ecRenderDocSection('persona');
+  ecRenderDocSection('tov');
+  openModal('modalEditClient');
+  setTimeout(()=>document.getElementById('ecName').focus(), 60);
+}
+
+function cancelEditClient(){
+  ecClientId = null;
+  ecBrandTerms = [];
+  ecPersonaDoc = { fileName:null, rawText:null, uploadedAt:null };
+  ecTovDoc     = { fileName:null, rawText:null, uploadedAt:null };
+  ecPersonaRules = null; ecTovRules = null;
+  closeModal('modalEditClient');
+}
+
+function confirmEditClient(){
+  const name = document.getElementById('ecName').value.trim();
+  if(!name){ ecSetError('ecNameError', 'Client name is required'); return; }
+  const isDuplicate = clients.some(c =>
+    c.id !== ecClientId && c.name.trim().toLowerCase() === name.toLowerCase()
+  );
+  if(isDuplicate){ ecSetError('ecNameError', 'A client with this name already exists'); return; }
+
+  const idx = clients.findIndex(c => c.id === ecClientId);
+  if(idx < 0){ closeModal('modalEditClient'); return; }
+
+  clients[idx] = {
+    ...clients[idx],
+    name,
+    description:  document.getElementById('ecDesc').value.trim(),
+    brandTerms:   [...ecBrandTerms],
+    personaDoc:   {...ecPersonaDoc},
+    tovDoc:       {...ecTovDoc},
+    personaRules: ecPersonaRules || { audienceKeywords:[], preferredLanguage:[], avoidLanguage:[] },
+    tovRules:     ecTovRules     || { bannedWords:[], preferredTerms:[], lengthPreference:null, personPreference:null },
+  };
+
+  clientsSave();
+  closeModal('modalEditClient');
+  renderClientNav();
+  renderBrandTerms();
+  renderHistory();
+  updateClientContextBar();
+  showToast('✓ Client updated');
+}
+
+function ecOnNameInput(){
+  const val = document.getElementById('ecName').value.trim();
+  const btn = document.getElementById('btnSaveEditClient');
+  if(!val){ btn.disabled = true; ecSetError('ecNameError', 'Client name is required'); return; }
+  const dup = clients.some(c => c.id !== ecClientId && c.name.trim().toLowerCase() === val.toLowerCase());
+  if(dup){ btn.disabled = true; ecSetError('ecNameError', 'A client with this name already exists'); return; }
+  btn.disabled = false;
+  ecSetError('ecNameError', '');
+}
+
+function ecOnDescInput(){
+  document.getElementById('ecDescCount').textContent = document.getElementById('ecDesc').value.length;
+}
+
+function ecOnTermKey(e){
+  if(e.key === 'Enter' || e.key === ','){
+    e.preventDefault();
+    const input = document.getElementById('ecTermInput');
+    const val = input.value.trim().replace(/,+$/, '');
+    if(!val) return;
+    if(ecBrandTerms.length >= 20){ showToast('⚠️ Max 20 brand terms'); return; }
+    const norm = val.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
+    if(ecBrandTerms.some(t => t.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim() === norm)) return;
+    ecBrandTerms.push(val);
+    input.value = '';
+    renderEcChips();
+  } else if(e.key === 'Backspace' && !e.target.value && ecBrandTerms.length){
+    ecBrandTerms.pop();
+    renderEcChips();
+  }
+}
+
+function ecRemoveTerm(i){
+  ecBrandTerms.splice(i, 1);
+  renderEcChips();
+}
+
+function renderEcChips(){
+  const row   = document.getElementById('ecChipsRow');
+  const input = document.getElementById('ecTermInput');
+  Array.from(row.querySelectorAll('.bt-chip')).forEach(el => el.remove());
+  ecBrandTerms.forEach((term, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'bt-chip';
+    chip.innerHTML = `${esc(term)}<button class="bt-chip-x" onclick="ecRemoveTerm(${i})" title="Remove">×</button>`;
+    row.insertBefore(chip, input);
+  });
+}
+
+function ecSetError(id, msg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.toggle('visible', !!msg);
+}
+
+function ecSetStatus(type, state, msg=''){
+  const el = document.getElementById(type === 'persona' ? 'ecPersonaStatus' : 'ecTovStatus');
+  if(!el) return;
+  el.className = 'ac-file-status' + (state ? ' '+state : '');
+  if(!state){ el.textContent = ''; return; }
+  if(state === 'parsing') el.textContent = '⏳ Reading file…';
+  else if(state === 'done')  el.innerHTML  = '✓ ' + esc(msg).replace(/\n/g, '<br>');
+  else if(state === 'error') el.textContent = '⚠ ' + msg;
+}
+
+// Returns a human-readable description of current staged doc extraction
+function ecDocMeta(type){
+  const doc      = type === 'persona' ? ecPersonaDoc : ecTovDoc;
+  const rawRules = type === 'persona' ? ecPersonaRules : ecTovRules;
+  const uploadStr = 'Uploaded ' + (relativeTime(doc.uploadedAt) || 'recently');
+  if(!rawRules) return uploadStr;
+  try {
+    const rules = type === 'tov'
+      ? { bannedWords:[], preferredTerms:[], lengthPreference:null, personPreference:null, ...rawRules }
+      : { audienceKeywords:[], preferredLanguage:[], avoidLanguage:[], ...rawRules };
+    const summary = buildExtractionSummary(type, rules);
+    return summary ? uploadStr + ' · ' + summary : uploadStr;
+  } catch(e){ return uploadStr; }
+}
+
+function ecRenderDocSection(type){
+  const sectionId = type === 'persona' ? 'ecPersonaDocSection' : 'ecTovDocSection';
+  const inputId   = type === 'persona' ? 'ecPersonaInput'      : 'ecTovInput';
+  const statusId  = type === 'persona' ? 'ecPersonaStatus'     : 'ecTovStatus';
+  const el = document.getElementById(sectionId);
+  if(!el) return;
+
+  const doc = type === 'persona' ? ecPersonaDoc : ecTovDoc;
+  const hasDoc = !!(doc && doc.fileName);
+
+  const inputHtml = `<input id="${inputId}" type="file" accept=".pdf,.docx,.txt" style="display:none" onchange="ecHandleFile('${type}',this)">`;
+  const statusHtml = `<div class="ac-file-status" id="${statusId}"></div>`;
+
+  if(hasDoc){
+    el.innerHTML = `
+      <div class="ec-doc-existing">
+        <div class="ec-doc-name">${esc(doc.fileName)}</div>
+        <div class="ec-doc-meta">${esc(ecDocMeta(type))}</div>
+        <div class="ec-doc-actions">
+          <button class="ec-doc-btn" onclick="ecTriggerReplace('${type}')">↑ Replace document</button>
+          <button class="ec-doc-btn ec-doc-remove" onclick="ecRequestRemoveDoc('${type}')">✕ Remove</button>
+        </div>
+      </div>
+      ${inputHtml}${statusHtml}`;
+  } else {
+    const titles = { persona:'Upload buyer persona', tov:'Upload tone of voice guide' };
+    el.innerHTML = `
+      <label class="ac-file-zone" for="${inputId}">
+        <div class="ac-file-label">
+          <div class="ac-file-title">${titles[type]}</div>
+          <div class="ac-file-sub">.pdf, .docx or .txt · max 10 MB</div>
+        </div>
+        <span class="ac-file-btn">Choose file</span>
+      </label>
+      ${inputHtml}${statusHtml}`;
+  }
+}
+
+function ecTriggerReplace(type){
+  const inputId = type === 'persona' ? 'ecPersonaInput' : 'ecTovInput';
+  const el = document.getElementById(inputId);
+  if(el){ el.value = ''; el.click(); }
+}
+
+function ecRequestRemoveDoc(type){
+  const sectionId = type === 'persona' ? 'ecPersonaDocSection' : 'ecTovDocSection';
+  const inputId   = type === 'persona' ? 'ecPersonaInput'      : 'ecTovInput';
+  const statusId  = type === 'persona' ? 'ecPersonaStatus'     : 'ecTovStatus';
+  const el = document.getElementById(sectionId);
+  if(!el) return;
+  el.innerHTML = `
+    <div class="ec-doc-confirm-strip">
+      <div class="ec-doc-confirm-msg">Remove this document? Brand context from this document will no longer be applied to audits for this client.</div>
+      <div class="ec-doc-confirm-btns">
+        <button class="ec-doc-btn" onclick="ecConfirmRemoveDoc('${type}')">Confirm removal</button>
+        <button class="ec-doc-btn" onclick="ecRenderDocSection('${type}')">Keep document</button>
+      </div>
+    </div>
+    <input id="${inputId}" type="file" accept=".pdf,.docx,.txt" style="display:none" onchange="ecHandleFile('${type}',this)">
+    <div class="ac-file-status" id="${statusId}"></div>`;
+}
+
+function ecConfirmRemoveDoc(type){
+  if(type === 'persona'){
+    ecPersonaDoc   = { fileName:null, rawText:null, uploadedAt:null };
+    ecPersonaRules = null;
+  } else {
+    ecTovDoc   = { fileName:null, rawText:null, uploadedAt:null };
+    ecTovRules = null;
+  }
+  ecRenderDocSection(type);
+}
+
+async function ecHandleFile(type, input){
+  const file = input.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(!['pdf','docx','txt'].includes(ext)){
+    ecSetStatus(type, 'error', 'Unsupported file type — use .pdf, .docx or .txt');
+    input.value = ''; return;
+  }
+  if(file.size > 10*1024*1024){
+    ecSetStatus(type, 'error', 'File too large — max 10 MB');
+    input.value = ''; return;
+  }
+  ecSetStatus(type, 'parsing');
+  let rawText = null;
+  let parseError = null;
+  try { rawText = await acParseFile(file, ext); }
+  catch(e){ parseError = e.message || 'Could not read file'; }
+
+  if(!rawText){
+    const hint = ext === 'pdf'
+      ? "Couldn't read this PDF — try saving it as plain text and uploading again"
+      : ext === 'docx'
+        ? "Couldn't read this docx — try saving as .txt and uploading again"
+        : (parseError || "Couldn't read this file");
+    ecSetStatus(type, 'error', hint + '. Previous document (if any) is unchanged.');
+    return; // do NOT update staged state on failure
+  }
+
+  // Commit the new doc and extract rules
+  const doc = { fileName:file.name, rawText, uploadedAt:Date.now() };
+  let rules;
+  if(type === 'tov'){
+    ecTovDoc   = doc;
+    ecTovRules = extractTovRules(rawText);
+    rules = ecTovRules;
+  } else {
+    ecPersonaDoc   = doc;
+    ecPersonaRules = extractPersonaRules(rawText);
+    rules = ecPersonaRules;
+  }
+  const summary = buildExtractionSummary(type, rules);
+  // Re-render the section (now shows "has doc" state) then set done status
+  ecRenderDocSection(type);
+  ecSetStatus(type, 'done', `${file.name}\n${summary}`);
 }
 
 const ta  = document.getElementById('editor-textarea');
@@ -2704,7 +3052,7 @@ function detectCTA(text){
 let secKWs = []; // array of strings
 
 // ── Brand Terms (per-client — persisted with client data) ───────────────────
-// Brand terms moved from a global session array to per-client storage in v6.20.
+// Brand terms moved from a global session array to per-client storage in v6.21.
 // Returns the active client's brandTerms, or [] when no client is active.
 function getBrandTerms(){
   if(!activeClientId) return [];
@@ -3219,7 +3567,7 @@ const OLD_FOLDERS_KEY = 'ce_folders_v1'; // legacy key — used only during one-
 const MIGRATION_FLAG  = 'ce_migration_v1';
 const SESSION_KEY    = 'copyengine_v63';
 const LAST_EXPORT_KEY = 'ce_last_export_v1';
-const APP_VERSION    = 'v6.20';
+const APP_VERSION    = 'v6.21'; // bumped: full add-client modal from editor, edit-client centering fix
 const MAX_CLIENTS = 10;
 const MAX_SAVES   = 5;
 
@@ -3587,41 +3935,10 @@ function confirmOverwriteEntry(){
 }
 
 // ── Create Folder modal ───────────────────────────────────────────────────────
+// "+ New Client" in the editor top bar — opens the full add-client modal
 function openCreateClientModal(){
-  if(clients.length>=MAX_CLIENTS){ showToast(`⚠️ Maximum ${MAX_CLIENTS} clients reached`); return; }
-  document.getElementById('inputClientName').value='';
-  document.getElementById('btnCreateClient').disabled=true;
-  openModal('modalCreateClient');
-  setTimeout(()=>document.getElementById('inputClientName').focus(),100);
-}
-
-function confirmCreateClient(){
-  const name = document.getElementById('inputClientName').value.trim();
-  if(!name) return;
-  const now = Date.now();
-  const client = {
-    id:          genId(),
-    name,
-    description: '',
-    brandTerms:  [],
-    personaDoc:  { fileName: null, rawText: null, uploadedAt: null },
-    tovDoc:      { fileName: null, rawText: null, uploadedAt: null },
-    personaRules:{},
-    tovRules:    {},
-    saves:       [],
-    createdAt:   now,
-    lastUsedAt:  now,
-  };
-  clients.push(client);
-  activeClientId = client.id;
-  clientsSave();
-  closeModal('modalCreateClient');
-  hideSplash();
-  renderClientNav();
-  renderHistory();
-  renderBrandTerms();
-  updateClientContextBar();
-  showToast('✓ Client created: '+name);
+  if(clients.length >= MAX_CLIENTS){ showToast(`⚠️ Maximum ${MAX_CLIENTS} clients reached`); return; }
+  openAddClientModal();
 }
 
 // ── Delete modals ─────────────────────────────────────────────────────────────
@@ -3699,9 +4016,7 @@ document.addEventListener('keydown',e=>{
     }
   }
   if(e.key!=='Enter') return;
-  if(document.getElementById('modalCreateClient').classList.contains('open')){
-    if(!document.getElementById('btnCreateClient').disabled) confirmCreateClient();
-  } else if(document.getElementById('modalSaveEntry').classList.contains('open')){
+  if(document.getElementById('modalSaveEntry').classList.contains('open')){
     if(!document.getElementById('btnSaveEntry').disabled) confirmSaveEntry();
   }
 });
@@ -4324,7 +4639,7 @@ function closeGuide(){
       <button class="guide-back-btn" onclick="closeGuide()">&#8592; Back to Copy Engine</button>
       <div class="guide-brand">
         <span class="guide-brand-name">Copy Engine</span>
-        <span class="guide-brand-ver">v6.20</span>
+        <span class="guide-brand-ver">v6.21</span>
       </div>
     </div>
 
