@@ -3694,7 +3694,10 @@ function onClientTabClick(folderId, btnEl){
   renderClientNav();
   renderHistory();
   renderBrandTerms();
-  openClientDropdown(folderId, btnEl);
+  // Re-look-up the tab element after renderClientNav rebuilds the DOM —
+  // the original btnEl is now detached, so getBoundingClientRect() would return zeros
+  const freshAnchor = document.getElementById('ftab-' + folderId);
+  if(freshAnchor) openClientDropdown(folderId, freshAnchor);
 }
 
 function openClientDropdown(folderId, anchorEl){
