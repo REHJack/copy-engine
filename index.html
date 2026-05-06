@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Copy Engine v6.21</title>
+<title>Copy Engine v6.22</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap">
@@ -611,6 +611,82 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .guide-highlight-content{}
 .guide-highlight-name{font-size:12px;font-weight:800;color:#111;margin-bottom:2px}
 .guide-highlight-desc{font-size:11px;color:#888;line-height:1.5}
+
+/* ── Brief prompt & indicator bars ── */
+.brief-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#f8f7ff;border:1.5px solid #e0dcff;border-radius:9px;padding:9px 14px;margin-bottom:10px;flex-wrap:wrap}
+.brief-bar-text{font-size:11px;color:#555;line-height:1.45;flex:1}
+.brief-bar-actions{display:flex;gap:7px;flex-shrink:0;align-items:center}
+.brief-bar-btn{background:#6366f1;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;padding:5px 11px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s}
+.brief-bar-btn:hover{background:#4f46e5}
+.brief-bar-dismiss{background:none;border:none;color:#9ca3af;font-size:11px;cursor:pointer;padding:2px 4px;font-family:inherit;transition:color .15s;white-space:nowrap}
+.brief-bar-dismiss:hover{color:#555}
+.brief-indicator{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;padding:8px 13px;margin-bottom:10px;flex-wrap:wrap}
+.brief-indicator-text{font-size:11px;color:#166534;font-weight:500;line-height:1.45;flex:1;min-width:0}
+.brief-indicator-kw{font-weight:700;color:#14532d}
+.brief-indicator-actions{display:flex;gap:6px;flex-shrink:0}
+.brief-ind-btn{background:none;border:1.5px solid #86efac;border-radius:7px;font-size:11px;font-weight:700;color:#166534;cursor:pointer;padding:4px 9px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.brief-ind-btn:hover{background:#dcfce7}
+.brief-ind-btn-remove{border-color:#fca5a5;color:#991b1b}
+.brief-ind-btn-remove:hover{background:#fee2e2;border-color:#f87171}
+
+/* ── Import brief modal ── */
+.ib-tabs{display:flex;border-bottom:1.5px solid #f0f0f0;margin-bottom:14px}
+.ib-tab{flex:1;padding:9px 12px;background:none;border:none;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;font-size:12px;font-weight:700;color:#aaa;cursor:pointer;font-family:inherit;transition:all .15s;text-align:center}
+.ib-tab.active{color:#6366f1;border-bottom-color:#6366f1}
+.ib-panel{display:none}
+.ib-panel.active{display:block}
+.ib-textarea{width:100%;padding:10px 13px;border:1.5px solid #e5e5e5;border-radius:9px;font-size:12px;font-family:inherit;color:#111;outline:none;resize:vertical;min-height:130px;line-height:1.6;box-sizing:border-box;transition:border-color .2s}
+.ib-textarea:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.ib-parse-btn{width:100%;padding:10px;border-radius:9px;background:#6366f1;color:#fff;border:none;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;transition:background .15s}
+.ib-parse-btn:hover:not(:disabled){background:#4f46e5}
+.ib-parse-btn:disabled{background:#d1d5db;color:#9ca3af;cursor:not-allowed}
+.ib-file-zone{border:1.5px dashed #e0e0e0;border-radius:9px;padding:16px;text-align:center;cursor:pointer;background:#fafafa;transition:all .15s}
+.ib-file-zone:hover{border-color:#6366f1;background:#f8f7ff}
+.ib-file-zone-title{font-size:12px;font-weight:700;color:#555;margin-bottom:3px}
+.ib-file-zone-sub{font-size:10px;color:#aaa}
+.ib-file-status{font-size:11px;margin-top:6px;display:none;line-height:1.4}
+.ib-file-status.ok{color:#10b981;display:block}
+.ib-file-status.err{color:#ef4444;display:block}
+.ib-review-field{margin-bottom:14px}
+.ib-review-label{display:block;font-size:11px;font-weight:700;color:#555;margin-bottom:5px;letter-spacing:.01em}
+.ib-review-input{width:100%;padding:8px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;transition:border-color .2s}
+.ib-review-input:focus{border-color:#6366f1}
+.ib-review-textarea{width:100%;padding:8px 11px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;resize:vertical;min-height:64px;line-height:1.5;transition:border-color .2s}
+.ib-review-textarea:focus{border-color:#6366f1}
+.ib-wc-row{display:flex;align-items:center;gap:8px}
+.ib-wc-sep{font-size:11px;color:#aaa;flex-shrink:0}
+.ib-wc-input{width:76px;padding:7px 9px;border:1.5px solid #e5e5e5;border-radius:8px;font-size:12px;font-family:inherit;color:#111;outline:none;text-align:center;transition:border-color .2s}
+.ib-wc-input:focus{border-color:#6366f1}
+.ib-heading-list{display:flex;flex-direction:column;gap:5px;margin-bottom:6px}
+.ib-heading-row{display:flex;gap:5px;align-items:center}
+.ib-heading-input{flex:1;padding:6px 9px;border:1.5px solid #e5e5e5;border-radius:7px;font-size:11px;font-family:inherit;color:#111;outline:none;transition:border-color .2s}
+.ib-heading-input:focus{border-color:#6366f1}
+.ib-heading-del{width:20px;height:20px;border-radius:50%;border:1.5px solid #e0e0e0;background:#fff;color:#bbb;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;font-family:inherit;transition:all .15s}
+.ib-heading-del:hover{border-color:#ef4444;color:#ef4444}
+.ib-add-heading-btn{background:none;border:1.5px dashed #d1d5db;border-radius:7px;font-size:11px;font-weight:700;color:#9ca3af;cursor:pointer;padding:5px 9px;width:100%;font-family:inherit;transition:all .15s}
+.ib-add-heading-btn:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
+.ib-kw-chips{display:flex;flex-wrap:wrap;gap:5px;padding:5px 8px;border:1.5px solid #e5e5e5;border-radius:8px;min-height:34px;cursor:text;background:#fff;transition:border-color .2s}
+.ib-kw-chips:focus-within{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+.ib-kw-chip{display:inline-flex;align-items:center;gap:3px;background:#ede9fe;border:1.5px solid #c7d2fe;border-radius:99px;padding:2px 7px 2px 9px;font-size:11px;font-weight:700;color:#4338ca}
+.ib-kw-chip-x{background:none;border:none;color:#a5b4fc;cursor:pointer;font-size:12px;line-height:1;padding:0;font-family:inherit;transition:color .15s}
+.ib-kw-chip-x:hover{color:#4338ca}
+.ib-kw-chip-input{border:none;outline:none;font-size:11px;font-family:inherit;color:#111;flex:1;min-width:80px;background:transparent;padding:1px 3px}
+.ib-hint{font-size:10px;color:#9ca3af;line-height:1.4;margin-top:3px}
+.ib-fallback-note{background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;padding:9px 12px;font-size:11px;color:#9a3412;line-height:1.55;margin-bottom:14px}
+
+/* ── Brief alignment section (audit panel) ── */
+.brief-score-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid #f0f0f0}
+.brief-score-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#bbb}
+.brief-score-val{font-size:15px;font-weight:900}
+.brief-check-row{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid #f8f8f8}
+.brief-check-row:last-of-type{border-bottom:none}
+.brief-check-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;flex-shrink:0;margin-top:2px}
+.bci-pass{background:#dcfce7;color:#166534}
+.bci-warn{background:#fef9c3;color:#854d0e}
+.bci-fail{background:#fee2e2;color:#991b1b}
+.brief-check-label{font-size:11px;font-weight:700;color:#111;margin-bottom:2px}
+.brief-check-message{font-size:11px;color:#666;line-height:1.5}
+.brief-disclaimer{font-size:10px;color:#aaa;font-style:italic;margin-top:8px;padding-top:7px;border-top:1px solid #f8f8f8;line-height:1.55}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -822,6 +898,15 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
   </div>
 </div>
 
+<!-- ── Modal: Import brief ── -->
+<div class="modal-overlay-top" id="modalImportBrief">
+  <div class="modal-box modal-box-wide modal-box-scroll">
+    <div class="modal-title">Import a content brief</div>
+    <div class="modal-sub">Paste or upload your brief. Copy Engine will pull out the key fields and check your draft against them.</div>
+    <div id="ibContent"><!-- rendered dynamically by ibRenderInputState() --></div>
+  </div>
+</div>
+
 <!-- ── Modal: Import confirm ── -->
 <div class="modal-overlay" id="modalImportConfirm">
   <div class="modal-box">
@@ -851,7 +936,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
       <div class="splash-card">
         <div class="sp-brand-row">
           <span class="sp-brand-name">Copy Engine</span>
-          <span class="sp-brand-ver">v6.21</span>
+          <span class="sp-brand-ver">v6.22</span>
         </div>
         <div class="sp-brand-sub">Real-time copy analysis for UK marketers &amp; copywriters.</div>
       </div>
@@ -902,7 +987,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 
   <div class="top-bar">
     <div>
-      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.21</span></div>
+      <div class="brand"><span class="brand-name">Copy Engine</span><span class="brand-ver">v6.22</span></div>
       <div class="brand-sub" id="reportDate"></div>
       <div class="client-ctx-bar" id="clientContextBar">
         <span id="ctxContent"></span>
@@ -950,6 +1035,23 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
         <button class="toggle-pill active" data-mode="cliche"   onclick="toggleMode(this)">🟣 Clichés</button>
         <button class="toggle-pill active" data-mode="repeat"   onclick="toggleMode(this)">🔵 Repetition</button>
         <button class="toggle-pill active" data-mode="variety"  onclick="toggleMode(this)">🩷 Variety</button>
+      </div>
+
+      <!-- Brief prompt bar: shown when blog selected, no brief loaded, not dismissed -->
+      <div id="briefPromptBar" class="brief-bar no-print" style="display:none">
+        <span class="brief-bar-text">Got a content brief? Import it to check your draft against the spec.</span>
+        <span class="brief-bar-actions">
+          <button class="brief-bar-btn" onclick="openImportBriefModal()">Import brief</button>
+          <button class="brief-bar-dismiss" onclick="dismissBriefPrompt()">Dismiss</button>
+        </span>
+      </div>
+      <!-- Brief indicator bar: shown when a brief is loaded for this entry -->
+      <div id="briefIndicatorBar" class="brief-indicator no-print" style="display:none">
+        <span class="brief-indicator-text" id="briefIndicatorText">Brief imported</span>
+        <span class="brief-indicator-actions">
+          <button class="brief-ind-btn" onclick="editBrief()">Edit brief</button>
+          <button class="brief-ind-btn brief-ind-btn-remove" onclick="removeBriefClick()">Remove brief</button>
+        </span>
       </div>
 
       <div class="editor-shell">
@@ -1059,7 +1161,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 
         <!-- Content type selector -->
         <div style="font-size:10px;font-weight:700;color:#aaa;margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em">Content Type</div>
-        <select class="seo-content-type" id="seoContentType" onchange="analyse();persistSave()">
+        <select class="seo-content-type" id="seoContentType" onchange="onContentTypeChange()">
           <option value="standard">Standard Article (1,000–1,500 words)</option>
           <option value="blog">Blog Post (1,800–2,500 words)</option>
           <option value="pillar">Pillar / Cornerstone (3,000+ words)</option>
@@ -1252,11 +1354,13 @@ function selectClientAndEnter(clientId){
 
 function enterQuickCheckMode(){
   activeClientId = null;
+  activeBrief    = null;
   document.getElementById('modalClientPicker').classList.remove('open');
   hideSplash();
   renderBrandTerms();
   renderHistory();
   updateClientContextBar();
+  updateBriefUI();
 }
 
 function updateClientContextBar(){
@@ -1353,6 +1457,7 @@ function goToPickerFromEntryList(){
 function openNewPiece(){
   document.getElementById('modalEntryList').classList.remove('open');
   openEntryId = null;
+  activeBrief = null;
   // Clear the editor
   ta.value = '';
   document.getElementById('targetKW').value = '';
@@ -1363,6 +1468,7 @@ function openNewPiece(){
   renderBrandTerms();
   renderHistory();
   updateClientContextBar();
+  updateBriefUI();
   updateEditorNav(true);
   ta.focus();
 }
@@ -1417,6 +1523,7 @@ function doAutoSave(){
   entry.contentType  = document.getElementById('seoContentType').value;
   entry.diffInput    = document.getElementById('diffInput').value;
   entry.secKWs       = [...secKWs];
+  entry.brief        = activeBrief || null;
   if(!entry._titleManual){
     const t = autoTitle(ta.value);
     entry.title = t;
@@ -1445,6 +1552,7 @@ function createCurrentEntry(issues, score){
     lastAuditScore:   score ?? null,
     lastAuditResults:   issues ? [...issues] : null,
     lastAuditOverrides: auditOverrides.length ? [...auditOverrides] : null,
+    brief:            activeBrief || null,
     audience:         document.getElementById('audSelect').value,
     kw:               document.getElementById('targetKW').value,
     contentType:      document.getElementById('seoContentType').value,
@@ -3052,7 +3160,7 @@ function detectCTA(text){
 let secKWs = []; // array of strings
 
 // ── Brand Terms (per-client — persisted with client data) ───────────────────
-// Brand terms moved from a global session array to per-client storage in v6.21.
+// Brand terms moved from a global session array to per-client storage in v6.22.
 // Returns the active client's brandTerms, or [] when no client is active.
 function getBrandTerms(){
   if(!activeClientId) return [];
@@ -3567,7 +3675,7 @@ const OLD_FOLDERS_KEY = 'ce_folders_v1'; // legacy key — used only during one-
 const MIGRATION_FLAG  = 'ce_migration_v1';
 const SESSION_KEY    = 'copyengine_v63';
 const LAST_EXPORT_KEY = 'ce_last_export_v1';
-const APP_VERSION    = 'v6.21'; // bumped: full add-client modal from editor, edit-client centering fix
+const APP_VERSION    = 'v6.22'; // bumped: brief import workflow — inline prompt, modal, parsing, brief alignment audit
 const MAX_CLIENTS = 10;
 const MAX_SAVES   = 5;
 
@@ -3578,6 +3686,14 @@ let openEntryId    = null; // currently loaded entry id (for overwrite)
 let pendingDeleteEntryId   = null;
 let pendingDeleteClientId  = null;
 let pendingImportData      = null;
+
+// ── Brief import state ────────────────────────────────────────────────────────
+let activeBrief      = null;    // per-entry brief data (null = no brief)
+let _briefDismissed  = false;   // session-only: hide the "got a brief?" prompt for this session
+let ibSecKws         = [];      // secondary keywords being edited in the import modal
+let ibHeadings       = [];      // headings being edited in the import modal
+let ibRawText        = '';      // raw text from paste or uploaded file
+let ibFileReady      = false;   // a file has been parsed and is ready to use
 
 // ── One-time migration: ce_folders_v1 → ce_clients_v1 ───────────────────────
 // Runs exactly once per browser (MIGRATION_FLAG guards re-runs).
@@ -3811,18 +3927,24 @@ function loadEntry(folderId, entryId){
   activeClientId = folderId;
   const _ec = clients.find(cl=>cl.id===folderId);
   if(_ec) { _ec.lastUsedAt = Date.now(); clientsSave(); }
+  // Restore brief before calling updateBriefUI
+  activeBrief = entry.brief || null;
   onEditorInput();
   renderClientNav();
   renderHistory();
   renderBrandTerms();
   updateClientContextBar();
+  updateBriefUI();
   // Restore last audit results if available
   if(entry.lastAuditResults && entry.lastAuditResults.length){
     auditIssues    = entry.lastAuditResults;
     auditOverrides = Array.isArray(entry.lastAuditOverrides) ? entry.lastAuditOverrides : [];
     const _panel = document.getElementById('aiPanel');
     if(_panel) _panel.classList.add('open');
-    renderAI(auditIssues, ta.value, auditOverrides);
+    const _restoredBriefChecks = activeBrief && entry.contentType === 'blog'
+      ? runBriefChecks(activeBrief, ta.value)
+      : [];
+    renderAI(auditIssues, ta.value, auditOverrides, _restoredBriefChecks);
   } else {
     auditIssues    = [];
     auditOverrides = [];
@@ -4051,6 +4173,7 @@ function persistLoad(){
   }catch(e){}
   clientsLoad();
   renderBackupReminder();
+  updateBriefUI();
 }
 
 function resetUI(){
@@ -4263,7 +4386,14 @@ function runAIAudit(){
 
   auditIssues=deduped;
   auditOverrides=overrides;
-  renderAI(deduped, text, overrides);
+
+  // ── Brief alignment checks (only when blog content type and a brief is loaded) ──
+  let _briefChecks = [];
+  if(activeBrief && document.getElementById('seoContentType').value === 'blog'){
+    _briefChecks = runBriefChecks(activeBrief, text);
+  }
+
+  renderAI(deduped, text, overrides, _briefChecks);
   // Persist audit results to the current entry (create one if needed)
   if(activeClientId){
     if(!openEntryId){
@@ -4360,7 +4490,7 @@ function locateIssue(i){
   showToast('↑ Jumped to issue');
 }
 
-function renderAI(issues, text, overrides=[]){
+function renderAI(issues, text, overrides=[], briefChecks=[]){
   const out=document.getElementById('aiOutput');
   const typeMap={
     passive:      {tag:'tag-passive',   label:'Passive Voice',  icon:'🔴'},
@@ -4437,16 +4567,604 @@ function renderAI(issues, text, overrides=[]){
       </div>
     </details>`:'';
 
+  // ── Brief alignment section ─────────────────────────────────────────────────
+  const briefSection = briefChecks.length ? (()=>{
+    const passCount = briefChecks.filter(c=>c.status==='pass').length;
+    const pct       = Math.round((passCount/briefChecks.length)*100);
+    const scoreCol  = pct >= 80 ? '#16a34a' : pct >= 60 ? '#d97706' : '#dc2626';
+    const rows = briefChecks.map(c=>{
+      const iconText  = c.status==='pass'?'✓':c.status==='warn'?'!':'✕';
+      const iconClass = c.status==='pass'?'bci-pass':c.status==='warn'?'bci-warn':'bci-fail';
+      return `<div class="brief-check-row">
+        <div class="brief-check-icon ${iconClass}">${iconText}</div>
+        <div>
+          <div class="brief-check-label">${esc(c.label)}</div>
+          <div class="brief-check-message">${esc(c.message)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="ai-section">
+      <div class="ai-section-title">Brief Alignment</div>
+      <div class="brief-score-header">
+        <span class="brief-score-label">Brief score</span>
+        <span class="brief-score-val" style="color:${scoreCol}">${pct}%</span>
+      </div>
+      ${rows}
+      <div class="brief-disclaimer">These checks compare your draft to specific fields in the brief. They don't read intent or understand context — that's still the writer's job.</div>
+    </div>`;
+  })() : '';
+
   out.innerHTML=`
     <div class="ai-section">
       <div class="ai-section-title">Summary</div>
       ${chips}
     </div>
+    ${briefSection}
     <div class="ai-section">
       <div class="ai-section-title">Issues — ${issues.length} found</div>
       ${issueHTML}
     </div>
     ${overrideSection}`;
+}
+
+// ── Brief prompt bar ─────────────────────────────────────────────────────────
+
+function updateBriefUI(){
+  const promptBar     = document.getElementById('briefPromptBar');
+  const indicatorBar  = document.getElementById('briefIndicatorBar');
+  if(!promptBar || !indicatorBar) return;
+  const contentType = document.getElementById('seoContentType').value;
+  const isBlog = contentType === 'blog';
+  if(activeBrief){
+    promptBar.style.display = 'none';
+    indicatorBar.style.display = 'flex';
+    const textEl = document.getElementById('briefIndicatorText');
+    if(textEl){
+      let info = 'Brief imported';
+      if(activeBrief.primaryKeyword)
+        info += ` · keyword: <span class="brief-indicator-kw">${esc(activeBrief.primaryKeyword)}</span>`;
+      if(activeBrief.wordCountTarget){
+        const {min,max} = activeBrief.wordCountTarget;
+        if(min && max && min !== max)
+          info += ` · target: ${min.toLocaleString()}–${max.toLocaleString()} words`;
+        else if(min || max)
+          info += ` · target: ${(min||max).toLocaleString()} words`;
+      }
+      textEl.innerHTML = info;
+    }
+  } else if(isBlog && !_briefDismissed){
+    promptBar.style.display = 'flex';
+    indicatorBar.style.display = 'none';
+  } else {
+    promptBar.style.display = 'none';
+    indicatorBar.style.display = 'none';
+  }
+}
+
+function dismissBriefPrompt(){
+  _briefDismissed = true;
+  updateBriefUI();
+}
+
+function removeBriefClick(){
+  if(!activeBrief) return;
+  if(!confirm('Remove the imported brief from this entry? This cannot be undone.')) return;
+  activeBrief = null;
+  scheduleAutoSave();
+  updateBriefUI();
+  showToast('Brief removed');
+}
+
+function onContentTypeChange(){
+  const sel = document.getElementById('seoContentType');
+  const newType = sel.value;
+  // Switching away from blog with an active brief requires confirmation
+  if(newType !== 'blog' && activeBrief){
+    if(!confirm('This entry has an imported brief. Changing the content type will discard the brief. Continue?')){
+      sel.value = 'blog'; // revert
+      return;
+    }
+    activeBrief = null;
+  }
+  analyse();
+  persistSave();
+  updateBriefUI();
+}
+
+// ── Import brief modal ────────────────────────────────────────────────────────
+
+function openImportBriefModal(){
+  ibSecKws    = [];
+  ibHeadings  = [];
+  ibRawText   = '';
+  ibFileReady = false;
+  ibRenderInputState();
+  document.getElementById('modalImportBrief').classList.add('open');
+}
+
+function editBrief(){
+  if(!activeBrief) return;
+  ibSecKws   = activeBrief.secondaryKeywords ? [...activeBrief.secondaryKeywords] : [];
+  ibHeadings = activeBrief.suggestedHeadings ? [...activeBrief.suggestedHeadings] : [];
+  ibRawText  = activeBrief.rawText || '';
+  ibRenderReviewState(activeBrief, false);
+  document.getElementById('modalImportBrief').classList.add('open');
+}
+
+function cancelImportBrief(){
+  document.getElementById('modalImportBrief').classList.remove('open');
+}
+
+function ibSwitchTab(tab){
+  document.querySelectorAll('.ib-tab').forEach(t=>t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.ib-panel').forEach(p=>p.classList.toggle('active', p.dataset.panel === tab));
+  ibUpdateParseBtn();
+}
+
+function ibUpdateParseBtn(){
+  const btn = document.getElementById('ibParseBtn');
+  if(!btn) return;
+  const activeTab = document.querySelector('.ib-tab.active');
+  if(!activeTab) return;
+  if(activeTab.dataset.tab === 'paste'){
+    const ta2 = document.getElementById('ibPasteText');
+    btn.disabled = !ta2 || !ta2.value.trim();
+  } else {
+    btn.disabled = !ibFileReady;
+  }
+}
+
+function ibRenderInputState(){
+  const content = document.getElementById('ibContent');
+  if(!content) return;
+  content.innerHTML = `
+    <div class="ib-tabs">
+      <button class="ib-tab active" data-tab="paste" onclick="ibSwitchTab('paste')">Paste brief</button>
+      <button class="ib-tab" data-tab="upload" onclick="ibSwitchTab('upload')">Upload file</button>
+    </div>
+    <div class="ib-panel active" data-panel="paste">
+      <textarea class="ib-textarea" id="ibPasteText" placeholder="Paste your brief content here…" oninput="ibUpdateParseBtn()"></textarea>
+    </div>
+    <div class="ib-panel" data-panel="upload">
+      <div class="ib-file-zone" onclick="document.getElementById('ibFileInput').click()">
+        <div class="ib-file-zone-title">Click to choose a file</div>
+        <div class="ib-file-zone-sub">.pdf, .docx or .txt — max 10 MB</div>
+      </div>
+      <input type="file" id="ibFileInput" accept=".pdf,.docx,.txt" style="display:none" onchange="ibHandleFile(this)">
+      <div class="ib-file-status" id="ibFileStatus"></div>
+    </div>
+    <button class="ib-parse-btn" id="ibParseBtn" disabled onclick="ibParseBrief()">Parse brief</button>
+    <div class="modal-footer" style="margin-top:10px">
+      <button class="modal-btn modal-btn-cancel" onclick="cancelImportBrief()">Cancel</button>
+    </div>`;
+}
+
+async function ibHandleFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  const statusEl = document.getElementById('ibFileStatus');
+  if(!statusEl) return;
+  if(!['pdf','docx','txt'].includes(ext)){
+    statusEl.className = 'ib-file-status err';
+    statusEl.textContent = 'Unsupported file type — use .pdf, .docx or .txt';
+    ibFileReady = false; ibUpdateParseBtn(); return;
+  }
+  if(file.size > 10*1024*1024){
+    statusEl.className = 'ib-file-status err';
+    statusEl.textContent = 'File too large — max 10 MB';
+    ibFileReady = false; ibUpdateParseBtn(); return;
+  }
+  statusEl.className = 'ib-file-status ok';
+  statusEl.textContent = '⏳ Reading file…';
+  try{
+    ibRawText = await acParseFile(file, ext);
+    if(!ibRawText) throw new Error('Empty result');
+    statusEl.textContent = `✓ ${file.name} ready`;
+    ibFileReady = true;
+  }catch(e){
+    statusEl.className = 'ib-file-status err';
+    statusEl.textContent = '⚠ Could not read file — try saving as .txt';
+    ibFileReady = false;
+  }
+  ibUpdateParseBtn();
+}
+
+function ibParseBrief(){
+  const activeTab = document.querySelector('.ib-tab.active');
+  const tab = activeTab ? activeTab.dataset.tab : 'paste';
+  let rawText = '';
+  if(tab === 'paste'){
+    rawText = (document.getElementById('ibPasteText').value || '').trim();
+  } else {
+    rawText = ibRawText;
+  }
+  if(!rawText) return;
+  ibRawText = rawText;
+  const btn = document.getElementById('ibParseBtn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Parsing…'; }
+  // Parsing is synchronous — setTimeout lets the UI update first
+  setTimeout(()=>{
+    const parsed = parseBriefText(rawText);
+    ibSecKws   = parsed.secondaryKeywords ? [...parsed.secondaryKeywords] : [];
+    ibHeadings = parsed.suggestedHeadings ? [...parsed.suggestedHeadings] : [];
+    const isFallback = !parsed.primaryKeyword
+      && ibSecKws.length === 0
+      && ibHeadings.length === 0
+      && !parsed.audienceNotes
+      && !parsed.wordCountTarget;
+    ibRenderReviewState(parsed, isFallback);
+  }, 60);
+}
+
+// ── Brief field extraction ────────────────────────────────────────────────────
+
+function parseBriefText(text){
+  const result = {
+    primaryKeyword:    null,
+    secondaryKeywords: [],
+    wordCountTarget:   null,
+    suggestedHeadings: [],
+    audienceNotes:     ''
+  };
+
+  // ── Primary keyword ──────────────────────────────────────────────────────────
+  const pkRe = /(?:primary\s+keyword|target\s+keyword|focus\s+keyword|main\s+keyword|(?:^|\n)keyword)[\s:–\-]+([^\n,;.]{2,80})/im;
+  const pkM  = pkRe.exec(text);
+  if(pkM){
+    result.primaryKeyword = pkM[1].trim()
+      .replace(/^[:"'\s]+|[:"'\s]+$/g,'')
+      .split(/[\n,;]/)[0].trim();
+  }
+
+  // ── Secondary keywords ───────────────────────────────────────────────────────
+  const skInlineRe = /(?:secondary\s+keywords?|supporting\s+keywords?|related\s+keywords?|additional\s+keywords?|lsi\s+keywords?)[\s:–\-]+([^\n]{2,200})/im;
+  const skInlineM  = skInlineRe.exec(text);
+  if(skInlineM){
+    const parts = skInlineM[1].split(/[,;]/)
+      .map(s=>s.trim().toLowerCase())
+      .filter(s=>s.length >= 2 && s.length <= 60);
+    if(parts.length) result.secondaryKeywords = [...new Set(parts)].slice(0,20);
+  }
+  if(!result.secondaryKeywords.length){
+    // Try bullet/numbered list below a secondary-keywords label
+    const skSectionRe = /(?:secondary\s+keywords?|supporting\s+keywords?|related\s+keywords?|additional\s+keywords?|lsi\s+keywords?)[^\n]*\n([\s\S]{0,400})/im;
+    const skSectionM  = skSectionRe.exec(text);
+    if(skSectionM){
+      const chunk = skSectionM[1].split(/\n[ \t]*\n/)[0];
+      const items = extractListItems(chunk, 20);
+      result.secondaryKeywords = items.filter(k=>k.length >= 2 && k.length <= 60);
+    }
+  }
+
+  // ── Word count target ────────────────────────────────────────────────────────
+  const wcPatterns = [
+    /(\d{1,2},?\d{3})\s*[-–to]+\s*(\d{1,2},?\d{3})\s+words?/i,
+    /(\d{3,5})\s*[-–to]+\s*(\d{3,5})\s+words?/i,
+    /(?:word\s+count|word\s+length|length|target)[\s:–\-]+(\d{1,2},?\d{3})(?:\s*[-–to]+\s*(\d{1,2},?\d{3}))?/i,
+    /(?:around|approximately|approx\.?|~|circa|min(?:imum)?|at\s+least)?\s*(\d{1,2},?\d{3})\s+words?/i,
+  ];
+  for(const re of wcPatterns){
+    const m = re.exec(text);
+    if(m){
+      const n1 = parseInt((m[1]||'').replace(/,/g,''));
+      const n2 = m[2] ? parseInt(m[2].replace(/,/g,'')) : null;
+      if(n1 >= 50 && n1 <= 50000){
+        result.wordCountTarget = (n2 && n2 >= n1) ? {min:n1, max:n2} : {min:n1, max:n1};
+        break;
+      }
+    }
+  }
+
+  // ── Suggested headings ───────────────────────────────────────────────────────
+  const hdRe = /(?:headings?|h2s?|structure|outline|sections?|topics?\s+to\s+cover|suggested\s+headings?)[^\n]*\n([\s\S]{0,600})/im;
+  const hdM  = hdRe.exec(text);
+  if(hdM){
+    const chunk = hdM[1].split(/\n[ \t]*\n/)[0];
+    const items = extractListItems(chunk, 15);
+    result.suggestedHeadings = items
+      .filter(h=>h.length >= 4)
+      .map(h=>h.charAt(0).toUpperCase()+h.slice(1));
+  }
+
+  // ── Audience notes ───────────────────────────────────────────────────────────
+  const audRe = /(?:(?:target\s+)?audience|persona|reader|who\s+this\s+is\s+for)[^\n]*\n([\s\S]{0,500})/im;
+  const audM  = audRe.exec(text);
+  if(audM){
+    result.audienceNotes = audM[1].split(/\n[ \t]*\n/)[0].trim().slice(0,500);
+  }
+
+  return result;
+}
+
+// ── Review state rendering ────────────────────────────────────────────────────
+
+function ibRenderReviewState(data, isFallback){
+  const content = document.getElementById('ibContent');
+  if(!content) return;
+  const wcMin = (data.wordCountTarget && data.wordCountTarget.min) ? data.wordCountTarget.min : '';
+  const wcMax = (data.wordCountTarget && data.wordCountTarget.max && data.wordCountTarget.max !== data.wordCountTarget.min)
+    ? data.wordCountTarget.max : '';
+
+  content.innerHTML = `
+    ${isFallback ? `<div class="ib-fallback-note">Couldn't parse this brief automatically. Fill in the fields manually if you'd like to use the brief alignment checks.</div>` : ''}
+    <div class="ib-review-field">
+      <label class="ib-review-label">Primary keyword</label>
+      <input class="ib-review-input" id="ibPrimaryKw" type="text" placeholder="e.g. sustainable packaging UK" value="${esc(data.primaryKeyword||'')}">
+    </div>
+    <div class="ib-review-field">
+      <label class="ib-review-label">Secondary keywords</label>
+      <div class="ib-kw-chips" id="ibKwChipsRow" onclick="document.getElementById('ibKwChipInput').focus()">
+        <input class="ib-kw-chip-input" id="ibKwChipInput" type="text" placeholder="Type a keyword, press Enter" maxlength="60" onkeydown="ibOnSecKwKey(event)">
+      </div>
+      <div class="ib-hint">Press Enter or comma to add. Up to 20 keywords.</div>
+    </div>
+    <div class="ib-review-field">
+      <label class="ib-review-label">Word count target</label>
+      <div class="ib-wc-row">
+        <input class="ib-wc-input" id="ibWcMin" type="number" min="0" max="50000" placeholder="Min" value="${wcMin}">
+        <span class="ib-wc-sep">to</span>
+        <input class="ib-wc-input" id="ibWcMax" type="number" min="0" max="50000" placeholder="Max" value="${wcMax}">
+        <span class="ib-wc-sep" style="font-size:10px;color:#bbb">words</span>
+      </div>
+      <div class="ib-hint">Leave blank if the brief didn't specify a word count.</div>
+    </div>
+    <div class="ib-review-field">
+      <label class="ib-review-label">Suggested headings</label>
+      <div id="ibHeadingList" class="ib-heading-list"></div>
+      <button class="ib-add-heading-btn" onclick="ibAddHeading()">+ Add heading</button>
+    </div>
+    <div class="ib-review-field">
+      <label class="ib-review-label">Audience notes <span style="color:#aaa;font-weight:500">(optional)</span></label>
+      <textarea class="ib-review-textarea" id="ibAudienceNotes" placeholder="Who is this piece for?">${esc(data.audienceNotes||'')}</textarea>
+    </div>
+    <div class="modal-footer" style="margin-top:4px">
+      <button class="modal-btn modal-btn-cancel" onclick="cancelImportBrief()">Cancel</button>
+      <button class="modal-btn modal-btn-confirm" onclick="saveBrief()">Save brief</button>
+    </div>`;
+
+  ibRenderSecKwChips();
+  ibRenderHeadings();
+}
+
+function ibRenderSecKwChips(){
+  const row   = document.getElementById('ibKwChipsRow');
+  const input = document.getElementById('ibKwChipInput');
+  if(!row || !input) return;
+  Array.from(row.querySelectorAll('.ib-kw-chip')).forEach(el=>el.remove());
+  ibSecKws.forEach((kw,i)=>{
+    const chip = document.createElement('span');
+    chip.className = 'ib-kw-chip';
+    chip.innerHTML = `${esc(kw)}<button class="ib-kw-chip-x" onclick="ibRemoveSecKw(${i})" title="Remove">×</button>`;
+    row.insertBefore(chip, input);
+  });
+}
+
+function ibOnSecKwKey(e){
+  if(e.key === 'Enter' || e.key === ','){
+    e.preventDefault();
+    const input = document.getElementById('ibKwChipInput');
+    const val = input.value.trim().replace(/,+$/,'').toLowerCase();
+    if(!val || val.length < 2) return;
+    if(ibSecKws.length >= 20){ showToast('⚠️ Max 20 secondary keywords'); return; }
+    if(!ibSecKws.includes(val)) ibSecKws.push(val);
+    input.value = '';
+    ibRenderSecKwChips();
+  } else if(e.key === 'Backspace' && !e.target.value && ibSecKws.length){
+    ibSecKws.pop();
+    ibRenderSecKwChips();
+  }
+}
+
+function ibRemoveSecKw(i){
+  ibSecKws.splice(i,1);
+  ibRenderSecKwChips();
+}
+
+function ibRenderHeadings(){
+  const list = document.getElementById('ibHeadingList');
+  if(!list) return;
+  if(!ibHeadings.length){ list.innerHTML = ''; return; }
+  list.innerHTML = ibHeadings.map((h,i)=>`
+    <div class="ib-heading-row">
+      <input class="ib-heading-input" type="text" value="${esc(h)}" oninput="ibHeadings[${i}]=this.value" placeholder="Heading text">
+      <button class="ib-heading-del" onclick="ibRemoveHeading(${i})" title="Remove">×</button>
+    </div>`).join('');
+}
+
+function ibAddHeading(){
+  ibHeadings.push('');
+  ibRenderHeadings();
+  const inputs = document.querySelectorAll('.ib-heading-input');
+  if(inputs.length) inputs[inputs.length-1].focus();
+}
+
+function ibRemoveHeading(i){
+  ibHeadings.splice(i,1);
+  ibRenderHeadings();
+}
+
+function saveBrief(){
+  const primaryKeyword     = (document.getElementById('ibPrimaryKw').value||'').trim();
+  const secondaryKeywords  = ibSecKws.filter(k=>k.trim()).map(k=>k.trim().toLowerCase());
+  const wcMinRaw = document.getElementById('ibWcMin').value;
+  const wcMaxRaw = document.getElementById('ibWcMax').value;
+  const wcMin    = wcMinRaw ? parseInt(wcMinRaw) : null;
+  const wcMax    = wcMaxRaw ? parseInt(wcMaxRaw) : null;
+  // Sync heading input values before reading
+  const headingInputs  = document.querySelectorAll('.ib-heading-input');
+  const suggestedHeadings = Array.from(headingInputs).map(el=>el.value.trim()).filter(Boolean);
+  const audienceNotes  = (document.getElementById('ibAudienceNotes').value||'').trim();
+
+  let wordCountTarget = null;
+  if(wcMin || wcMax){
+    wordCountTarget = { min: wcMin || wcMax, max: wcMax || wcMin };
+  }
+
+  activeBrief = {
+    primaryKeyword:    primaryKeyword || null,
+    secondaryKeywords,
+    wordCountTarget,
+    suggestedHeadings,
+    audienceNotes,
+    rawText:           ibRawText,
+    importedAt:        Date.now()
+  };
+
+  scheduleAutoSave();
+  document.getElementById('modalImportBrief').classList.remove('open');
+  updateBriefUI();
+  showToast('✓ Brief imported');
+}
+
+// ── Brief alignment checks ────────────────────────────────────────────────────
+
+function runBriefChecks(brief, text){
+  const checks  = [];
+  const words   = text.trim().split(/\s+/).filter(w=>w.length > 0);
+  const wc      = words.length;
+  const textLow = text.toLowerCase();
+
+  // ── Word count ───────────────────────────────────────────────────────────────
+  if(brief.wordCountTarget){
+    const {min, max} = brief.wordCountTarget;
+    const tMin = min || max;
+    const tMax = max || min;
+    let status, message;
+    if(tMin && tMax && tMin !== tMax){
+      const pctOff = wc < tMin
+        ? (tMin - wc) / tMin
+        : wc > tMax ? (wc - tMax) / tMax : 0;
+      if(pctOff === 0){
+        status  = 'pass';
+        message = `Your draft is ${wc.toLocaleString()} words, within the brief target of ${tMin.toLocaleString()}–${tMax.toLocaleString()}.`;
+      } else if(pctOff <= 0.25){
+        status  = 'warn';
+        message = `Your draft is ${wc.toLocaleString()} words, ${wc < tMin ? 'short of' : 'over'} the brief target of ${tMin.toLocaleString()}–${tMax.toLocaleString()}.`;
+      } else {
+        status  = 'fail';
+        message = `Your draft is ${wc.toLocaleString()} words, well ${wc < tMin ? 'short of' : 'over'} the brief target of ${tMin.toLocaleString()}–${tMax.toLocaleString()}.`;
+      }
+    } else {
+      const target  = tMin || tMax;
+      const pctOff  = Math.abs(wc - target) / target;
+      if(pctOff <= 0.1){
+        status  = 'pass';
+        message = `Your draft is ${wc.toLocaleString()} words, in line with the brief target of ${target.toLocaleString()}.`;
+      } else if(pctOff <= 0.25){
+        status  = 'warn';
+        message = `Your draft is ${wc.toLocaleString()} words. The brief asked for ${target.toLocaleString()}.`;
+      } else {
+        status  = 'fail';
+        message = `Your draft is ${wc.toLocaleString()} words. The brief asked for ${target.toLocaleString()}.`;
+      }
+    }
+    checks.push({check:'word_count', status, label:'Word count', message});
+  }
+
+  // ── Primary keyword presence ─────────────────────────────────────────────────
+  if(brief.primaryKeyword){
+    const kw  = brief.primaryKeyword.toLowerCase();
+    const idx = textLow.indexOf(kw);
+    if(idx === -1){
+      checks.push({check:'primary_kw_present', status:'fail', label:'Primary keyword presence',
+        message:`"${brief.primaryKeyword}" does not appear in the draft.`});
+    } else {
+      const first100 = words.slice(0,100).join(' ').toLowerCase();
+      if(first100.includes(kw)){
+        checks.push({check:'primary_kw_present', status:'pass', label:'Primary keyword presence',
+          message:`"${brief.primaryKeyword}" is present and appears within the first 100 words.`});
+      } else {
+        checks.push({check:'primary_kw_present', status:'warn', label:'Primary keyword presence',
+          message:`"${brief.primaryKeyword}" is present but does not appear within the first 100 words.`});
+      }
+    }
+
+    // ── Primary keyword density ────────────────────────────────────────────────
+    if(wc >= 50){
+      const kwEsc    = kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      const matches  = (text.match(new RegExp(kwEsc,'gi'))||[]).length;
+      const density  = (matches / wc) * 100;
+      let dStatus, dMsg;
+      if(density >= 1.0 && density <= 2.0){
+        dStatus = 'pass';
+        dMsg    = `Primary keyword density is ${density.toFixed(1)}% (${matches} ${matches===1?'occurrence':'occurrences'}). This is in the optimal range.`;
+      } else if(density >= 0.5 && density < 1.0){
+        dStatus = 'warn';
+        dMsg    = `Primary keyword density is ${density.toFixed(1)}% (${matches} ${matches===1?'occurrence':'occurrences'}). Slightly low — aim for 1.0–2.0%.`;
+      } else if(density > 2.0 && density <= 3.0){
+        dStatus = 'warn';
+        dMsg    = `Primary keyword density is ${density.toFixed(1)}% (${matches} ${matches===1?'occurrence':'occurrences'}). Slightly high — above 2.0% risks over-optimisation.`;
+      } else if(density > 3.0){
+        dStatus = 'fail';
+        dMsg    = `Primary keyword density is ${density.toFixed(1)}% (${matches} ${matches===1?'occurrence':'occurrences'}). This is over-optimised — aim for 1.0–2.0%.`;
+      } else {
+        dStatus = 'fail';
+        dMsg    = `Primary keyword density is ${density.toFixed(1)}% — the keyword is barely present. Aim for 1.0–2.0%.`;
+      }
+      checks.push({check:'primary_kw_density', status:dStatus, label:'Primary keyword density', message:dMsg});
+    }
+  }
+
+  // ── Secondary keywords coverage ──────────────────────────────────────────────
+  if(brief.secondaryKeywords && brief.secondaryKeywords.length){
+    const found   = brief.secondaryKeywords.filter(k=>textLow.includes(k.toLowerCase()));
+    const missing = brief.secondaryKeywords.filter(k=>!textLow.includes(k.toLowerCase()));
+    const pct     = found.length / brief.secondaryKeywords.length;
+    let skStatus, skMsg;
+    if(pct === 1){
+      skStatus = 'pass';
+      skMsg    = `All ${brief.secondaryKeywords.length} secondary keyword${brief.secondaryKeywords.length===1?'':'s'} are present.`;
+    } else if(pct >= 0.7){
+      skStatus = 'warn';
+      skMsg    = `${found.length} of ${brief.secondaryKeywords.length} secondary keywords found. Missing: ${missing.map(k=>`"${k}"`).join(', ')}.`;
+    } else {
+      skStatus = 'fail';
+      skMsg    = `Only ${found.length} of ${brief.secondaryKeywords.length} secondary keywords found. Missing: ${missing.map(k=>`"${k}"`).join(', ')}.`;
+    }
+    checks.push({check:'secondary_kw_coverage', status:skStatus, label:'Secondary keyword coverage', message:skMsg});
+  }
+
+  // ── Suggested headings ────────────────────────────────────────────────────────
+  if(brief.suggestedHeadings && brief.suggestedHeadings.length){
+    // Extract heading candidates from the copy
+    const extractedH = [];
+    for(const line of text.split(/\n/)){
+      const trimmed = line.trim();
+      if(!trimmed) continue;
+      if(/^#{2,3}\s+.{4,}/.test(trimmed)){
+        extractedH.push(trimmed.replace(/^#+\s+/,'').toLowerCase());
+        continue;
+      }
+      // Short title-cased lines that aren't sentences
+      if(trimmed.length <= 80 && trimmed.length >= 5 && /^[A-Z]/.test(trimmed)
+        && !trimmed.endsWith('.') && trimmed.split(/\s+/).length <= 12){
+        extractedH.push(trimmed.toLowerCase());
+      }
+    }
+    const foundH   = brief.suggestedHeadings.filter(h=>{
+      const hl = h.toLowerCase();
+      return extractedH.some(eh=>eh.includes(hl) || hl.includes(eh));
+    });
+    const missingH = brief.suggestedHeadings.filter(h=>{
+      const hl = h.toLowerCase();
+      return !extractedH.some(eh=>eh.includes(hl) || hl.includes(eh));
+    });
+    let hStatus, hMsg;
+    if(foundH.length === brief.suggestedHeadings.length){
+      hStatus = 'pass';
+      hMsg    = `All ${brief.suggestedHeadings.length} suggested heading${brief.suggestedHeadings.length===1?'':'s'} found in the draft.`;
+    } else if(foundH.length > 0){
+      hStatus = 'warn';
+      hMsg    = `${foundH.length} of ${brief.suggestedHeadings.length} suggested headings found. Missing: ${missingH.map(h=>`"${h}"`).join(', ')}.`;
+    } else {
+      hStatus = 'fail';
+      hMsg    = `None of the ${brief.suggestedHeadings.length} suggested headings were found. Missing: ${missingH.map(h=>`"${h}"`).join(', ')}.`;
+    }
+    checks.push({check:'suggested_headings', status:hStatus, label:'Suggested headings', message:hMsg});
+  }
+
+  return checks;
 }
 
 // ── Export / Import ──────────────────────────────────────────────────────────
@@ -4642,7 +5360,7 @@ function closeGuide(){
       <button class="guide-back-btn" onclick="closeGuide()">&#8592; Back to Copy Engine</button>
       <div class="guide-brand">
         <span class="guide-brand-name">Copy Engine</span>
-        <span class="guide-brand-ver">v6.21</span>
+        <span class="guide-brand-ver">v6.22</span>
       </div>
     </div>
 
