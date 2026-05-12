@@ -96,9 +96,9 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .md-syntax{color:rgba(26,26,26,0.3);font-weight:normal;font-style:normal}
 .md-bold{font-weight:400;text-shadow:0.55px 0 0 currentColor}
 .md-italic{font-style:italic}
-.md-h1{font-weight:400;color:#000;text-shadow:0.55px 0 0 currentColor}
-.md-h2{font-weight:400;color:#111;text-shadow:0.55px 0 0 currentColor}
-.md-h3{font-weight:400;color:#222;text-shadow:0.55px 0 0 currentColor}
+.md-h1{font-weight:400;color:#4f46e5;text-shadow:0.6px 0 0 currentColor}
+.md-h2{font-weight:400;color:#6366f1;text-shadow:0.6px 0 0 currentColor}
+.md-h3{font-weight:400;color:#818cf8;text-shadow:0.6px 0 0 currentColor}
 .md-li{display:inline}
 .md-ol{display:inline}
 .tip{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:11px;padding:7px 11px;border-radius:8px;z-index:200;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.18);width:210px;white-space:normal;text-align:center;line-height:1.45;display:none}
@@ -2419,7 +2419,9 @@ const PROOFS = [
     }
   },
   // Double spaces — two or more consecutive spaces on the same line.
-  { re: /[^\S\r\n]{2,}/g,
+  // Lookbehind requires a real character before the spaces so masked markdown
+  // syntax (heading #, list - etc.) that becomes leading spaces doesn't trigger this rule.
+  { re: /(?<=[^\s])[^\S\r\n]{2,}/g,
     tip: 'Double space — remove the extra space.' },
   // Common misspellings — built dynamically from MISSPELLINGS dictionary
   {
