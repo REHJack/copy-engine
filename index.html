@@ -90,6 +90,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .ch{background:#f3e8ff;box-shadow:0 2px 0 #a855f7;color:#6b21a8;border-radius:2px;cursor:pointer;position:relative}
 .rh{background:#dbeafe;box-shadow:0 2px 0 #3b82f6;color:#1e40af;border-radius:2px;cursor:pointer;position:relative}
 .vh{background:#fce7f3;box-shadow:0 2px 0 #ec4899;color:#9d174d;border-radius:2px}
+.erh{background:#ccfbf1;box-shadow:0 2px 0 #14b8a6;color:#134e4a;border-radius:2px;cursor:pointer;position:relative}
 /* ── Markdown syntax styling (Phase M.2 v2) ── */
 /* CRITICAL: no font-size or line-height changes — overlay must stay character-aligned with textarea */
 .md-syntax{color:rgba(26,26,26,0.3);font-weight:normal;font-style:normal}
@@ -104,7 +105,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .tip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#111}
 
 /* ── Stats ── */
-.stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:#e5e5e5;border:1.5px solid #e0e0e0;border-top:none;border-radius:0 0 14px 14px;overflow:hidden}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:1px;background:#e5e5e5;border:1.5px solid #e0e0e0;border-top:none;border-radius:0 0 14px 14px;overflow:hidden}
 @media(max-width:700px){.stats-row{grid-template-columns:repeat(3,1fr)}}
 .stat{background:#fff;padding:12px 14px}
 .stat-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:#bbb;margin-bottom:3px}
@@ -234,6 +235,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 .tag-long{background:#ffedd5;color:#9a3412}
 .tag-repeat{background:#dbeafe;color:#1e40af}
 .tag-kw{background:#dcfce7;color:#166534}
+.tag-proof{background:#ccfbf1;color:#134e4a}
 .issue-locate{background:none;border:1.5px solid #e0e0e0;border-radius:7px;font-size:10px;font-weight:700;color:#888;cursor:pointer;padding:3px 9px;white-space:nowrap;transition:all .15s;font-family:inherit}
 .issue-locate:hover{border-color:#6366f1;color:#6366f1;background:#f8f7ff}
 .issue-phrase{font-size:12px;font-weight:700;color:#111;background:#f5f5f5;border-radius:6px;padding:4px 8px;display:inline-block;margin-bottom:6px;font-family:monospace}
@@ -972,6 +974,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
           <div class="sp-feat"><div class="sp-feat-icon">🟣</div><div class="sp-feat-label">Clichés</div><div class="sp-feat-sub">with better alternatives</div></div>
           <div class="sp-feat"><div class="sp-feat-icon">🔵</div><div class="sp-feat-label">Repetition</div><div class="sp-feat-sub">nearby word reuse</div></div>
           <div class="sp-feat"><div class="sp-feat-icon">🩷</div><div class="sp-feat-label">Sentence variety</div><div class="sp-feat-sub">same-start detection</div></div>
+          <div class="sp-feat"><div class="sp-feat-icon">🩵</div><div class="sp-feat-label">Proof errors</div><div class="sp-feat-sub">homophones, double words</div></div>
         </div>
       </div>
       <div>
@@ -1035,6 +1038,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
         <button class="toggle-pill active" data-mode="cliche"   onclick="toggleMode(this)">🟣 Clichés</button>
         <button class="toggle-pill active" data-mode="repeat"   onclick="toggleMode(this)">🔵 Repetition</button>
         <button class="toggle-pill active" data-mode="variety"  onclick="toggleMode(this)">🩷 Variety</button>
+        <button class="toggle-pill active" data-mode="proof"    onclick="toggleMode(this)">✅ Proof</button>
       </div>
 
       <!-- Brief prompt bar: shown when blog selected, no brief loaded, not dismissed -->
@@ -1067,6 +1071,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
             <div class="leg-item"><div class="leg-dot" style="background:#e9d5ff;border:1px solid #a855f7"></div>Cliché</div>
             <div class="leg-item"><div class="leg-dot" style="background:#bfdbfe;border:1px solid #3b82f6"></div>Repeat</div>
             <div class="leg-item"><div class="leg-dot" style="background:#fce7f3;border:1px solid #ec4899"></div>Variety</div>
+            <div class="leg-item"><div class="leg-dot" style="background:#99f6e4;border:1px solid #14b8a6"></div>Proof</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
             <div id="readingTime" style="font-size:10px;color:#bbb;font-weight:700">— min read</div>
@@ -1083,6 +1088,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
         <div class="stat"><div class="stat-label">Repeats</div><div class="stat-val c-blue"  id="sRepeat">0</div></div>
         <div class="stat"><div class="stat-label">Words</div><div class="stat-val c-violet"  id="sWords">0</div></div>
         <div class="stat"><div class="stat-label">Chars</div><div class="stat-val c-slate"   id="sChars">0</div></div>
+        <div class="stat"><div class="stat-label">Proof</div><div class="stat-val" style="color:#0d9488" id="sProof">0</div></div>
       </div>
 
       <div class="card" style="margin-top:20px">
@@ -1104,19 +1110,16 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
 
     <div class="sidebar">
       <div class="card">
-        <div class="card-title">Active Voice Score</div>
+        <div class="card-title">Copy Score</div>
         <div class="gauge-center">
-          <svg class="gauge-svg" width="150" height="95" viewBox="0 0 150 95">
-            <path class="g-bg"   d="M 15 85 A 65 65 0 0 1 135 85"/>
-            <path class="g-fill" id="gFill" d="M 15 85 A 65 65 0 0 1 135 85" stroke="#e5e5e5" stroke-dasharray="204" stroke-dashoffset="0"/>
-            <text class="g-num" id="gNum" x="75" y="82">—</text>
-            <text class="g-lbl" x="75" y="95">score</text>
-          </svg>
+          <div id="gNum" style="font-size:42px;font-weight:900;line-height:1;color:#111;margin-bottom:12px;font-variant-numeric:tabular-nums">—</div>
+          <div style="width:100%;background:#f0f0f0;border-radius:99px;height:8px;overflow:hidden;margin-bottom:10px">
+            <div id="gFill" style="height:100%;border-radius:99px;width:0%;background:#e5e5e5;transition:width .6s cubic-bezier(.4,0,.2,1),background .3s"></div>
+          </div>
           <div class="score-status" id="scoreStatus" style="display:none">
             <span class="score-status-icon" id="scoreStatusIcon"></span>
             <span id="scoreStatusLabel"></span>
           </div>
-          <div class="score-msg" id="scoreMsg">Paste copy to begin.</div>
         </div>
         <button class="score-breakdown-toggle" id="scoreBreakdownToggle" onclick="toggleScoreBreakdown()" style="display:none">Show breakdown ▾</button>
         <div class="score-breakdown-panel" id="scoreBreakdownPanel"></div>
@@ -2309,7 +2312,55 @@ const AUDIENCES = {
   academic:     {fk:[0,45],  passive:15,filler:2, sentLen:35,desc:'Formal, evidence-based, complex structure tolerated.'},
 };
 
-const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true};
+const PROOFS = [
+  // Double words — "the the", "and and", etc.
+  { re: /\b([a-zA-Z]{2,})\s+\1\b/gi,
+    getTip: (m) => `Double word — delete one "${m[1]}"` },
+  // "your" before a verb most likely means "you're"
+  { re: /\byour\s+(?:going|coming|doing|being|trying|getting|making|having|saying|looking|feeling|thinking|working|running|writing|reading|welcome|right|wrong|fine|sure|able|ready|supposed|meant)\b/gi,
+    tip: 'Check: "your" (possessive) or "you\'re" (you are)?' },
+  // "their is/are/was/were" most likely means "there"
+  { re: /\btheir\s+(?:is|are|was|were)\b/gi,
+    tip: 'Check: "their" (possessive) or "there"?' },
+  // "its" followed by article/adverb most likely means "it's"
+  { re: /\bits\s+(?:a\b|an\b|the\b|not\b|been\b|going\b)/gi,
+    tip: 'Check: "its" (possessive) or "it\'s" (it is/has)?' },
+  // "more/less/better/worse then" in comparisons most likely means "than"
+  { re: /\b(?:more|less|better|worse|rather|higher|lower|greater|fewer|longer|shorter)\s+then\b/gi,
+    tip: 'Check: "then" (time sequence) or "than" (comparison)?' },
+  // "the affect of/on" most likely means "effect"
+  { re: /\bthe\s+affect\s+(?:of|on)\b/gi,
+    tip: 'Check: "affect" (verb) or "effect" (noun)?' },
+  // Missing apostrophes in negative contractions — /gi catches any case
+  { re: /\b(cant|dont|wont|didnt|doesnt|isnt|wasnt|werent|hasnt|havent|hadnt|shouldnt|wouldnt|couldnt|mustnt|neednt)\b/gi,
+    getTip: (m) => {
+      const fixes = {
+        cant:"can't", dont:"don't", wont:"won't", didnt:"didn't",
+        doesnt:"doesn't", isnt:"isn't", wasnt:"wasn't", werent:"weren't",
+        hasnt:"hasn't", havent:"haven't", hadnt:"hadn't", shouldnt:"shouldn't",
+        wouldnt:"wouldn't", couldnt:"couldn't", mustnt:"mustn't", neednt:"needn't"
+      };
+      const fix = fixes[m[0].toLowerCase()];
+      return fix ? `Missing apostrophe — did you mean "${fix}"?` : 'Missing apostrophe in contraction';
+    }
+  },
+  // Missing apostrophes in "to be/have/will/would" contractions — /g (lowercase only) avoids
+  // flagging sentence-start capitals like "He", "Ill", "Well", "We" etc.
+  { re: /\b(im|youre|hes|shes|theyre|ive|youve|weve|theyve|ill|youll|hell|shell|theyll|youd|hed|shed|theyd)\b/g,
+    getTip: (m) => {
+      const fixes = {
+        im:"I'm", youre:"you're", hes:"he's", shes:"she's", theyre:"they're",
+        ive:"I've", youve:"you've", weve:"we've", theyve:"they've",
+        ill:"I'll", youll:"you'll", hell:"he'll", shell:"she'll", theyll:"they'll",
+        youd:"you'd", hed:"he'd", shed:"she'd", theyd:"they'd"
+      };
+      const fix = fixes[m[0].toLowerCase()];
+      return fix ? `Missing apostrophe — did you mean "${fix}"?` : 'Missing apostrophe in contraction';
+    }
+  },
+];
+
+const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true,proof:true};
 let analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],auditIssues=[],auditOverrides=[];
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
@@ -2838,7 +2889,7 @@ function analyse(){
   const varietyIssues=new Set();
   for(let i=1;i<starts.length;i++) if(starts[i]&&starts[i]===starts[i-1]&&starts[i].length>2) varietyIssues.add(i);
 
-  let pCount=0,fCount=0,cCount=0;
+  let pCount=0,fCount=0,cCount=0,eCount=0;
 
   // Build sentence index mapping: sentParts includes ALL segments (even blank-line ones).
   // Variety/repetition detection used sentence index from lastSentences (non-empty only).
@@ -2880,6 +2931,16 @@ function analyse(){
       while((m=pr.exec(maskedSent))!==null){ pCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ph',tip:getSug(m[0])}); }
     }
 
+    if(modes.proof) PROOFS.forEach(rule=>{
+      const re = new RegExp(rule.re.source, rule.re.flags.includes('i') ? 'gi' : 'g');
+      let m;
+      while((m=re.exec(maskedSent))!==null){
+        eCount++;
+        const tip = rule.getTip ? rule.getTip(m) : rule.tip;
+        ann.push({start:m.index, end:m.index+m[0].length, cls:'erh', tip});
+      }
+    });
+
     ann.sort((a,b)=>a.start-b.start||b.end-a.end);
     const filtered=[]; let cursor=0;
     for(const a of ann) if(a.start>=cursor){ filtered.push(a); cursor=a.end; }
@@ -2910,6 +2971,7 @@ function analyse(){
   document.getElementById('sRepeat').innerText =repeatCount;
   document.getElementById('sWords').innerText  =lastWords.length;
   document.getElementById('sChars').innerText  =cleanText.length;
+  document.getElementById('sProof').innerText  =eCount;
 
   lastScore=scoreText(text);
   renderScoreBreakdown(text);
@@ -2957,11 +3019,12 @@ function analyse(){
 }
 
 function updateGauge(s){
-  const fill=document.getElementById('gFill'),num=document.getElementById('gNum'),msg=document.getElementById('scoreMsg');
-  fill.style.strokeDashoffset=204-(s/100)*204; num.textContent=s+'%';
-  if(s>85){fill.style.stroke='#22c55e';msg.innerHTML='<span style="color:#16a34a;font-weight:700">Excellent</span> — lean and direct.';}
-  else if(s>65){fill.style.stroke='#6366f1';msg.innerHTML='<span style="color:#6366f1;font-weight:700">Good</span> — a few fixes will sharpen it.';}
-  else{fill.style.stroke='#ef4444';msg.innerHTML='<span style="color:#ef4444;font-weight:700">Needs work</span> — too much passive or filler.';}
+  const fill=document.getElementById('gFill'),num=document.getElementById('gNum');
+  fill.style.width=s+'%';
+  num.textContent=s+'%';
+  if(s>85){fill.style.background='#22c55e';}
+  else if(s>65){fill.style.background='#6366f1';}
+  else{fill.style.background='#ef4444';}
 }
 
 function updateAudience(){
@@ -4179,9 +4242,8 @@ function persistLoad(){
 function resetUI(){
   ov.innerHTML='';
   ['sPassive','sFiller','sCliche','sRepeat','sWords','sChars'].forEach(id=>document.getElementById(id).innerText='0');
-  const fill=document.getElementById('gFill'); fill.style.strokeDashoffset='0'; fill.style.stroke='#e5e5e5';
+  const fill=document.getElementById('gFill'); fill.style.width='0%'; fill.style.background='#e5e5e5';
   document.getElementById('gNum').innerText='—';
-  document.getElementById('scoreMsg').innerText='Paste copy to begin.';
   document.getElementById('scoreStatus').style.display = 'none';
   document.getElementById('scoreBreakdownToggle').style.display = 'none';
   document.getElementById('scoreBreakdownPanel').classList.remove('open');
@@ -4370,9 +4432,24 @@ function runAIAudit(){
     }
   });
 
+  // ── Proof errors (homophones, double words, missing apostrophes) ──
+  PROOFS.forEach(rule=>{
+    const re=new RegExp(rule.re.source, 'gi');
+    let pm;
+    while((pm=re.exec(text))!==null){
+      const tip = rule.getTip ? rule.getTip(pm) : rule.tip;
+      const phrase = pm[0];
+      issues.push({
+        type:'proof', phrase, searchPhrase:phrase, charIdx:pm.index,
+        why: `"${phrase}" appears to contain a proof error. ${tip}`,
+        fix: tip
+      });
+    }
+  });
+
   // ── Deduplicate, normalise source fields, sort, cap active issues at 12 ─────
   const seen=new Set();
-  const typeOrder={passive:0,banned:1,preferred:1,cliche:2,avoid:2,long_sentence:3,filler:4,repetition:5};
+  const typeOrder={proof:0,passive:1,banned:2,preferred:2,cliche:3,avoid:3,long_sentence:4,filler:5,repetition:6};
   const deduped=issues
     .map(i=>({source:'generic',overrideReason:null,...i})) // normalise missing source/overrideReason
     .filter(i=>{ const k=i.type+'|'+i.phrase.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; })
@@ -4501,6 +4578,7 @@ function renderAI(issues, text, overrides=[], briefChecks=[]){
     banned:       {tag:'tag-banned',    label:'Banned Word',    icon:'🚫'},
     preferred:    {tag:'tag-preferred', label:'Preferred Term', icon:'🔄'},
     avoid:        {tag:'tag-avoid',     label:'Avoid Language', icon:'⚠️'},
+    proof:        {tag:'tag-proof',     label:'Proof Error',    icon:'✅'},
   };
   // Tooltip shown on hover over override cards — explains the generic rule that was suppressed
   const genericRuleHint={
@@ -4518,7 +4596,7 @@ function renderAI(issues, text, overrides=[], briefChecks=[]){
   const fkLabel=lastFK>=80?'Very Easy':lastFK>=70?'Easy':lastFK>=60?'Fairly Easy':lastFK>=50?'Standard':lastFK>=40?'Fairly Difficult':lastFK>=30?'Difficult':'Very Difficult';
   const scoreCol=lastScore>85?'#22c55e':lastScore>65?'#6366f1':'#ef4444';
   const chips=`<div class="ai-summary-grid">
-    <div class="ai-sum-chip"><div class="ai-sum-val" style="color:${scoreCol}">${lastScore}%</div><div class="ai-sum-lbl">Active Score</div></div>
+    <div class="ai-sum-chip"><div class="ai-sum-val" style="color:${scoreCol}">${lastScore}%</div><div class="ai-sum-lbl">Copy Score</div></div>
     <div class="ai-sum-chip"><div class="ai-sum-val">${fkLabel}</div><div class="ai-sum-lbl">Readability</div></div>
     <div class="ai-sum-chip"><div class="ai-sum-val">${lastWords.length}</div><div class="ai-sum-lbl">Words</div></div>
   </div>`;
