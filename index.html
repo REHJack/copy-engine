@@ -2312,18 +2312,78 @@ const AUDIENCES = {
   academic:     {fk:[0,45],  passive:15,filler:2, sentLen:35,desc:'Formal, evidence-based, complex structure tolerated.'},
 };
 
+const MISSPELLINGS = {
+  'abscence':'absence','accesible':'accessible','accomodate':'accommodate',
+  'accomodation':'accommodation','acheive':'achieve','acheiving':'achieving',
+  'agressive':'aggressive','agressively':'aggressively',
+  'apparant':'apparent','appearence':'appearance','arguement':'argument',
+  'beleive':'believe','buisness':'business','bussiness':'business',
+  'calender':'calendar','catagory':'category','catagories':'categories',
+  'colleage':'colleague','collegue':'colleague',
+  'commited':'committed','commitement':'commitment',
+  'concious':'conscious','consious':'conscious','curiousity':'curiosity',
+  'decieve':'deceive','definately':'definitely','definatly':'definitely',
+  'develpment':'development','differance':'difference',
+  'disapear':'disappear','disapoint':'disappoint',
+  'embarass':'embarrass','embarassed':'embarrassed',
+  'enviroment':'environment','enviromental':'environmental',
+  'excercise':'exercise','excelent':'excellent','excellant':'excellent',
+  'existance':'existence','experiance':'experience',
+  'familair':'familiar','familier':'familiar',
+  'foriegn':'foreign','freind':'friend',
+  'garentee':'guarantee','garantee':'guarantee','guarentee':'guarantee',
+  'goverment':'government','grammer':'grammar',
+  'harrass':'harass','happend':'happened',
+  'imediate':'immediate','imediately':'immediately',
+  'independant':'independent','independance':'independence',
+  'inteligent':'intelligent','intresting':'interesting','interupt':'interrupt',
+  'knowlege':'knowledge','knowlegde':'knowledge',
+  'liason':'liaison','liscense':'license','lisence':'license',
+  'managment':'management','maintainance':'maintenance',
+  'millenium':'millennium','millenial':'millennial',
+  'mispell':'misspell','mispelling':'misspelling','miniscule':'minuscule',
+  'necesary':'necessary','neccessary':'necessary','neccesary':'necessary',
+  'noticable':'noticeable',
+  'ocasion':'occasion','ocassion':'occasion','occurance':'occurrence',
+  'occured':'occurred','occuring':'occurring',
+  'ommit':'omit','ommited':'omitted',
+  'opporunity':'opportunity','oppurtunity':'opportunity','orignal':'original',
+  'paralel':'parallel','percieve':'perceive','peice':'piece',
+  'persistant':'persistent','plagarism':'plagiarism','posible':'possible',
+  'profesional':'professional','priviledge':'privilege','privilige':'privilege',
+  'publically':'publicly','questionaire':'questionnaire',
+  'recieve':'receive','realy':'really','relevent':'relevant',
+  'recomend':'recommend','recomendation':'recommendation','reccomend':'recommend',
+  'releive':'relieve','remeber':'remember','rember':'remember',
+  'responsabilty':'responsibility','responsibilty':'responsibility','rythm':'rhythm',
+  'schedual':'schedule','seperate':'separate','seperation':'separation',
+  'sieze':'seize','similer':'similar','sincerly':'sincerely',
+  'sofware':'software','softwere':'software',
+  'succesful':'successful','succes':'success','sucessful':'successful',
+  'supercede':'supersede','suprise':'surprise','suprising':'surprising',
+  'tendancy':'tendency','tommorow':'tomorrow','tommorrow':'tomorrow',
+  'tounge':'tongue','truely':'truly','truley':'truly',
+  'unforseen':'unforeseen','unfortunatley':'unfortunately','unfortunatly':'unfortunately',
+  'untill':'until','visable':'visible','visability':'visibility',
+  'wierd':'weird','witheld':'withheld','writting':'writing','writen':'written',
+};
+
 const PROOFS = [
   // Double words — "the the", "and and", etc.
   { re: /\b([a-zA-Z]{2,})\s+\1\b/gi,
     getTip: (m) => `Double word — delete one "${m[1]}"` },
   // "your" before a verb most likely means "you're"
-  { re: /\byour\s+(?:going|coming|doing|being|trying|getting|making|having|saying|looking|feeling|thinking|working|running|writing|reading|welcome|right|wrong|fine|sure|able|ready|supposed|meant)\b/gi,
+  // Lookahead: highlights only "your", leaving following word free for independent flagging
+  { re: /\byour(?=\s+(?:going|coming|doing|being|trying|getting|making|having|saying|looking|feeling|thinking|working|running|writing|reading|welcome|right|wrong|fine|sure|able|ready|supposed|meant)\b)/gi,
     tip: 'Check: "your" (possessive) or "you\'re" (you are)?' },
-  // "their is/are/was/were" most likely means "there"
-  { re: /\btheir\s+(?:is|are|was|were)\b/gi,
+  // "their" before a form of "to be" (including uncontracted versions) most likely means "there"
+  // Lookahead: highlights only "their", leaving the following word free for independent flagging
+  // Extended to catch "their isnt/arent/wasnt/werent" as well as "their is/are/was/were"
+  { re: /\btheir(?=\s+(?:is|are|was|were|isn't|aren't|wasn't|weren't|isnt|arent|wasnt|werent)\b)/gi,
     tip: 'Check: "their" (possessive) or "there"?' },
   // "its" followed by article/adverb most likely means "it's"
-  { re: /\bits\s+(?:a\b|an\b|the\b|not\b|been\b|going\b)/gi,
+  // Lookahead: highlights only "its", leaving the following word free for independent flagging
+  { re: /\bits(?=\s+(?:a\b|an\b|the\b|not\b|been\b|going\b))/gi,
     tip: 'Check: "its" (possessive) or "it\'s" (it is/has)?' },
   // "more/less/better/worse then" in comparisons most likely means "than"
   { re: /\b(?:more|less|better|worse|rather|higher|lower|greater|fewer|longer|shorter)\s+then\b/gi,
@@ -2357,6 +2417,14 @@ const PROOFS = [
       const fix = fixes[m[0].toLowerCase()];
       return fix ? `Missing apostrophe — did you mean "${fix}"?` : 'Missing apostrophe in contraction';
     }
+  },
+  // Double spaces — two or more consecutive spaces on the same line.
+  { re: /[^\S\r\n]{2,}/g,
+    tip: 'Double space — remove the extra space.' },
+  // Common misspellings — built dynamically from MISSPELLINGS dictionary
+  {
+    re: new RegExp(`\\b(${Object.keys(MISSPELLINGS).join('|')})\\b`, 'gi'),
+    getTip: (m) => `Possible misspelling — did you mean "${MISSPELLINGS[m[0].toLowerCase()]}"?`
   },
 ];
 
@@ -2940,6 +3008,15 @@ function analyse(){
         ann.push({start:m.index, end:m.index+m[0].length, cls:'erh', tip});
       }
     });
+
+    if(modes.proof && sentIdx > 0){
+      const firstWord = maskedSent.match(/^[a-z][a-zA-Z]*/);
+      if(firstWord){
+        eCount++;
+        ann.push({start:0, end:firstWord[0].length, cls:'erh',
+          tip:`Sentence starts lowercase — should "${firstWord[0]}" be capitalised?`});
+      }
+    }
 
     ann.sort((a,b)=>a.start-b.start||b.end-a.end);
     const filtered=[]; let cursor=0;
@@ -4443,6 +4520,21 @@ function runAIAudit(){
         type:'proof', phrase, searchPhrase:phrase, charIdx:pm.index,
         why: `"${phrase}" appears to contain a proof error. ${tip}`,
         fix: tip
+      });
+    }
+  });
+
+  // ── Lowercase sentence starters ──
+  lastSentences.forEach((sent, i) => {
+    if(i === 0) return;
+    const firstWord = sent.match(/^[a-z][a-zA-Z]*/);
+    if(firstWord){
+      const charIdx = text.indexOf(sent);
+      issues.push({
+        type:'proof', phrase:firstWord[0], searchPhrase:firstWord[0],
+        charIdx:charIdx>-1?charIdx:0,
+        why:`"${firstWord[0]}" starts a sentence with a lowercase letter.`,
+        fix:`Capitalise to "${firstWord[0][0].toUpperCase()+firstWord[0].slice(1)}"`
       });
     }
   });
