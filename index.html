@@ -3001,10 +3001,11 @@ function analyse(){
       while((m=pr.exec(maskedSent))!==null){ pCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ph',tip:getSug(m[0])}); }
     }
 
+    const maskedForProof = maskedSent.replace(/https?:\/\/[^\s)>\]]+|\[[^\]]*\]\([^)]*\)/gi, m=>' '.repeat(m.length));
     if(modes.proof) PROOFS.forEach(rule=>{
       const re = new RegExp(rule.re.source, rule.re.flags.includes('i') ? 'gi' : 'g');
       let m;
-      while((m=re.exec(maskedSent))!==null){
+      while((m=re.exec(maskedForProof))!==null){
         eCount++;
         const tip = rule.getTip ? rule.getTip(m) : rule.tip;
         ann.push({start:m.index, end:m.index+m[0].length, cls:'erh', tip});
@@ -3012,7 +3013,7 @@ function analyse(){
     });
 
     if(modes.proof && sentIdx > 0){
-      const firstWord = maskedSent.match(/^[a-z][a-zA-Z]*/);
+      const firstWord = maskedForProof.match(/^[a-z][a-zA-Z]*/);
       if(firstWord){
         eCount++;
         ann.push({start:0, end:firstWord[0].length, cls:'erh',
@@ -4511,11 +4512,13 @@ function runAIAudit(){
     }
   });
 
+  // Mask URLs and markdown links so proof rules don't fire on URL paths
+  const proofText=text.replace(/https?:\/\/[^\s)>\]]+|\[[^\]]*\]\([^)]*\)/gi, m=>' '.repeat(m.length));
   // ── Proof errors (homophones, double words, missing apostrophes) ──
   PROOFS.forEach(rule=>{
     const re=new RegExp(rule.re.source, 'gi');
     let pm;
-    while((pm=re.exec(text))!==null){
+    while((pm=re.exec(proofText))!==null){
       const tip = rule.getTip ? rule.getTip(pm) : rule.tip;
       const phrase = pm[0];
       issues.push({
@@ -4541,10 +4544,14 @@ function runAIAudit(){
     }
   });
 
-  // ── Deduplicate, normalise source fields, sort, cap active issues at 12 ─────
+  // ── Deduplicate, normalise source fields, sort, then apply per-type cap ──────
   const seen=new Set();
   const typeOrder={proof:0,passive:1,banned:2,preferred:2,cliche:3,avoid:3,long_sentence:4,filler:5,repetition:6};
-  const deduped=issues
+  // Per-type cap: prevents a single check type flooding all slots on long copy.
+  // Brand rules (banned/preferred/avoid) have a higher cap since they're always intentional.
+  const typeCaps={proof:3,passive:4,long_sentence:3,filler:3,cliche:3,repetition:3,banned:10,preferred:10,avoid:10};
+  const typeCounts={};
+  const sorted=issues
     .map(i=>({source:'generic',overrideReason:null,...i})) // normalise missing source/overrideReason
     .filter(i=>{ const k=i.type+'|'+i.phrase.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; })
     .sort((a,b)=>{
@@ -4552,8 +4559,16 @@ function runAIAudit(){
       const tA=(typeOrder[a.type]??5)*2+(a.source==='brand'?0:1);
       const tB=(typeOrder[b.type]??5)*2+(b.source==='brand'?0:1);
       return tA-tB;
+    });
+  const deduped=sorted
+    .filter(i=>{
+      const cap=typeCaps[i.type]??3;
+      typeCounts[i.type]=(typeCounts[i.type]||0);
+      if(typeCounts[i.type]>=cap) return false;
+      typeCounts[i.type]++;
+      return true;
     })
-    .slice(0,12);
+    .slice(0,15);
 
   auditIssues=deduped;
   auditOverrides=overrides;
