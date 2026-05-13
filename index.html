@@ -3001,7 +3001,13 @@ function analyse(){
       while((m=pr.exec(maskedSent))!==null){ pCount++; ann.push({start:m.index,end:m.index+m[0].length,cls:'ph',tip:getSug(m[0])}); }
     }
 
-    const maskedForProof = maskedSent.replace(/https?:\/\/[^\s)>\]]+|\[[^\]]*\]\([^)]*\)/gi, m=>' '.repeat(m.length));
+    // Mask links and bare URLs in the original sentence BEFORE markdown masking.
+    // maskMarkdown keeps link label text visible and turns the URL into trailing spaces,
+    // which then trigger the double-space rule. Pre-masking prevents this entirely.
+    const sentNoLinks = sent
+      .replace(/\[([^\]]*)\]\([^)]*\)/g, m=>' '.repeat(m.length))
+      .replace(/https?:\/\/[^\s]+/g, m=>' '.repeat(m.length));
+    const maskedForProof = maskMarkdown(sentNoLinks);
     if(modes.proof) PROOFS.forEach(rule=>{
       const re = new RegExp(rule.re.source, rule.re.flags.includes('i') ? 'gi' : 'g');
       let m;
@@ -4396,7 +4402,15 @@ function runAIAudit(){
       issues.push({
         type:'filler', phrase, searchPhrase:phrase, charIdx:fm.index,
         why:`"${w}" adds length without meaning. Readers skip it instinctively — which means the words around it lose impact too.`,
-        fix:`Remove it entirely. "${sentence}" becomes: "${withoutFiller}"`
+        fix:(()=>{
+          const clean=s=>s
+            .replace(/\[([^\]]*)\]\([^)]*\)/g,'[$1]')
+            .replace(/https?:\/\/\S+/g,'[link]')
+            .replace(/^[#\s]+/,'')
+            .trim()
+            .slice(0,120)+(s.trim().length>120?'…':'');
+          return `Remove it entirely. "${clean(sentence)}" becomes: "${clean(withoutFiller)}"`;
+        })()
       });
     }
   });
