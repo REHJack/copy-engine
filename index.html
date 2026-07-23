@@ -1249,11 +1249,14 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
       <div class="tip-card no-print">
         <div class="card-title">Quick Fix Tips</div>
         <ul class="tip-list">
-          <li><span>→</span><span>Target <strong>1.0–2.0%</strong> keyword density. Hard limit: <strong>3.0%</strong>.</span></li>
-          <li><span>→</span><span>Click <strong style="color:#fca5a5">red</strong> or <strong style="color:#c4b5fd">purple</strong> highlights for fix suggestions.</span></li>
+          <li><span>→</span><span>Keyword density targets adjust by content length — check the range shown above the editor.</span></li>
+          <li><span>→</span><span>Click <strong>any</strong> highlighted text for a tooltip with fix suggestions.</span></li>
+          <li><span>→</span><span><strong style="color:#fca5a5">Red</strong> = passive voice.</span></li>
+          <li><span>→</span><span><strong style="color:#fde047">Yellow</strong> = filler words.</span></li>
+          <li><span>→</span><span><strong style="color:#fdba74">Orange</strong> = long sentences (30+ words).</span></li>
+          <li><span>→</span><span><strong style="color:#c4b5fd">Purple</strong> = cliché.</span></li>
           <li><span>→</span><span><strong style="color:#93c5fd">Blue</strong> = word repeated too close together.</span></li>
           <li><span>→</span><span><strong style="color:#f9a8d4">Pink</strong> = consecutive sentences starting the same way.</span></li>
-          <li><span>→</span><span>Keep sentences <strong>under 30 words</strong> for maximum punch.</span></li>
         </ul>
       </div>
     </div>
@@ -4547,7 +4550,9 @@ function runAIAudit(){
   // ── Lowercase sentence starters ──
   lastSentences.forEach((sent, i) => {
     if(i === 0) return;
-    const firstWord = sent.match(/^[a-z][a-zA-Z]*/);
+    // Mask URLs and markdown links so a URL opening a sentence isn't flagged as a capitalisation error
+    const maskedSent = sent.replace(/https?:\/\/[^\s)>\]]+|\[[^\]]*\]\([^)]*\)/gi, m=>' '.repeat(m.length));
+    const firstWord = maskedSent.match(/^[a-z][a-zA-Z]*/);
     if(firstWord){
       const charIdx = text.indexOf(sent);
       issues.push({
