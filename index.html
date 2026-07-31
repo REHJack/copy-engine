@@ -3064,15 +3064,15 @@ function analyse(){
       if(a.start>pos) html+=esc(sent.slice(pos,a.start));
       const inner=esc(sent.slice(a.start,a.end));
       html+=a.tip
-        ?`<span class="${a.cls}" data-gidx="${sentGlobalStart+a.start}" onclick="showTip(this)">${inner}<span class="tip">${a.tip}</span></span>`
-        :`<span class="${a.cls}" data-gidx="${sentGlobalStart+a.start}">${inner}</span>`;
+        ?`<span class="${a.cls}" data-gidx="${sentGlobalStart+a.start}" data-gend="${sentGlobalStart+a.end}" onclick="showTip(this)">${inner}<span class="tip">${a.tip}</span></span>`
+        :`<span class="${a.cls}" data-gidx="${sentGlobalStart+a.start}" data-gend="${sentGlobalStart+a.end}">${inner}</span>`;
       pos=a.end;
     }
     if(pos<sent.length) html+=esc(sent.slice(pos));
 
-    if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh" data-gidx="${sentGlobalStart}">${html}</span>`;
+    if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh" data-gidx="${sentGlobalStart}" data-gend="${sentGlobalStart+sent.length}">${html}</span>`;
     const wc=maskedSent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(modes.sentence&&wc>=30) html=`<span class="sh" data-gidx="${sentGlobalStart}">${html}</span>`;
+    if(modes.sentence&&wc>=30) html=`<span class="sh" data-gidx="${sentGlobalStart}" data-gend="${sentGlobalStart+sent.length}">${html}</span>`;
     return html + sep;
   });
 
@@ -4782,18 +4782,24 @@ function locateIssue(i){
   wrap.scrollTop = Math.max(0, markerY - (viewportH / 3) + (markerHeight / 2));
 
   // Flash the corresponding overlay span. Spans carry their real document offset
-  // (data-gidx, set in analyse()) — match on that against the resolved `idx` above rather
-  // than just on text content, so a repeated word/phrase flashes the same occurrence the
-  // cursor actually jumped to, instead of whichever matching span happens to appear first.
+  // (data-gidx/data-gend, set in analyse()) and pick whichever one's character range
+  // actually contains the resolved `idx` — not by matching on text content. Content
+  // matching breaks whenever the overlay merges an issue's exact words into a bigger
+  // overlapping highlight (e.g. a repeated word sitting inside a passive-voice phrase
+  // never gets its own span — "committed" only exists as part of "are committed" — so
+  // searching for "committed" as text finds nothing, even though the location is real).
+  // Matching by position always finds *some* real highlight at the right spot, even if
+  // it's the outer span rather than the exact word. Prefer the smallest (most specific)
+  // span when several nested ones all contain idx.
   const spans=ov.querySelectorAll('span.ph,span.fh,span.ch,span.sh,span.rh,span.vh');
-  let matched=null,bestSpanDist=Infinity;
-  const phraseLower=searchPhrase.toLowerCase().trim().slice(0,30);
+  let matched=null,bestSpanLen=Infinity;
   for(const s of spans){
-    const t=s.textContent.replace(/\s+/g,' ').trim().toLowerCase();
-    if(t===phraseLower||t.startsWith(phraseLower)||phraseLower.startsWith(t.slice(0,10))){
-      const gidx=s.dataset.gidx!==undefined?parseInt(s.dataset.gidx,10):NaN;
-      const dist=Number.isNaN(gidx)?Infinity:Math.abs(gidx-idx);
-      if(dist<bestSpanDist){ bestSpanDist=dist; matched=s; }
+    const gStart=s.dataset.gidx!==undefined?parseInt(s.dataset.gidx,10):NaN;
+    const gEnd=s.dataset.gend!==undefined?parseInt(s.dataset.gend,10):NaN;
+    if(Number.isNaN(gStart)||Number.isNaN(gEnd)) continue;
+    if(idx>=gStart&&idx<gEnd){
+      const len=gEnd-gStart;
+      if(len<bestSpanLen){ bestSpanLen=len; matched=s; }
     }
   }
   if(matched){
