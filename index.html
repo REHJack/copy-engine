@@ -1658,7 +1658,7 @@ function acOnTermKey(e){
     const input = document.getElementById('acTermInput');
     const val = input.value.trim().replace(/,+$/, '');
     if(!val) return;
-    if(acBrandTerms.length >= 20){ showToast('⚠️ Max 20 brand terms'); return; }
+    if(acBrandTerms.length >= 30){ showToast('⚠️ Max 30 brand terms'); return; }
     const norm = val.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
     if(acBrandTerms.some(t=>t.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim()===norm)) return;
     acBrandTerms.push(val);
@@ -2120,7 +2120,7 @@ function ecOnTermKey(e){
     const input = document.getElementById('ecTermInput');
     const val = input.value.trim().replace(/,+$/, '');
     if(!val) return;
-    if(ecBrandTerms.length >= 20){ showToast('⚠️ Max 20 brand terms'); return; }
+    if(ecBrandTerms.length >= 30){ showToast('⚠️ Max 30 brand terms'); return; }
     const norm = val.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim();
     if(ecBrandTerms.some(t => t.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim() === norm)) return;
     ecBrandTerms.push(val);
@@ -3354,12 +3354,34 @@ function addBrandTerm(){
   if(!c) return;
   const lc = val.toLowerCase();
   if(c.brandTerms.includes(lc)){ showToast('⚠️ Already in brand terms'); inp.value=''; return; }
-  if(c.brandTerms.length >= 20){ showToast('⚠️ Maximum 20 brand terms'); return; }
+  if(c.brandTerms.length >= 30){ showToast('⚠️ Maximum 30 brand terms'); return; }
   c.brandTerms.push(lc);
   inp.value = '';
   clientsSave();
   renderBrandTerms();
   analyse();
+}
+
+// Adds a term straight from an AI Audit issue card (the "+ Brand term" button) using the
+// exact same persistence steps as addBrandTerm() above — pushed onto the client record and
+// written to localStorage via clientsSave(), so it's saved permanently against that client
+// folder rather than only affecting the audit that happens to be open right now.
+function addBrandTermFromIssue(i){
+  const issue = auditIssues[i]; if(!issue) return;
+  const term = (issue.phrase||'').trim();
+  if(!term) return;
+  if(!activeClientId){ showToast('⚠️ Select a client to add brand terms'); return; }
+  const c = clients.find(cl=>cl.id===activeClientId);
+  if(!c) return;
+  const lc = term.toLowerCase();
+  if(c.brandTerms.includes(lc)){ showToast('⚠️ Already in brand terms'); return; }
+  if(c.brandTerms.length >= 30){ showToast('⚠️ Maximum 30 brand terms'); return; }
+  c.brandTerms.push(lc);
+  clientsSave();
+  renderBrandTerms();
+  analyse();
+  showToast(`✓ "${term}" saved as a brand term for this client`);
+  runAIAudit(); // re-run immediately so this (and any matching) issues clear from the list
 }
 
 function removeBrandTerm(i){
@@ -4859,10 +4881,16 @@ function renderAI(issues, text, overrides=[], briefChecks=[]){
       const brandBadge=issue.source==='brand'
         ?`<span class="issue-brand-badge">Brand rule</span>`
         :'';
+      // Filler/cliché/repetition are the only checks that consult isBrandTerm() (see detection
+      // code above), so those are the only types a brand-term whitelist can actually silence.
+      const canWhitelist=['repetition','filler','cliche'].includes(issue.type) && issue.source!=='brand';
+      const whitelistBtn=canWhitelist
+        ?`<button class="issue-locate" style="border-color:#c7d2fe;color:#4f46e5" onclick="addBrandTermFromIssue(${i})" title="Whitelist this word/phrase for this client so it's never flagged again">+ Brand term</button>`
+        :'';
       return `<div class="issue-card">
         <div class="issue-card-head">
           <span style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0"><span class="issue-tag ${t.tag}">${t.icon} ${t.label}</span>${brandBadge}</span>
-          <button class="issue-locate" onclick="locateIssue(${i})">Show me →</button>
+          <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${whitelistBtn}<button class="issue-locate" onclick="locateIssue(${i})">Show me →</button></span>
         </div>
         <div class="issue-phrase">${esc(displayPhrase)}</div>
         <div class="issue-why">${esc(issue.why)}</div>
@@ -5952,7 +5980,7 @@ function closeGuide(){
         <p>A per-client list of words and phrases that should never be flagged as filler words, clich&eacute;s, or repetition. Add any brand names, product names, or proprietary terms and the tool will ignore them when scanning for issues.</p>
         <p>Brand terms are saved with the client and persist across sessions. You can add them during the Add new client flow, or at any time from the Brand Terms panel in the editor. When no client is active, the Brand Terms panel is hidden.</p>
       </div>
-      <div class="guide-tip"><strong>Tip:</strong> Each client has its own brand terms list - up to 20 terms per client. Terms are automatically excluded from filler, clich&eacute;, and repetition checks.</div>
+      <div class="guide-tip"><strong>Tip:</strong> Each client has its own brand terms list - up to 30 terms per client. Terms are automatically excluded from filler, clich&eacute;, and repetition checks.</div>
     </div>
 
     <div class="guide-section" id="g-cta">
