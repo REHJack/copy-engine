@@ -1105,6 +1105,7 @@ body{font-family:'Inter','Helvetica Neue',Helvetica,Arial,sans-serif;background:
           <div class="ai-title">✦ AI Copy Audit Report</div>
           <button class="ai-close" onclick="document.getElementById('aiPanel').classList.remove('open')">×</button>
         </div>
+        <div id="aiStaleBanner" style="display:none;background:#fff7ed;border:1px solid #fdba74;color:#9a3412;font-size:12.5px;line-height:1.4;padding:8px 12px;border-radius:6px;margin:0 16px 10px">⚠️ The copy has changed since this audit ran — issue locations may be inaccurate. Re-run AI Audit for accurate results.</div>
         <div class="ai-body" id="aiOutput"></div>
       </div>
     </div>
@@ -2435,7 +2436,7 @@ const PROOFS = [
 ];
 
 const modes={passive:true,filler:true,sentence:true,cliche:true,repeat:true,variety:true,proof:true};
-let analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],auditIssues=[],auditOverrides=[];
+let analyseTimer=null,lastScore=0,lastFK=60,lastWords=[],lastSentences=[],lastSentenceStarts=[],auditIssues=[],auditOverrides=[],auditSnapshotText=null;
 
 document.getElementById('reportDate').innerText=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
 
@@ -2468,6 +2469,17 @@ function onEditorInput(){
   analyseTimer = setTimeout(()=>{ analyse(); persistSave(); }, 0);
   // Auto-save to the open entry (500 ms debounce, no-op if no entry materialised)
   scheduleAutoSave();
+  // Flag the AI Audit panel as stale the moment the copy diverges from what was audited —
+  // cached issue positions ("Show me") become unreliable as soon as the text shifts.
+  updateAuditStaleness();
+}
+
+// Shows/hides the "copy has changed since this audit ran" banner in the AI Audit panel.
+function updateAuditStaleness(){
+  const banner=document.getElementById('aiStaleBanner');
+  if(!banner) return;
+  const stale = auditSnapshotText!==null && auditIssues.length>0 && ta.value!==auditSnapshotText;
+  banner.style.display = stale ? 'block' : 'none';
 }
 
 ta.addEventListener('input', onEditorInput);
@@ -2969,10 +2981,17 @@ function analyse(){
   // Variety/repetition detection used sentence index from lastSentences (non-empty only).
   // We need to map sentParts index → lastSentences index for variety checks.
   let sentIdx = 0;
+  // Tracks each non-blank sentence's real offset in `text`, computed once here while we
+  // walk the string in order — instead of every downstream consumer re-guessing the offset
+  // later by searching for matching content (which breaks down on duplicate/similar text).
+  let globalOffset = 0;
+  lastSentenceStarts = [];
   const sentHTMLs = sentParts.map((part) => {
     const sent = part.text;
     const maskedSent = maskMarkdown(sent);
     const sep  = part.sep;
+    const sentGlobalStart = globalOffset;
+    globalOffset += sent.length + sep.length;
 
     if(!sent.trim()){
       // Blank / whitespace-only segment — emit as-is to preserve character positions
@@ -2980,6 +2999,7 @@ function analyse(){
     }
 
     const si = sentIdx++;
+    lastSentenceStarts.push(sentGlobalStart);
     const ann=[];
 
     if(modes.filler) FILLERS.forEach(w=>{
@@ -3040,15 +3060,15 @@ function analyse(){
       if(a.start>pos) html+=esc(sent.slice(pos,a.start));
       const inner=esc(sent.slice(a.start,a.end));
       html+=a.tip
-        ?`<span class="${a.cls}" onclick="showTip(this)">${inner}<span class="tip">${a.tip}</span></span>`
-        :`<span class="${a.cls}">${inner}</span>`;
+        ?`<span class="${a.cls}" data-gidx="${sentGlobalStart+a.start}" onclick="showTip(this)">${inner}<span class="tip">${a.tip}</span></span>`
+        :`<span class="${a.cls}" data-gidx="${sentGlobalStart+a.start}">${inner}</span>`;
       pos=a.end;
     }
     if(pos<sent.length) html+=esc(sent.slice(pos));
 
-    if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh">${html}</span>`;
+    if(modes.variety&&varietyIssues.has(si)) html=`<span class="vh" data-gidx="${sentGlobalStart}">${html}</span>`;
     const wc=maskedSent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
-    if(modes.sentence&&wc>=30) html=`<span class="sh">${html}</span>`;
+    if(modes.sentence&&wc>=30) html=`<span class="sh" data-gidx="${sentGlobalStart}">${html}</span>`;
     return html + sep;
   });
 
@@ -4098,12 +4118,16 @@ function loadEntry(folderId, entryId){
       ? runBriefChecks(activeBrief, ta.value)
       : [];
     renderAI(auditIssues, ta.value, auditOverrides, _restoredBriefChecks);
+    // The restored audit matches the text it was saved with — not stale yet.
+    auditSnapshotText = ta.value;
   } else {
     auditIssues    = [];
     auditOverrides = [];
+    auditSnapshotText = null;
     const _panel = document.getElementById('aiPanel');
     if(_panel) _panel.classList.remove('open');
   }
+  updateAuditStaleness();
   showToast('↩ Entry loaded');
 }
 
@@ -4437,22 +4461,65 @@ function runAIAudit(){
   });
 
   // ── Long sentences ──
-  lastSentences.forEach(sent=>{
+  // Splits a long sentence into two at a natural clause boundary rather than
+  // a blind character-midpoint, which used to chop phrases apart mid-word
+  // (e.g. "referred to as" being split into "referred." + "To as...").
+  function splitLongSentence(rawSent){
+    const trimmed=rawSent.trim().replace(/[.!?]+$/,''); // work without trailing punctuation, re-add via fix template
+    const midPoint=trimmed.length/2;
+    const MIN_WORDS=4; // never leave a scrap of 1-3 words on either side
+    const wordCount=s=>s.trim().split(/\s+/).filter(Boolean).length;
+    // Picks the candidate boundary closest to the midpoint, but only if it
+    // leaves a real chunk of words on both sides — otherwise a boundary
+    // right next to the midpoint (e.g. inside a short list item) wins by
+    // default and produces a fragment like "Even load distribution."
+    function pickBest(candidates){
+      const sorted=candidates.slice().sort((a,b)=>Math.abs(a.start-midPoint)-Math.abs(b.start-midPoint));
+      for(const c of sorted){
+        const half1=trimmed.slice(0,c.start).trim();
+        const half2=trimmed.slice(c.end).trim();
+        if(wordCount(half1)>=MIN_WORDS&&wordCount(half2)>=MIN_WORDS) return [half1,half2];
+      }
+      return null;
+    }
+    // 1) Prefer a comma immediately followed by a coordinating/subordinating
+    //    conjunction — this marks a real clause boundary, not a list item.
+    const conjRe=/,\s+(and|but|or|so|which|that|because|while|yet)\s+/gi;
+    const conjCandidates=[]; let m;
+    while((m=conjRe.exec(trimmed))!==null){
+      conjCandidates.push({start:m.index,end:m.index+m[0].length});
+    }
+    let result=pickBest(conjCandidates);
+    if(result) return result;
+    // 2) Fall back to the comma nearest the midpoint (still a real clause/list
+    //    break, unlike an arbitrary space) — still enforcing the word-count floor.
+    const commaCandidates=[];
+    for(let i=0;i<trimmed.length;i++) if(trimmed[i]===',') commaCandidates.push({start:i,end:i+1});
+    result=pickBest(commaCandidates);
+    if(result) return result;
+    // 3) Last resort: nearest word boundary to the midpoint (old behaviour).
+    const splitPoint=trimmed.indexOf(' ',Math.floor(midPoint));
+    if(splitPoint>-1){
+      return [trimmed.slice(0,splitPoint).trim(),trimmed.slice(splitPoint+1).trim()];
+    }
+    return [trimmed,''];
+  }
+  lastSentences.forEach((sent,sIdx)=>{
     const wc=sent.trim().split(/\s+/).filter(w=>w.replace(/[^a-zA-Z]/g,'').length>0).length;
     if(wc>=_longThreshold){
       const searchPhrase=sent.slice(0,40);
-      const charIdx=text.indexOf(searchPhrase);
-      const midPoint=Math.floor(sent.length/2);
-      const splitPoint=sent.indexOf(' ',midPoint);
-      const half1=sent.slice(0,splitPoint).trim();
-      const half2=sent.slice(splitPoint+1).trim();
+      // Use the sentence's real position (captured while parsing in analyse()) rather than
+      // re-finding it by searching for this 40-char snippet — duplicate/similar sentence
+      // openers used to make indexOf() lock onto the wrong occurrence of the sentence.
+      const charIdx=(typeof lastSentenceStarts[sIdx]==='number')?lastSentenceStarts[sIdx]:text.indexOf(searchPhrase);
+      const [half1,half2]=splitLongSentence(sent);
       const issueObj={
         type:'long_sentence', source:'generic', overrideReason:null,
         phrase:sent.length>70?sent.slice(0,70)+'…':sent,
         searchPhrase,
         charIdx:charIdx>-1?charIdx:0,
         why:`At ${wc} words, this sentence asks readers to hold too much in working memory. In marketing copy, long sentences bury the point and invite skimming.`,
-        fix:`Split it into two: "${half1}." then "${half2[0].toUpperCase()+half2.slice(1)}"`
+        fix:half2?`Split it into two: "${half1}." then "${half2[0].toUpperCase()+half2.slice(1)}"`:`This sentence is one long run-on without a natural break point — consider rewriting it as two shorter sentences.`
       };
       if(_lengthPref==='long'){
         issueObj.overrideReason="This sentence is long but your client's tone of voice favours longer, considered sentences.";
@@ -4554,7 +4621,9 @@ function runAIAudit(){
     const maskedSent = sent.replace(/https?:\/\/[^\s)>\]]+|\[[^\]]*\]\([^)]*\)/gi, m=>' '.repeat(m.length));
     const firstWord = maskedSent.match(/^[a-z][a-zA-Z]*/);
     if(firstWord){
-      const charIdx = text.indexOf(sent);
+      // Real sentence offset (see analyse()) instead of text.indexOf(sent) — a duplicate
+      // or near-identical short sentence elsewhere used to make this lock onto that one instead.
+      const charIdx = (typeof lastSentenceStarts[i]==='number') ? lastSentenceStarts[i] : text.indexOf(sent);
       issues.push({
         type:'proof', phrase:firstWord[0], searchPhrase:firstWord[0],
         charIdx:charIdx>-1?charIdx:0,
@@ -4592,6 +4661,10 @@ function runAIAudit(){
 
   auditIssues=deduped;
   auditOverrides=overrides;
+  // Snapshot the exact text this audit ran against, so we can flag the panel as stale
+  // the moment the editor diverges from it (see updateAuditStaleness()).
+  auditSnapshotText=text;
+  updateAuditStaleness();
 
   // ── Brief alignment checks (only when blog content type and a brief is loaded) ──
   let _briefChecks = [];
@@ -4623,18 +4696,45 @@ function runAIAudit(){
 }
 
 // Scroll the editor to a detected issue by its index in auditIssues
+// Finds the occurrence of `needle` in `haystack` closest to `targetIdx`, rather than just
+// the first one in the document. Used when a cached issue position no longer matches —
+// e.g. because the copy has been edited since the audit ran — so a repeated word or phrase
+// resolves to wherever it most likely still is, not to an unrelated occurrence elsewhere.
+function indexOfNearest(haystack, needle, targetIdx){
+  if(!needle) return -1;
+  let idx=haystack.indexOf(needle);
+  if(idx===-1) return -1;
+  let best=idx, bestDist=Math.abs(idx-targetIdx);
+  let next=haystack.indexOf(needle, idx+1);
+  while(next!==-1){
+    const dist=Math.abs(next-targetIdx);
+    if(dist<bestDist){ bestDist=dist; best=next; }
+    next=haystack.indexOf(needle, next+1);
+  }
+  return best;
+}
+
 function locateIssue(i){
   const issue=auditIssues[i]; if(!issue) return;
   const text=ta.value;
   const searchPhrase=issue.searchPhrase||issue.phrase;
 
-  // Resolve charIdx — verify cached, else search
-  let idx=(typeof issue.charIdx==='number' && issue.charIdx>=0
-    && text.slice(issue.charIdx, issue.charIdx+searchPhrase.length).toLowerCase()===searchPhrase.toLowerCase())
+  // Resolve charIdx — verify cached position still holds; if the copy has shifted since the
+  // audit ran, fall back to the nearest occurrence of the phrase to its old position (not
+  // just the first occurrence in the whole document, which used to send "Show me" to an
+  // unrelated spot whenever the flagged word/phrase appeared more than once).
+  const cacheValid = typeof issue.charIdx==='number' && issue.charIdx>=0
+    && text.slice(issue.charIdx, issue.charIdx+searchPhrase.length).toLowerCase()===searchPhrase.toLowerCase();
+  const idx = cacheValid
     ? issue.charIdx
-    : text.toLowerCase().indexOf(searchPhrase.toLowerCase());
+    : indexOfNearest(text.toLowerCase(), searchPhrase.toLowerCase(), typeof issue.charIdx==='number' ? issue.charIdx : 0);
 
-  if(idx===-1){showToast('⚠️ Could not locate in editor');return;}
+  if(idx===-1){
+    showToast(auditSnapshotText!==null && text!==auditSnapshotText
+      ? '⚠️ Could not locate in editor — copy has changed since this audit ran'
+      : '⚠️ Could not locate in editor');
+    return;
+  }
 
   ta.focus();
   ta.selectionStart=idx;
@@ -4677,14 +4777,19 @@ function locateIssue(i){
   const viewportH = wrap.clientHeight;
   wrap.scrollTop = Math.max(0, markerY - (viewportH / 3) + (markerHeight / 2));
 
-  // Flash the corresponding overlay span
+  // Flash the corresponding overlay span. Spans carry their real document offset
+  // (data-gidx, set in analyse()) — match on that against the resolved `idx` above rather
+  // than just on text content, so a repeated word/phrase flashes the same occurrence the
+  // cursor actually jumped to, instead of whichever matching span happens to appear first.
   const spans=ov.querySelectorAll('span.ph,span.fh,span.ch,span.sh,span.rh,span.vh');
-  let matched=null;
+  let matched=null,bestSpanDist=Infinity;
   const phraseLower=searchPhrase.toLowerCase().trim().slice(0,30);
   for(const s of spans){
     const t=s.textContent.replace(/\s+/g,' ').trim().toLowerCase();
     if(t===phraseLower||t.startsWith(phraseLower)||phraseLower.startsWith(t.slice(0,10))){
-      matched=s; break;
+      const gidx=s.dataset.gidx!==undefined?parseInt(s.dataset.gidx,10):NaN;
+      const dist=Number.isNaN(gidx)?Infinity:Math.abs(gidx-idx);
+      if(dist<bestSpanDist){ bestSpanDist=dist; matched=s; }
     }
   }
   if(matched){
@@ -4693,7 +4798,7 @@ function locateIssue(i){
     matched.classList.add('locate-flash');
     setTimeout(()=>matched.classList.remove('locate-flash'),2000);
   }
-  showToast('↑ Jumped to issue');
+  showToast(cacheValid ? '↑ Jumped to issue' : '↑ Jumped to nearest match — copy has changed since this audit ran');
 }
 
 function renderAI(issues, text, overrides=[], briefChecks=[]){
